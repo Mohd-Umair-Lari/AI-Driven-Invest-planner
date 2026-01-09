@@ -1,4 +1,4 @@
-const BASE_URL = "https://ai-finpass-backend.onrender.com";
+const BASE_URL = "https://ai-driven-invest-planner.onrender.com";
 
 export async function apiFetch(endpoint, options = {}) {
   const res = await fetch(`${BASE_URL}${endpoint}`, {

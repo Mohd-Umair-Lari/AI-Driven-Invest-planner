@@ -1,1 +1,1 @@
-export const BACKEND_URL = "https://ai-finpass-backend.onrender.com";
+export const BACKEND_URL = "https://ai-driven-invest-planner.onrender.com";
