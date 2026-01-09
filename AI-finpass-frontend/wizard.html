@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>FinPass | Onboarding</title>
+  <link rel="stylesheet" href="./css/style.css" />
+</head>
+
+<body>
+  <div class="wizard">
+
+    <div class="progress">
+      <span class="dot active"></span>
+      <span class="dot"></span>
+      <span class="dot"></span>
+      <span class="dot"></span>
+    </div>
+
+    <div class="step active">
+      <h2>Goal Setup</h2>
+      <input id="goal-name" placeholder="Goal (e.g Car Purchase)" />
+      <input id="goal-amount" placeholder="Target Amount" type="number" />
+      <input id="goal-time" placeholder="Target Time (months)" type="number" />
+
+      <div class="controls">
+        <button class="btn primary" onclick="cancelOnboarding()">Cancel</button>
+        <button class="btn primary" onclick="next()">Next</button>
+      </div>
+    </div>
+
+    <div class="step">
+      <h2>Financials</h2>
+      <input id="income" placeholder="Monthly Income" type="number" />
+      <input id="expenses" placeholder="Monthly Expenses" type="number" />
+      <input id="debt" placeholder="Debt" type="number" />
+      <label>
+        <input type="checkbox" id="emergency" /> Emergency Fund?
+      </label>
+
+      <div class="controls">
+        <button class="btn primary" onclick="prev()">Back</button>
+        <button class="btn pprimary" onclick="cancelOnboarding()">Cancel</button>
+        <button class="btn primary" onclick="next()">Next</button>
+      </div>
+    </div>
+
+    <div class="step">
+      <h2>Investments</h2>
+      <select id="risk">
+        <option value="Low">Low</option>
+        <option value="Medium">Medium</option>
+        <option value="High">High</option>
+      </select>
+
+      <select id="mode">
+        <option value="SIP">SIP</option>
+        <option value="Lumpsum">Lumpsum</option>
+      </select>
+
+      <input id="invest-amt" placeholder="Investment Amount" type="number" />
+
+      <div class="controls">
+        <button class="btn primary" onclick="prev()">Back</button>
+        <button class="btn primary" onclick="cancelOnboarding()">Cancel</button>
+        <button class="btn primary" onclick="next()">Next</button>
+      </div>
+    </div>
+
+    <div class="step">
+      <h2>Confirm & Finish</h2>
+      <p>We will analyze your finances and build your plan.</p>
+
+      <div class="controls">
+        <button class="btn primary" onclick="prev()">Back</button>
+        <button class="btn primary" onclick="cancelOnboarding()">Cancel</button>
+        <button class="btn primary" onclick="submitWizard()">Finish</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./js/wizard.js"></script>
+</body>
+</html>

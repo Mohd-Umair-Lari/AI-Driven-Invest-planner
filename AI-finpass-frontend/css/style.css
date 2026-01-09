@@ -1,0 +1,264 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap");
+
+/* ===== RESET ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  background: linear-gradient(to right, #f4f4f9, #d6e0f0);
+  color: #222;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 30px;
+}
+
+/* ===== CONTAINERS ===== */
+.container,
+.dashboard-container {
+  width: 100%;
+  max-width: 1100px;
+  background: #fff;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+}
+
+h1,
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #28324d;
+}
+
+/* ===== FORMS ===== */
+input,
+select {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+}
+
+input[type="checkbox"] {
+  width: auto;
+  margin-right: 8px;
+}
+
+button {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  border: none;
+  background: #5a73e0;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+button:hover {
+  background: #34427a;
+}
+
+p {
+  margin-top: 10px;
+  font-size: 14px;
+  text-align: center;
+}
+
+p a {
+  color: #5a73e0;
+  text-decoration: none;
+}
+
+p a:hover {
+  text-decoration: underline;
+}
+
+/* ===== DASHBOARD GRID ===== */
+#dashboard-content {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-top: 30px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.card {
+  background: #f9faff;
+  padding: 24px;
+  border-radius: 14px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.card h2 {
+  margin-bottom: 16px;
+  color: #28324d;
+}
+
+.card p {
+  margin: 6px 0;
+  font-size: 15px;
+}
+
+/* ===== ACTIONS CARD ===== */
+.card.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  justify-content: center;
+}
+
+.card.actions button {
+  background: #5b74e8;
+}
+
+.card.actions button:hover {
+  background: #425edc;
+}
+
+/* ===== LOGOUT ===== */
+.logout-btn {
+  margin-top: 20px;
+  width: 100%;
+  padding: 16px;
+  font-size: 16px;
+  border-radius: 12px;
+  background: #5b74e8;
+}
+
+/* ===== WIZARD ===== */
+.wizard {
+  max-width: 980px;
+  margin: 30px auto;
+}
+
+.step {
+  display: none;
+  background: #fff;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+.step.active {
+  display: block;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.btn.primary {
+  background: #4f6be6;
+  color: #fff;
+}
+
+.btn.ghost {
+  background: #f1f5f9;
+  border: 1px solid #e6e9f2;
+}
+
+/* ===== MODALS ===== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.hidden {
+  display: none;
+}
+
+.modal-card {
+  background: #fff;
+  width: 90%;
+  max-width: 520px;
+  padding: 28px;
+  border-radius: 14px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  position: relative;
+  animation: popIn 0.25s ease-out;
+}
+
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #f1f1f1;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* ===== AGENT BADGES ===== */
+.agent-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.agent-badge.adjust {
+  background: #fff4cc;
+  color: #8a6d00;
+}
+
+.agent-badge.abort {
+  background: #ffe1e1;
+  color: #b00020;
+}
+
+.agent-badge.hold {
+  background: #e0f2ff;
+  color: #005b96;
+}
+
+.agent-badge.switch {
+  background: #e8ffe8;
+  color: #1b5e20;
+}
+
+/* ===== ANIMATION ===== */
+@keyframes popIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

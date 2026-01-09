@@ -1,0 +1,1 @@
+export const BACKEND_URL = "https://ai-finpass-backend.onrender.com";

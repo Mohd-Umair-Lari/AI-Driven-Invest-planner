@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Register | FinPass AI</title>
+  <link rel="stylesheet" href="./css/style.css" />
+</head>
+
+<body>
+  <div class="container">
+    <h1>Create Account</h1>
+
+    <input id="name" placeholder="Full Name" />
+    <input id="email" placeholder="Email" type="email" />
+    <input id="password" placeholder="Password" type="password" />
+    <input id="age" placeholder="Age" type="number" />
+
+    <select id="status">
+      <option value="Buisness Owner">Business Owner</option>
+      <option value="Freelancer">Freelancer</option>
+      <option value="Salaried">Salaried</option>
+      <option value="Unemployed">Unemployed</option>
+      <option value="Student">Student</option>
+    </select>
+
+    <button id="register-btn">Register</button>
+
+    <p>
+      Already have an account?
+      <a href="/">Login</a>
+    </p>
+  </div>
+
+  <script type="module" src="./js/register.js"></script>
+</body>
+</html>
