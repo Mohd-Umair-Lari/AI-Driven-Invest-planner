@@ -319,35 +319,30 @@ def agent_api(email):
     if not user:
         return jsonify({"error": "User not found"}), 404
 
-    if user.get("onboarding", {}).get("status") != "completed":
-        return jsonify({
-            "status": "inactive",
-            "reason": "onboarding_incomplete",
-            "message": "Complete onboarding to activate AI Decision Advisor.",
-            "agent": None
-        }), 200
-
-    if not has_minimum_financial_data(user):
-        return jsonify({
-            "status": "inactive",
-            "reason": "insufficient_data",
-            "message": "Not enough financial data to generate AI advice.",
-            "agent": None
-        }), 200
-
     try:
         goal_intel = compute_goal_intelligence(user)
+
         agent_response = run_agent(goal_intel)
 
+        # 🔒 GUARANTEE STRUCTURE
+        if not agent_response:
+            agent_response = {
+                "action": "HOLD",
+                "message": "Decision data unavailable",
+                "reason": "Incomplete user data"
+            }
+
         return jsonify({
-            "status": "active",
             "goal_intelligence": goal_intel,
             "agent": agent_response
         })
 
     except Exception as e:
-        print("[Agent Error]", e)
+        print("[AGENT ERROR]", e)
         return jsonify({
-            "status": "error",
-            "message": "AI Decision Advisor temporarily unavailable."
+            "agent": {
+                "action": "ERROR",
+                "message": "Decision computation failed",
+                "reason": str(e)
+            }
         }), 200
