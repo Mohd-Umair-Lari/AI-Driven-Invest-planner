@@ -105,7 +105,8 @@ Key rules:
 ---
 
 ## Repository Structure
-
+```
+finpass-ai
 ├── backend/
 │ ├── main.py
 │ ├── requirements.txt
@@ -124,26 +125,26 @@ Key rules:
 │ │ └── init.py
 │ │
 │ └── utils/
-│ ├── data_normalizer.py
-│ └── init.py
+│   ├── data_normalizer.py
+│   └── init.py
 │
 └── frontend/
-├── index.html
-├── dashboard.html
-├── register.html
-├── wizard.html
-│
-├── css/
-│ └── style.css
-│
-└── js/
-├── api.js
-├── config.js
-├── dashboard.js
-├── login.js
-├── register.js
-└── wizard.js
-
+  ├── dashboard.html
+  ├── register.html
+  ├── index.html
+  ├── wizard.html
+  │
+  ├── css/
+  │ └── style.css
+  │
+  └── js/
+    ├── api.js
+    ├── config.js
+    ├── dashboard.js
+    ├── login.js
+    ├── register.js
+    └── wizard.js
+```
 ---
 
 ## Deployment Status
