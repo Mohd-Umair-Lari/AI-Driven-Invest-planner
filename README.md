@@ -1,8 +1,11 @@
-# Personalized-AI-Driven-Investment-Planner
+# Personalized AI-Driven Investment Planner
 
-[The Notion page for the idea of the Project lies here](https://www.notion.so/2-Personalized-AI-Driven-Investment-Planner-21cd1ee2d1be807da0a1e1693cd1f0c8)
+[Notion page for the project idea](https://www.notion.so/2-Personalized-AI-Driven-Investment-Planner-21cd1ee2d1be807da0a1e1693cd1f0c8)
 
-The WebApp is live at : https://ai-driven-invest-planner.vercel.app/
+**Live Web App:**  
+https://ai-driven-invest-planner.vercel.app/
+
+---
 
 # FinPass AI
 
@@ -30,12 +33,14 @@ FinPass AI is built on three core principles:
 ## Key Features
 
 ### 1. Investment Route Generator
+
 FinPass AI generates curated investment routes based on a user’s income profile, risk appetite, and investment horizon.
 
 Supported user categories:
-- **Daily wage earners**: RD, Post Office schemes, Sovereign Gold Bonds
-- **Salaried individuals**: SIPs, ELSS, PPF, NPS
-- **High Net-Worth Individuals (HNIs)**: Stocks, REITs, Mutual Funds, equity baskets
+
+- **Daily wage earners**: RD, Post Office schemes, Sovereign Gold Bonds  
+- **Salaried individuals**: SIPs, ELSS, PPF, NPS  
+- **High Net-Worth Individuals (HNIs)**: Stocks, REITs, Mutual Funds, equity baskets  
 
 Each route includes:
 - Asset allocation rationale
@@ -45,6 +50,7 @@ Each route includes:
 ---
 
 ### 2. Adaptive Recommendation Updates
+
 The system periodically evaluates whether a user’s current investment route should be adjusted, based on:
 
 - Simulated market regimes
@@ -62,9 +68,16 @@ To avoid overwhelm:
 
 FinPass AI follows a simple, robust architecture:
 
-Frontend (Web UI) -> Backend API -> Decision Logic + AI Reasoning -> DataBase
+Frontend (Web UI)
+↓
+Backend API
+↓
+Decision Logic + AI Reasoning
+↓
+Database
 
 
+Key rules:
 - AI is **never** used to execute financial actions.
 - AI outputs are structured, versioned, and logged.
 - All numeric calculations (ROI, allocation limits) are deterministic.
@@ -74,7 +87,7 @@ Frontend (Web UI) -> Backend API -> Decision Logic + AI Reasoning -> DataBase
 ## Tech Stack
 
 ### Frontend
-- Modern JavaScript framework (Vite/React-based)
+- HTML, CSS, JavaScript
 - Deployed on **Vercel**
 
 ### Backend
@@ -93,46 +106,43 @@ Frontend (Web UI) -> Backend API -> Decision Logic + AI Reasoning -> DataBase
 
 ## Repository Structure
 
-finpass-ai/
-│   README.md
+├── backend/
+│ ├── main.py
+│ ├── requirements.txt
+│ │
+│ ├── agent/
+│ │ ├── decision_engine.py
+│ │ ├── financial_agent.py
+│ │ └── what_if.py
+│ │
+│ ├── analytics/
+│ │ └── financial_analytics.py
+│ │
+│ ├── ml/
+│ │ ├── goal_intelligence.py
+│ │ ├── goal_predictor.py
+│ │ └── init.py
+│ │
+│ └── utils/
+│ ├── data_normalizer.py
+│ └── init.py
 │
-├───backend
-│   │   main.py
-│   │   requirements.txt
-│   │
-│   ├───agent
-│   │       decision_engine.py
-│   │       financial_agent.py
-│   │       what_if.py
-│   │
-│   ├───analytics
-│   │       financial_analytics.py
-│   │       
-│   ├───ml
-│   │       goal_intelligence.py
-│   │       goal_predictor.py
-│   │       __init__.py
-│   │
-│   └───utils
-│           data_normalizer.py
-│           __init__.py
+└── frontend/
+├── index.html
+├── dashboard.html
+├── register.html
+├── wizard.html
 │
-└───frontend
-    │   dashboard.html
-    │   index.html
-    │   register.html
-    │   wizard.html
-    │
-    ├───css
-    │       style.css
-    │
-    └───js
-            api.js
-            config.js
-            dashboard.js
-            login.js
-            register.js
-            wizard.js
+├── css/
+│ └── style.css
+│
+└── js/
+├── api.js
+├── config.js
+├── dashboard.js
+├── login.js
+├── register.js
+└── wizard.js
 
 ---
 
