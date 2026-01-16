@@ -62,13 +62,7 @@ To avoid overwhelm:
 
 FinPass AI follows a simple, robust architecture:
 
-Frontend (Web UI)
-↓
-Backend API
-↓
-Decision Logic + AI Reasoning
-↓
-DataBase
+Frontend (Web UI) -> Backend API -> Decision Logic + AI Reasoning -> DataBase
 
 
 - AI is **never** used to execute financial actions.
