@@ -93,7 +93,6 @@ Frontend (Web UI) -> Backend API -> Decision Logic + AI Reasoning -> DataBase
 
 ## Repository Structure
 
-'''
 finpass-ai/
 |-- frontend/
 |   |-- css/
@@ -111,8 +110,7 @@ finpass-ai/
 |   |-- agent/
 |
 |-- README.md
-`-- .gitignore
-'''
+|-- .gitignore
 
 ---
 
