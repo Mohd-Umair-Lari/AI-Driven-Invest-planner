@@ -101,17 +101,23 @@ DataBase
 
 finpass-ai/
 |-- frontend/
-| |-- src/
-│ |-- package.json
-│ |-- build/dist
-│
+|   |-- css/
+|   |-- js/
+|   |-- dashboard.html
+|   |-- register.html
+|   |-- wizard.html
+|   `-- index.html
+|
 |-- backend/
-│ |-- app.py
-│ |-- requirements.txt
-│ |-- services/
-│
+|   |-- app.py
+|   |-- requirements.txt
+|   |-- analytics/
+|   |-- ml/
+|   `-- agent/
+|
 |-- README.md
-|-- .gitignore
+`-- .gitignore
+
 
 ---
 
