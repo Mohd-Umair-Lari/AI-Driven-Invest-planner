@@ -101,14 +101,14 @@ finpass-ai/
 |   |-- dashboard.html
 |   |-- register.html
 |   |-- wizard.html
-|   `-- index.html
+|   |-- index.html
 |
 |-- backend/
 |   |-- app.py
 |   |-- requirements.txt
 |   |-- analytics/
 |   |-- ml/
-|   `-- agent/
+|   |-- agent/
 |
 |-- README.md
 `-- .gitignore
