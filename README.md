@@ -94,23 +94,45 @@ Frontend (Web UI) -> Backend API -> Decision Logic + AI Reasoning -> DataBase
 ## Repository Structure
 
 finpass-ai/
-|-- frontend/
-|   |-- css/
-|   |-- js/
-|   |-- dashboard.html
-|   |-- register.html
-|   |-- wizard.html
-|   |-- index.html
-|
-|-- backend/
-|   |-- app.py
-|   |-- requirements.txt
-|   |-- analytics/
-|   |-- ml/
-|   |-- agent/
-|
-|-- README.md
-|-- .gitignore
+│   README.md
+│
+├───backend
+│   │   main.py
+│   │   requirements.txt
+│   │
+│   ├───agent
+│   │       decision_engine.py
+│   │       financial_agent.py
+│   │       what_if.py
+│   │
+│   ├───analytics
+│   │       financial_analytics.py
+│   │       
+│   ├───ml
+│   │       goal_intelligence.py
+│   │       goal_predictor.py
+│   │       __init__.py
+│   │
+│   └───utils
+│           data_normalizer.py
+│           __init__.py
+│
+└───frontend
+    │   dashboard.html
+    │   index.html
+    │   register.html
+    │   wizard.html
+    │
+    ├───css
+    │       style.css
+    │
+    └───js
+            api.js
+            config.js
+            dashboard.js
+            login.js
+            register.js
+            wizard.js
 
 ---
 
