@@ -100,18 +100,18 @@ DataBase
 ## Repository Structure
 
 finpass-ai/
-├── frontend/
-│ ├── src/
-│ ├── package.json
-│ └── build/dist
+|-- frontend/
+| |-- src/
+│ |-- package.json
+│ |-- build/dist
 │
-├── backend/
-│ ├── app.py
-│ ├── requirements.txt
-│ └── services/
+|-- backend/
+│ |-- app.py
+│ |-- requirements.txt
+│ |-- services/
 │
-├── README.md
-└── .gitignore
+|-- README.md
+|-- .gitignore
 
 ---
 
