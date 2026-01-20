@@ -199,26 +199,36 @@ button:hover {
   padding-right: 48px;
 }
 
-
 .modal-close {
   position: absolute;
-  top: 34px;
-  right: 34px;
-  width: 34px;
-  height: 34px;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: #eef2ff;
   border: none;
-  font-size: 20px;
-  font-weight: 700;
-  color: #1e3a8a;
   cursor: pointer;
-  transition: 0.2s ease;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+  transition: all 0.2s ease;
+}
+
+.modal-close span {
+  display: block;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  transform: translateY(-1px);
 }
 
 .modal-close:hover {
-  background: #dbeafe;
-  transform: rotate(90deg);
+  background: #e0e7ff;
+  transform: scale(1.05);
 }
 
 
