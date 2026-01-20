@@ -303,3 +303,56 @@ button:hover {
     flex-direction: column;
   }
 }
+
+.auth-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 520px;
+  background: #ffffff;
+  padding: 36px 40px;
+  border-radius: 18px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.12);
+  text-align: center;
+}
+
+.auth-card input,
+.auth-card select {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid #d6dbe8;
+  margin-bottom: 16px;
+  font-size: 15px;
+}
+
+.auth-card button {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #5b74e8, #4f6be6);
+  color: #fff;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.auth-card button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(79, 107, 230, 0.35);
+}
+
+.auth-card p {
+  margin-top: 14px;
+  font-size: 14px;
+}
+
+.auth-card a {
+  color: #5b74e8;
+  font-weight: 500;
+}
