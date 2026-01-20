@@ -8,13 +8,13 @@
 }
 
 body {
-  background: linear-gradient(135deg, #f4f6fb, #dde6f5);
-  color: #1f2937;
   min-height: 100vh;
+  background: linear-gradient(135deg, #eef2ff, #e3ebff);
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  padding: 32px 16px;
+  padding: 32px;
+  color: #1f2937;
 }
 
 .container,
@@ -22,106 +22,111 @@ body {
   width: 100%;
   max-width: 1100px;
   background: #ffffff;
-  padding: 42px;
   border-radius: 18px;
-  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.12);
+  padding: 40px;
+  box-shadow: 0 25px 60px rgba(30, 64, 175, 0.15);
+}
+
+h1,
+h2,
+h3 {
+  color: #1e3a8a;
+  font-weight: 600;
 }
 
 h1 {
   text-align: center;
-  font-size: 28px;
   margin-bottom: 28px;
-  color: #1e293b;
-}
-
-h2 {
-  color: #1e293b;
-  font-size: 20px;
-  margin-bottom: 14px;
 }
 
 input,
 select {
   width: 100%;
-  padding: 13px 14px;
+  padding: 14px 16px;
   margin-bottom: 16px;
   border-radius: 10px;
   border: 1px solid #d1d5db;
   font-size: 15px;
+  transition: 0.2s ease;
 }
 
 input:focus,
 select:focus {
   outline: none;
-  border-color: #5b74e8;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
 }
 
-input[type="checkbox"] {
-  width: auto;
-  margin-right: 8px;
+label {
+  font-size: 14px;
+  color: #374151;
 }
 
-button {
-  padding: 14px 18px;
-  border-radius: 12px;
+button,
+.btn {
   border: none;
+  border-radius: 12px;
+  padding: 14px 18px;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.25s ease;
 }
 
-.btn.primary {
-  background: #5b74e8;
-  color: #ffffff;
+.btn.primary,
+button {
+  background: linear-gradient(135deg, #4f6ef7, #3b5bdb);
+  color: #fff;
 }
 
-.btn.primary:hover {
-  background: #445dd8;
+.btn.primary:hover,
+button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px rgba(79, 110, 247, 0.35);
 }
 
-.btn.secondary {
-  background: #eef2ff;
-  color: #334155;
+.analytics-trigger-card button {
+  background: #f1f5ff;
+  color: #1e3a8a;
+  border: 1px solid #dbe3ff;
 }
 
-.btn.secondary:hover {
+.analytics-trigger-card button:hover {
   background: #e0e7ff;
 }
 
-.btn.ghost {
-  background: #f8fafc;
-  border: 1depx solid #e5e7eb;
-  color: #334155;
-}
-
-.btn.ghost:hover {
-  background: #f1f5f9;
+.dashboard-container > button {
+  margin-top: 30px;
+  width: 100%;
+  background: linear-gradient(135deg, #4f6ef7, #3b5bdb);
 }
 
 #dashboard-content {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 26px;
-  margin-top: 30px;
+  margin-top: 24px;
 }
 
 .card {
-  background: #f9fbff;
-  padding: 26px;
+  background: linear-gradient(180deg, #ffffff, #f8faff);
+  padding: 24px;
   border-radius: 16px;
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
 }
 
 .card h3 {
   margin-bottom: 14px;
-  font-size: 18px;
-  color: #1e293b;
 }
 
 .card p {
+  font-size: 15px;
   margin: 6px 0;
-  font-size: 14.5px;
   color: #374151;
 }
 
@@ -129,52 +134,28 @@ button {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  justify-content: center;
 }
 
-.analytics-trigger-card button {
-  width: 100%;
+#resume-onboarding-container {
+  grid-column: span 2;
 }
 
-.logout-btn,
-.dashboard-container > button {
-  margin-top: 28px;
-  width: 100%;
-  background: #5b74e8;
-  color: white;
+#resume-onboarding-container .card {
+  background: linear-gradient(135deg, #e0f2fe, #dbeafe);
+  border: 1px dashed #60a5fa;
+  text-align: center;
 }
 
-.wizard {
-  max-width: 900px;
-  margin: 30px auto;
-}
-
-.step {
-  display: none;
-  background: #ffffff;
-  padding: 28px;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-}
-
-.step.active {
-  display: block;
-}
-
-.controls {
-  display: flex;
-  justify-content: space-between;
-  gap: 14px;
-  margin-top: 24px;
-}
-
-.controls button {
-  flex: 1;
+#resume-onboarding-container p {
+  font-weight: 500;
+  margin-bottom: 12px;
 }
 
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(15, 23, 42, 0.55);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -191,31 +172,20 @@ button {
   max-width: 520px;
   padding: 30px;
   border-radius: 18px;
-  box-shadow: 0 25px 55px rgba(0, 0, 0, 0.25);
-  position: relative;
+  box-shadow: 0 30px 70px rgba(15, 23, 42, 0.35);
   animation: popIn 0.25s ease-out;
-}
-
-.modal-card h2 {
-  margin-bottom: 12px;
-}
-
-.modal-card p {
-  font-size: 15px;
-  line-height: 1.6;
 }
 
 .modal-close {
   position: absolute;
   top: 12px;
   right: 14px;
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
-  background: #f1f5f9;
-  border: none;
+  background: #eef2ff;
+  color: #1e3a8a;
   font-size: 18px;
-  cursor: pointer;
 }
 
 .agent-badge {
@@ -223,33 +193,59 @@ button {
   padding: 8px 16px;
   border-radius: 999px;
   font-weight: 600;
-  font-size: 14px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .agent-badge.adjust {
-  background: #fff7cc;
-  color: #8a6d00;
+  background: #fff7ed;
+  color: #9a3412;
 }
 
 .agent-badge.abort {
-  background: #ffe1e1;
-  color: #b00020;
+  background: #fee2e2;
+  color: #991b1b;
 }
 
 .agent-badge.hold {
-  background: #e0f2ff;
-  color: #005b96;
+  background: #e0f2fe;
+  color: #075985;
 }
 
 .agent-badge.switch {
-  background: #e8ffe8;
-  color: #1b5e20;
+  background: #dcfce7;
+  color: #166534;
+}
+
+.wizard {
+  max-width: 960px;
+  margin: 40px auto;
+}
+
+.step {
+  display: none;
+  background: #ffffff;
+  padding: 28px;
+  border-radius: 16px;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.1);
+}
+
+.step.active {
+  display: block;
+}
+
+.controls {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.controls button {
+  flex: 1;
 }
 
 @keyframes popIn {
   from {
-    transform: scale(0.96);
+    transform: scale(0.95);
     opacity: 0;
   }
   to {
@@ -263,8 +259,11 @@ button {
     grid-template-columns: 1fr;
   }
 
-  .container,
-  .dashboard-container {
-    padding: 26px;
+  #resume-onboarding-container {
+    grid-column: span 1;
+  }
+
+  .controls {
+    flex-direction: column;
   }
 }
