@@ -202,10 +202,10 @@ button:hover {
 
 .modal-close {
   position: absolute;
-  top: 14px;
-  right: 14px;
-  width: 14px;
-  height: 14px;
+  top: 34px;
+  right: 34px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   background: #eef2ff;
   border: none;
