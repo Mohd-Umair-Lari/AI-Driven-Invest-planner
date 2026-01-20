@@ -156,6 +156,12 @@ document.addEventListener("DOMContentLoaded", () => {
   checkOnboardingStatus(user);
 });
 
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    closeModal();
+  }
+});
+
 
 function setText(id, value) {
   const el = document.getElementById(id);
