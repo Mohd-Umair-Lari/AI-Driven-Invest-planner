@@ -17,11 +17,23 @@ body {
   color: #1f2937;
 }
 
+.container input,
+.container select {
+  max-width: 480px;
+  margin: 0 auto 16px auto;
+  display: block;
+}
+
+.container button {
+  max-width: 200px;
+  margin: 12px auto;
+}
+
 .container {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;             
-  text-align: center;   
+  text-align: center;
 }
 
 .dashboard-container {
