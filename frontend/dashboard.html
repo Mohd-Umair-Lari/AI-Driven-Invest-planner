@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <title>FinPass AI | Dashboard</title>
-  <link rel="stylesheet" href="./css/style.css" />
+  <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
 
 <div class="dashboard-container">
   <h1>User Dashboard</h1>
+
   <div id="dashboard-content">
     <div class="card">
       <h3>User Profile</h3>
@@ -54,7 +55,7 @@
       <button id="btn-goal">View Goal Intelligence</button>
       <button id="btn-agent">AI Decision Advisor</button>
     </div>
-    
+
     <div id="resume-onboarding-container" style="display:none;">
       <div class="card">
         <p>You haven’t completed your onboarding.</p>
@@ -65,15 +66,16 @@
     </div>
   </div>
 
-  <button onclick="logout()">Logout</button>
+  <button class="logout-btn" onclick="logout()">Logout</button>
 </div>
 
-<script type="module" src="./js/dashboard.js"></script>
 <div id="modal-backdrop" class="modal-backdrop hidden">
-  <div class="modal-card" id="modal-card">
+  <div class="modal-card">
     <button class="modal-close" id="modal-close">&times;</button>
     <div id="modal-content"></div>
   </div>
 </div>
+
+<script type="module" src="/js/dashboard.js"></script>
 </body>
 </html>
