@@ -8,14 +8,16 @@
 }
 
 body {
+  background: linear-gradient(to bottom, #eef3ff, #dbe7ff);
+  color: #222;
   min-height: 100vh;
-  background: linear-gradient(135deg, #eef2ff, #e3ebff);
+  margin: 0;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  padding: 32px;
-  color: #1f2937;
+  align-items: center;
+  overflow-x: hidden;
 }
+
 
 .container input,
 .container select {
