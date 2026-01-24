@@ -107,20 +107,18 @@ window.cancelOnboarding = async () => {
   if (!confirmCancel) return;
 
   const user = JSON.parse(localStorage.getItem("user"));
-
+  if (!user?.email) return;
+  
+  await apiFetch(`/api/user/${user.email}/onboarding/cancel`, {
+    method: "POST",
+    body: JSON.stringify({
+      current_step: step 
+    })
+  }).catch(() => {});
   localStorage.setItem("onboardingCompleted", "false");
-
-  if (user?.email) {
-    apiFetch(`/api/user/${user.email}/onboarding/cancel`, {
-      method: "POST"
-    }).catch(() => {});
-  }
-
-  step = 0;
-  show();
-
   window.location.href = "/dashboard.html";
 };
+
 
 window.submitWizard = async () => {
   const user = JSON.parse(localStorage.getItem("user"));
