@@ -6,6 +6,45 @@ const dots = document.querySelectorAll(".dot");
 const params = new URLSearchParams(window.location.search);
 const isResume = params.get("resume") === "true";
 
+function buildRegistrationPayload() {
+  return {
+    email: JSON.parse(localStorage.getItem("user"))?.email,
+
+    Goal: {
+      goal: document.getElementById("goal-name")?.value,
+      "target-amt": Number(document.getElementById("goal-amount")?.value),
+      "target-time": Number(document.getElementById("goal-time")?.value)
+    },
+
+    financials: {
+      "monthly-income": Number(document.getElementById("income")?.value),
+      "monthly-expenses": Number(document.getElementById("expenses")?.value),
+      debt: Number(document.getElementById("debt")?.value),
+      "em-fund-opted": document.getElementById("emergency")?.checked
+    },
+
+    investments: {
+      "risk-opt": document.getElementById("risk")?.value,
+      "prefered-mode": document.getElementById("mode")?.value,
+      "invest-amt": Number(document.getElementById("invest-amt")?.value)
+    }
+  };
+}
+
+function hydrateWizard(data) {
+  Object.entries(data).forEach(([section, values]) => {
+    if (typeof values !== "object") return;
+
+    Object.entries(values).forEach(([key, val]) => {
+      const el = document.getElementById(`${section}-${key}`);
+      if (el) {
+        if (el.type === "checkbox") el.checked = val;
+        else el.value = val;
+      }
+    });
+  });
+}
+
 async function loadResumeState() {
   if (!isResume) return;
 
@@ -14,11 +53,13 @@ async function loadResumeState() {
 
   try {
     const res = await apiFetch(`/api/onboarding/status/${user.email}`);
-
-    if (res.current_step !== null && typeof res.current_step === "number") {
-      step = res.current_step;
-      show();
+    const onboarding = res.onboarding;
+    if (!onboarding) return;
+    step = onboarding.current_step ?? 0;
+    if (onboarding.data) {
+      hydrateWizard(onboarding.data);
     }
+    show();
   } catch (err) {
     console.error("Failed to resume onboarding", err);
   }
@@ -32,29 +73,29 @@ function show() {
 show();
 loadResumeState();
 
-function persistStep() {
-  const user = JSON.parse(localStorage.getItem("user"));
-  if (!user?.email) return;
 
-  apiFetch(`/api/onboarding/start`, {
+window.nextStep = async () => {
+  const payload = buildRegistrationPayload();
+
+  step += 1;
+
+  await fetch("/api/onboarding/save", {
     method: "POST",
-    body: JSON.stringify({ email: user.email })
-  }).catch(() => {});
-}
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      email: payload.email,
+      step,
+      payload
+    })
+  });
 
-window.next = () => {
-  if (step < steps.length - 1) {
-    step++;
-    show();
-    persistStep();
-  }
+  show();
 };
 
-window.prev = () => {
+window.prevStep = () => {
   if (step > 0) {
-    step--;
+    step -= 1;
     show();
-    persistStep();
   }
 };
 
@@ -80,7 +121,6 @@ window.cancelOnboarding = async () => {
 
   window.location.href = "/dashboard.html";
 };
-
 
 window.submitWizard = async () => {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -130,4 +170,9 @@ window.submitWizard = async () => {
     alert("Failed to save onboarding");
     console.error(err);
   }
+  await fetch("/api/onboarding/complete", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: user.email })
+  });
 };

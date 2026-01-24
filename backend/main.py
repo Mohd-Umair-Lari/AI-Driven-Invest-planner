@@ -178,33 +178,38 @@ def start_onboarding():
         "onboarding": user["onboarding"]
     })
 
-@app.route("/api/user/<email>", methods=["GET"])
-def api_get_user(email):
-    user = collection.find_one({"email": email}, {"_id": 0})
-    if not user:
-        return jsonify({"status": "error", "message": "User not found"}), 404
-    return jsonify({"status": "success", "user": user})
+@app.route("/api/onboarding/save", methods=["POST"])
+def save_onboarding():
+    data = request.get_json()
+    email = data.get("email")
 
-@app.route("/api/user/<email>", methods=["PUT"])
-def api_update_user(email):
-    data = request.get_json(silent=True) or {}
+    if not email:
+        return jsonify({"error": "Email required"}), 400
 
-    update = {
-        "Goal": data.get("Goal", {}),
-        "financials": data.get("financials", {}),
-        "investments": data.get("investments", {}),
-        "progress": data.get("progress", {})
-    }
-
-    result = collection.update_one(
+    collection.update_one(
         {"email": email},
-        {"$set": update}
+        {
+            "$set": {
+                "onboarding": {
+                    "current_step": data.get("step", 0),
+                    "completed": False,
+                    "data": data.get("payload", {})
+                }
+            }
+        },
+        upsert=True
     )
 
-    if result.matched_count == 0:
-        return jsonify({"error": "User not found"}), 404
+    return jsonify({"status": "saved"})
 
-    return jsonify({"status": "success"})
+@app.route("/api/onboarding/load/<email>")
+def load_onboarding(email):
+    user = collection.find_one(
+        {"email": email},
+        {"onboarding": 1, "_id": 0}
+    )
+    return jsonify(user.get("onboarding", {}))
+
 
 @app.route("/api/user/<email>/onboarding/cancel", methods=["POST"])
 def cancel_onboarding(email):
@@ -278,6 +283,33 @@ def complete_onboarding():
 
     return jsonify({"status": "completed"})
 
+@app.route("/api/user/<email>", methods=["GET"])
+def api_get_user(email):
+    user = collection.find_one({"email": email}, {"_id": 0})
+    if not user:
+        return jsonify({"status": "error", "message": "User not found"}), 404
+    return jsonify({"status": "success", "user": user})
+
+@app.route("/api/user/<email>", methods=["PUT"])
+def api_update_user(email):
+    data = request.get_json(silent=True) or {}
+
+    update = {
+        "Goal": data.get("Goal", {}),
+        "financials": data.get("financials", {}),
+        "investments": data.get("investments", {}),
+        "progress": data.get("progress", {})
+    }
+
+    result = collection.update_one(
+        {"email": email},
+        {"$set": update}
+    )
+
+    if result.matched_count == 0:
+        return jsonify({"error": "User not found"}), 404
+
+    return jsonify({"status": "success"})
 
 @app.route("/api/analytics/<email>", methods=["GET"])
 def analytics(email):

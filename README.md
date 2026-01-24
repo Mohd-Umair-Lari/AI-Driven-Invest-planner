@@ -1,6 +1,7 @@
 # Personalized AI-Driven Investment Planner
 
-[Notion page for the project idea](https://www.notion.so/2-Personalized-AI-Driven-Investment-Planner-21cd1ee2d1be807da0a1e1693cd1f0c8)
+[Notion page for the project idea]
+(https://www.notion.so/2-Personalized-AI-Driven-Investment-Planner-21cd1ee2d1be807da0a1e1693cd1f0c8)
 
 **Live Web App:**  
 https://ai-driven-invest-planner.vercel.app/
