@@ -10,7 +10,41 @@ function openModal(html) {
 }
 
 function closeModal() {
-  document.getElementById("modal-backdrop").classList.add("hidden");
+  document.getElementById("modal-backdrop")?.classList.add("hidden");
+}
+
+function mergeBufferedData(user, buffer) {
+  if (!buffer) return user;
+
+  return {
+    ...user,
+    Goal: buffer.Goal ?? user.Goal,
+    financials: buffer.financials ?? user.financials,
+    investments: buffer.investments ?? user.investments,
+    progress: buffer.progress ?? user.progress
+  };
+}
+
+async function hydrateUserWithBufferedOnboarding(user) {
+  try {
+    const res = await apiFetch(`/api/onboarding/status/${user.email}`);
+    const onboarding = res.onboarding;
+
+    if (
+      onboarding &&
+      (onboarding.state === "cancelled" || onboarding.state === "in_progress") &&
+      onboarding.data
+    ) {
+      const merged = mergeBufferedData(user, onboarding.data);
+      localStorage.setItem("user", JSON.stringify(merged));
+      return merged;
+    }
+
+    return user;
+  } catch (err) {
+    console.error("❌ Failed to hydrate onboarding buffer", err);
+    return user;
+  }
 }
 
 async function checkOnboardingStatus(user) {
@@ -18,13 +52,11 @@ async function checkOnboardingStatus(user) {
 
   try {
     const res = await apiFetch(`/api/onboarding/status/${user.email}`);
-
     const onboarding = res.onboarding;
-    if (!onboarding) return;
 
     if (
-      onboarding.state === "cancelled" ||
-      onboarding.state === "in_progress"
+      onboarding &&
+      (onboarding.state === "cancelled" || onboarding.state === "in_progress")
     ) {
       const container = document.getElementById("resume-onboarding-container");
       const btn = document.getElementById("resume-onboarding-btn");
@@ -32,33 +64,29 @@ async function checkOnboardingStatus(user) {
       if (!container || !btn) return;
 
       container.style.display = "block";
-
       btn.onclick = () => {
-        console.log("▶️ Resume onboarding clicked");
         window.location.href = "/wizard.html?resume=true";
       };
     }
   } catch (err) {
-    console.error("Failed to fetch onboarding status", err);
+    console.error("Failed to check onboarding status", err);
   }
 }
 
 async function loadAnalytics(email) {
-  const data = await apiFetch(`/api/analytics/${email}`);
-  const a = data.analytics;
+  const { analytics } = await apiFetch(`/api/analytics/${email}`);
 
   openModal(`
     <h2>Financial Analytics</h2>
-    <p><b>Financial Health:</b> ${a.financial_health}</p>
-    <p><b>Savings Ratio:</b> ${(a.savings_ratio * 100).toFixed(1)}%</p>
-    <p><b>Expense Ratio:</b> ${(a.expense_ratio * 100).toFixed(1)}%</p>
-    <p><b>Risk Score:</b> ${a.risk_score}</p>
+    <p><b>Financial Health:</b> ${analytics.financial_health}</p>
+    <p><b>Savings Ratio:</b> ${(analytics.savings_ratio * 100).toFixed(1)}%</p>
+    <p><b>Expense Ratio:</b> ${(analytics.expense_ratio * 100).toFixed(1)}%</p>
+    <p><b>Risk Score:</b> ${analytics.risk_score}</p>
   `);
 }
 
 async function loadGoalIntelligence(email) {
-  const data = await apiFetch(`/api/goal-intelligence/${email}`);
-  const g = data.goal_intelligence;
+  const { goal_intelligence: g } = await apiFetch(`/api/goal-intelligence/${email}`);
 
   openModal(`
     <h2>Goal Intelligence</h2>
@@ -78,57 +106,22 @@ async function loadGoalIntelligence(email) {
 async function loadAgentDecision(email) {
   const data = await apiFetch(`/api/agent/${email}`);
 
-  if (!data || !data.agent || !data.agent.decision) {
-    openModal(`
-      <h2>AI Decision Advisor</h2>
-      <p>Decision data unavailable.</p>
-    `);
+  if (!data?.agent) {
+    openModal(`<h2>AI Decision Advisor</h2><p>Decision unavailable.</p>`);
     return;
   }
 
-  const decision = data.agent.decision;
-  const reason = data.agent.reason || "No reason provided";
-
-  const actionClass = decision.action
-    ? decision.action.toLowerCase()
-    : "hold";
+  const { action, message, reason } = data.agent;
 
   openModal(`
     <h2>AI Decision Advisor</h2>
-
-    <span class="agent-badge ${actionClass}">
-      ${decision.action}
-    </span>
-
-    <p class="agent-message">${decision.message}</p>
-
-    <hr/>
-    <p class="agent-reason"><b>Reason:</b> ${reason}</p>
+    <span class="agent-badge ${action.toLowerCase()}">${action}</span>
+    <p class="agent-message">${message}</p>
+    ${reason ? `<hr/><p><b>Reason:</b> ${reason}</p>` : ""}
   `);
 }
 
-
-document.addEventListener("DOMContentLoaded", () => {
-  const user = JSON.parse(localStorage.getItem("user"));
-  if (!user) {
-    window.location.href = "/";
-    return;
-  }
-
-  document.getElementById("modal-close")?.addEventListener("click", closeModal);
-  document.getElementById("modal-backdrop")?.addEventListener("click", e => {
-    if (e.target.id === "modal-backdrop") closeModal();
-  });
-
-  document.getElementById("btn-analytics")
-    ?.addEventListener("click", () => loadAnalytics(user.email));
-
-  document.getElementById("btn-goal")
-    ?.addEventListener("click", () => loadGoalIntelligence(user.email));
-
-  document.getElementById("btn-agent")
-    ?.addEventListener("click", () => loadAgentDecision(user.email));
-
+function renderDashboard(user) {
   setText("profile-name", user.Name);
   setText("profile-email", user.email);
   setText("profile-age", user.Age);
@@ -152,16 +145,33 @@ document.addEventListener("DOMContentLoaded", () => {
   setText("tenure", extract(user.progress?.tenure));
   setText("start-date", user.progress?.start_date);
   setText("auto-adjust", user.progress?.["auto-adjust"] ? "Enabled" : "Disabled");
+}
 
+document.addEventListener("DOMContentLoaded", async () => {
+  let user = JSON.parse(localStorage.getItem("user"));
+  if (!user) {
+    window.location.href = "/";
+    return;
+  }
+
+  document.getElementById("modal-close")?.addEventListener("click", closeModal);
+  document.getElementById("modal-backdrop")?.addEventListener("click", e => {
+    if (e.target.id === "modal-backdrop") closeModal();
+  });
+
+  document.getElementById("btn-analytics")
+    ?.addEventListener("click", () => loadAnalytics(user.email));
+
+  document.getElementById("btn-goal")
+    ?.addEventListener("click", () => loadGoalIntelligence(user.email));
+
+  document.getElementById("btn-agent")
+    ?.addEventListener("click", () => loadAgentDecision(user.email));
+
+  user = await hydrateUserWithBufferedOnboarding(user);
+  renderDashboard(user);
   checkOnboardingStatus(user);
 });
-
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") {
-    closeModal();
-  }
-});
-
 
 function setText(id, value) {
   const el = document.getElementById(id);
@@ -169,7 +179,7 @@ function setText(id, value) {
 }
 
 function extract(v) {
-  if (!v) return "-";
+  if (v == null) return "-";
   if (typeof v === "object") return Object.values(v)[0];
   return v;
 }
@@ -178,3 +188,7 @@ window.logout = () => {
   localStorage.removeItem("user");
   window.location.href = "/";
 };
+
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") closeModal();
+});
