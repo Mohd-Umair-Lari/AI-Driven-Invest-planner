@@ -4,7 +4,6 @@ let step = 0;
 const steps = document.querySelectorAll(".step");
 const dots = document.querySelectorAll(".dot");
 const params = new URLSearchParams(window.location.search);
-const isResume = params.get("resume") === "true";
 
 function buildRegistrationPayload() {
   return {
@@ -46,19 +45,21 @@ function hydrateWizard(data) {
 }
 
 async function loadResumeState() {
-  if (!isResume) return;
-
   const user = JSON.parse(localStorage.getItem("user"));
   if (!user?.email) return;
 
   try {
     const res = await apiFetch(`/api/onboarding/status/${user.email}`);
     const onboarding = res.onboarding;
-    if (!onboarding) return;
+
+    if (!onboarding || onboarding.state !== "in_progress") return;
+
     step = onboarding.current_step ?? 0;
+
     if (onboarding.data) {
       hydrateWizard(onboarding.data);
     }
+
     show();
   } catch (err) {
     console.error("Failed to resume onboarding", err);
@@ -77,8 +78,6 @@ loadResumeState();
 window.nextStep = async () => {
   const payload = buildRegistrationPayload();
 
-  step += 1;
-
   await fetch("/api/onboarding/save", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -89,6 +88,7 @@ window.nextStep = async () => {
     })
   });
 
+  step += 1;
   show();
 };
 
@@ -101,23 +101,30 @@ window.prevStep = () => {
 
 window.cancelOnboarding = async () => {
   const confirmCancel = confirm(
-    "Are you sure you want to cancel onboarding? You can complete it later."
+    "Are you sure you want to pause onboarding? You can resume later."
   );
 
   if (!confirmCancel) return;
 
   const user = JSON.parse(localStorage.getItem("user"));
   if (!user?.email) return;
-  
-  await apiFetch(`/api/user/${user.email}/onboarding/cancel`, {
-    method: "POST",
-    body: JSON.stringify({
-      current_step: step 
-    })
-  }).catch(() => {});
-  localStorage.setItem("onboardingCompleted", "false");
-  window.location.href = "/dashboard.html";
+
+  try {
+    await apiFetch("/api/onboarding/cancel", {
+      method: "POST",
+      body: JSON.stringify({
+        email: user.email,
+        current_step: step
+      })
+    });
+
+    window.location.href = "/dashboard.html";
+  } catch (err) {
+    console.error("Failed to cancel onboarding", err);
+    alert("Failed to pause onboarding");
+  }
 };
+
 
 
 window.submitWizard = async () => {

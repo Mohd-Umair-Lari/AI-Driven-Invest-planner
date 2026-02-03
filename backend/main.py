@@ -84,6 +84,7 @@ def api_login():
         return jsonify({"status": "error", "message": "Invalid credentials"}), 401
 
     user["_id"] = str(user["_id"])
+    ensure_onboarding(user)
     return jsonify({"status": "success", "user": user})
 
 
@@ -164,18 +165,41 @@ def save_onboarding():
         {"email": email},
         {
             "$set": {
-                "onboarding": {
-                    "status": "in_progress",
-                    "current_step": data.get("step", 0),
-                    "data": data.get("payload", {}),
-                    "last_updated": datetime.utcnow().isoformat()
-                }
+            "onboarding.status": "in_progress",
+            "onboarding.current_step": step,
+            "onboarding.last_updated": datetime.utcnow().isoformat()
+            },
+            "$mergeObjects": {
+            "onboarding.data": payload
             }
         }
     )
 
     return jsonify({"status": "saved"})
 
+@app.route("/api/onboarding/cancel", methods=["POST"])
+def cancel_onboarding():
+    data = request.get_json(silent=True) or {}
+    email = data.get("email")
+    current_step = data.get("current_step")
+
+    if not email:
+        return jsonify({"error": "Email required"}), 400
+
+    update = {
+        "onboarding.status": "cancelled",
+        "onboarding.last_updated": datetime.utcnow().isoformat()
+    }
+
+    if current_step is not None:
+        update["onboarding.current_step"] = current_step
+
+    collection.update_one(
+        {"email": email},
+        {"$set": update}
+    )
+
+    return jsonify({"status": "cancelled"})
 
 @app.route("/api/onboarding/status/<email>", methods=["GET"])
 def onboarding_status(email):
