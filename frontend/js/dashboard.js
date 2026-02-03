@@ -111,7 +111,11 @@ async function loadAgentDecision(email) {
     return;
   }
 
-  const { action, message, reason } = data.agent;
+  const agent = data.agent || {};
+
+  const action = (agent.action || "UNKNOWN").toUpperCase();
+  const message = agent.message || "Decision unavailable.";
+  const reason = agent.reason || null;
 
   openModal(`
     <h2>AI Decision Advisor</h2>
