@@ -155,22 +155,34 @@ def start_onboarding():
 
 @app.route("/api/onboarding/save", methods=["POST"])
 def save_onboarding():
-    data = request.get_json() or {}
+    data = request.get_json(silent=True) or {}
+
     email = data.get("email")
+    step = data.get("step", 0)
+    payload = data.get("payload", {})
 
     if not email:
         return jsonify({"error": "Email required"}), 400
+
+    user = collection.find_one({"email": email})
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    existing = user.get("onboarding", {}).get("data", {})
+
+    merged_data = {
+        **existing,
+        **payload
+    }
 
     collection.update_one(
         {"email": email},
         {
             "$set": {
-            "onboarding.status": "in_progress",
-            "onboarding.current_step": step,
-            "onboarding.last_updated": datetime.utcnow().isoformat()
-            },
-            "$mergeObjects": {
-            "onboarding.data": payload
+                "onboarding.status": "in_progress",
+                "onboarding.current_step": step,
+                "onboarding.data": merged_data,
+                "onboarding.last_updated": datetime.utcnow().isoformat()
             }
         }
     )
