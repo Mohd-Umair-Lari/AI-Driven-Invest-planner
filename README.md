@@ -184,3 +184,7 @@ All recommendations are intended to support user understanding and decision-maki
 ## Author
 
 Developed as a focused, system-driven financial AI project with an emphasis on clarity, safety, and long-term thinking.
+
+## Bugs
+
+The Onboarding wizard is still facing the Continuation problem and i was thinking to branch it and solve it independently while making new changes to the functionality of the prohject.
