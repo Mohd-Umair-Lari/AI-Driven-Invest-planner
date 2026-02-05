@@ -52,13 +52,12 @@ async function loadResumeState() {
     const res = await apiFetch(`/api/onboarding/status/${user.email}`);
     const onboarding = res.onboarding;
 
-    if (onboarding && onboarding.state == "in_progress"){
-      step = onboarding.current_step ?? 0;
+    if (onboarding &&(onboarding.state === "in_progress" || onboarding.state === "cancelled")) {
+      step = Number(onboarding.current_step) || 0;
       if (onboarding.data) {
         hydrateWizard(onboarding.data);
       }
     }
-    show();
   } catch (err) {
     console.error("Failed to resume onboarding", err);
   }
@@ -69,24 +68,18 @@ function show() {
   dots.forEach((d, i) => d.classList.toggle("active", i <= step));
 }
 
-await loadResumeState();
-show();
-
 
 window.nextStep = async () => {
-  const payload = buildRegistrationPayload();
-
+  const nextStep = step + 1;
   await apiFetch("/api/onboarding/save", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       email: payload.email,
-      step,
+      step: nextStep,  
       payload
     })
   });
-
-  step += 1;
+  step = nextStep;
   show();
 };
 
@@ -173,7 +166,6 @@ window.submitWizard = async () => {
   }
   await fetch("/api/onboarding/complete", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email: user.email })
   });
 };
