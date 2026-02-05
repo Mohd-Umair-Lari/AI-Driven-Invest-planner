@@ -78,7 +78,7 @@ loadResumeState();
 window.nextStep = async () => {
   const payload = buildRegistrationPayload();
 
-  await fetch("/api/onboarding/save", {
+  await apiFetch("/api/onboarding/save", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
