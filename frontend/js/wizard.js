@@ -52,14 +52,12 @@ async function loadResumeState() {
     const res = await apiFetch(`/api/onboarding/status/${user.email}`);
     const onboarding = res.onboarding;
 
-    if (!onboarding || onboarding.state !== "in_progress") return;
-
-    step = onboarding.current_step ?? 0;
-
-    if (onboarding.data) {
-      hydrateWizard(onboarding.data);
+    if (onboarding && onboarding.state == "in_progress"){
+      step = onboarding.current_step ?? 0;
+      if (onboarding.data) {
+        hydrateWizard(onboarding.data);
+      }
     }
-
     show();
   } catch (err) {
     console.error("Failed to resume onboarding", err);
@@ -71,8 +69,8 @@ function show() {
   dots.forEach((d, i) => d.classList.toggle("active", i <= step));
 }
 
+await loadResumeState();
 show();
-loadResumeState();
 
 
 window.nextStep = async () => {
@@ -124,8 +122,6 @@ window.cancelOnboarding = async () => {
     alert("Failed to pause onboarding");
   }
 };
-
-
 
 window.submitWizard = async () => {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -181,3 +177,7 @@ window.submitWizard = async () => {
     body: JSON.stringify({ email: user.email })
   });
 };
+(async () => {
+  await loadResumeState();
+  show();
+})();
