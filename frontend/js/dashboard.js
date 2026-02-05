@@ -65,7 +65,7 @@ async function checkOnboardingStatus(user) {
 
       container.style.display = "block";
       btn.onclick = () => {
-        window.location.href = "/wizard.html?resume=true";
+        window.location.href = "/wizard.html";
       };
     }
   } catch (err) {
