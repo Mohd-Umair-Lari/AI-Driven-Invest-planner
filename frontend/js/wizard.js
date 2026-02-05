@@ -70,15 +70,22 @@ function show() {
 
 
 window.nextStep = async () => {
+  const payload = buildRegistrationPayload(); 
+  if (!payload.email) {
+    alert("User not logged in");
+    return;
+  }
   const nextStep = step + 1;
+
   await apiFetch("/api/onboarding/save", {
     method: "POST",
     body: JSON.stringify({
       email: payload.email,
-      step: nextStep,  
+      step: nextStep,
       payload
     })
   });
+
   step = nextStep;
   show();
 };
