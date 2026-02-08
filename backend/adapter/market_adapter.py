@@ -29,3 +29,13 @@ class VolatilityIndexAdapter(MarketAPIAdapter):
             confidence=confidence,
             timestamp=datetime.utcnow()
         )
+    
+class MockVolatilityAdapter(MarketAPIAdapter):
+    def fetch(self):
+        return MarketSignal(
+            signal_type="volatility",
+            magnitude=0.7,
+            direction="up",
+            confidence=0.85,
+            timestamp=datetime.utcnow()
+        )

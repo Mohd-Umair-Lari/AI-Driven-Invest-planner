@@ -11,6 +11,7 @@ from analytics.financial_analytics import compute_financial_health
 from ml.goal_predictor import generate_plan, goal_probability
 from ml.goal_intelligence import compute_goal_intelligence
 from agent.financial_agent import run_agent
+from routes.intelligence_routes import intelligence_bp  
 
 
 env_path = os.path.join(os.path.dirname(__file__), "nosave", ".env")
@@ -22,7 +23,7 @@ COLLECTION_NAME = os.getenv("COLLECTION_NAME", "userGoals").strip()
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
-
+app.register_blueprint(intelligence_bp)
 
 def connect_mongo():
     client = MongoClient(
