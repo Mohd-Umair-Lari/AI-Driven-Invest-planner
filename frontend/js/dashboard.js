@@ -1,6 +1,54 @@
 import { apiFetch } from "./api.js";
-
+import { fetchInsights } from "./api.js";
 console.log("🔥 dashboard.js loaded");
+
+async function loadInsights() {
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  if (!user) return;
+
+  const financialState = {
+    income: parseFloat(user.financials?.income || 0),
+    expenses: parseFloat(user.financials?.expenses || 0),
+    savings: parseFloat(user.financials?.savings || 0),
+    debt: parseFloat(user.financials?.debt || 0),
+    risk_score: parseFloat(user.investments?.risk_score || 0.5),
+    investment_exposure: parseFloat(user.investments?.exposure || 0.5),
+    goal_horizon_months: parseInt(user.Goal?.duration_months || 60),
+    emergency_fund_months: parseFloat(user.financials?.emergency_fund_months || 3)
+  };
+
+  const response = await fetchInsights(financialState);
+  renderInsights(response.insights || []);
+}
+
+function renderInsights(insights) {
+  const container = document.getElementById("insights-container");
+  container.innerHTML = "";
+
+  if (!insights.length) {
+    container.innerHTML = `<div class="insight-empty">No active signals</div>`;
+    return;
+  }
+
+  insights.forEach(insight => {
+    const card = document.createElement("div");
+    card.className = `insight-card ${insight.severity}`;
+
+    card.innerHTML = `
+      <div class="insight-top">
+        <span class="insight-category">${insight.category.toUpperCase()}</span>
+        <span class="insight-impact">${insight.impact_area}</span>
+      </div>
+      <div class="insight-message">${insight.message}</div>
+      <div class="insight-confidence">
+        Confidence: ${(insight.confidence_score * 100).toFixed(0)}%
+      </div>
+    `;
+
+    container.appendChild(card);
+  });
+}
 
 function openModal(html) {
   const backdrop = document.getElementById("modal-backdrop");
