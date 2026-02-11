@@ -1,5 +1,12 @@
 const BASE_URL = "https://ai-driven-invest-planner.onrender.com";
 
+export async function fetchInsights(financialState) {
+  return await apiFetch("/api/intelligence/insights", {
+    method: "POST",
+    body: JSON.stringify(financialState)
+  });
+}
+
 export async function apiFetch(endpoint, options = {}) {
   const res = await fetch(`${BASE_URL}${endpoint}`, {
     headers: {
