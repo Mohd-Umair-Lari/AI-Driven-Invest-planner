@@ -366,3 +366,70 @@ button:hover {
   color: #5b74e8;
   font-weight: 500;
 }
+
+.insights-grid {
+  display: grid;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.insight-card {
+  padding: 16px;
+  border-radius: 12px;
+  background: #1e1e1e;
+  border-left: 5px solid #888;
+}
+
+.insight-card.high { border-left-color: #ff4d4f; }
+.insight-card.medium { border-left-color: #faad14; }
+.insight-card.low { border-left-color: #52c41a; }
+
+.insight-top {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.insight-message {
+  margin: 10px 0;
+  font-weight: 500;
+}
+
+.insight-confidence {
+  font-size: 12px;
+  opacity: 0.7;
+}
+.insights-grid {
+  display: grid;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.insight-card {
+  padding: 16px;
+  border-radius: 12px;
+  background: #1e1e1e;
+  border-left: 5px solid #888;
+}
+
+.insight-card.high { border-left-color: #ff4d4f; }
+.insight-card.medium { border-left-color: #faad14; }
+.insight-card.low { border-left-color: #52c41a; }
+
+.insight-top {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.insight-message {
+  margin: 10px 0;
+  font-weight: 500;
+}
+
+.insight-confidence {
+  font-size: 12px;
+  opacity: 0.7;
+}
