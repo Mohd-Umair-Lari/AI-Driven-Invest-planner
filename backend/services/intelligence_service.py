@@ -1,6 +1,6 @@
-from core.rule_engine import RuleEngine
-from core.market_state import MarketState
-from adapter.market_adapter import MockVolatilityAdapter
+from ..core.rule_engine import RuleEngine
+from ..core.market_state import MarketState
+from ..adapter.market_adapter import MockVolatilityAdapter
 
 class IntelligenceService:
     def __init__(self):

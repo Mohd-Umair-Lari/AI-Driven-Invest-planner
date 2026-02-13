@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
-from core.financial_state import FinancialState
-from services.intelligence_service import IntelligenceService
+from ..core.financial_state import FinancialState
+from ..services.intelligence_service import IntelligenceService
 
 intelligence_bp = Blueprint("intelligence", __name__)
 service = IntelligenceService()
