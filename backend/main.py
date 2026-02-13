@@ -22,7 +22,17 @@ DB_NAME = os.getenv("DB_NAME", "mockDB").strip()
 COLLECTION_NAME = os.getenv("COLLECTION_NAME", "userGoals").strip()
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "*"}})
+CORS(
+    app,
+    resources={
+        r"/api/*": {
+            "origins": [
+                "https://ai-driven-invest-planner.vercel.app"
+            ]
+        }
+    },
+    supports_credentials=True
+)
 app.register_blueprint(intelligence_bp)
 
 def connect_mongo():
