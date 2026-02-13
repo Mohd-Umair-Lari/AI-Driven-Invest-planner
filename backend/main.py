@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 from bson import ObjectId
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Blueprint
 from flask_cors import CORS
 from pymongo import MongoClient
 from dotenv import load_dotenv
@@ -33,7 +33,7 @@ CORS(
     },
     supports_credentials=True
 )
-app.register_blueprint(intelligence_bp)
+app.register_blueprint(intelligence_bp, url_prefix="/api")
 
 def connect_mongo():
     client = MongoClient(
