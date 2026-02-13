@@ -185,7 +185,6 @@ function renderDashboard(user) {
 
   setText("income", extract(user.financials?.["monthly-income"]));
   setText("expenses", extract(user.financials?.["monthly-expenses"]));
-  setText("savings", user.financials?.monthly_savings);
   setText("debt", extract(user.financials?.debt));
   setText("emergency", user.financials?.["em-fund-opted"] ? "Yes" : "No");
 
@@ -193,7 +192,6 @@ function renderDashboard(user) {
   setText("mode", user.investments?.["prefered-mode"]);
   setText("invest-amt", extract(user.investments?.["invest-amt"]));
 
-  setText("ror", extract(user.progress?.ROR) + "%");
   setText("tenure", extract(user.progress?.tenure));
   setText("start-date", user.progress?.start_date);
   setText("auto-adjust", user.progress?.["auto-adjust"] ? "Enabled" : "Disabled");
