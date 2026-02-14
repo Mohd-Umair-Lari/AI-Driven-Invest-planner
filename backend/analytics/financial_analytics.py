@@ -13,11 +13,9 @@ def compute_financial_health(user):
     expenses = get_num(user.get("financials", {}).get("monthly-expenses"))
     debt = get_num(user.get("financials", {}).get("debt"))
 
-    # Guard against division by zero
     expense_ratio = expenses / income if income > 0 else 0
     savings_ratio = 1 - expense_ratio if income > 0 else 0
 
-    # Simple health logic (can evolve later)
     if savings_ratio >= 0.3:
         financial_health = "Excellent"
     elif savings_ratio >= 0.2:
@@ -27,7 +25,6 @@ def compute_financial_health(user):
     else:
         financial_health = "Critical"
 
-    # Risk score (0–100)
     risk_score = min(100, max(0, (expense_ratio * 100)))
 
     return {
