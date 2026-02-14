@@ -15,7 +15,7 @@ def compute_financial_health(user):
 
     # Guard against division by zero
     expense_ratio = expenses / income if income > 0 else 0
-    savings_ratio = 1 - expense_ratio
+    savings_ratio = 1 - expense_ratio if income > 0 else 0
 
     # Simple health logic (can evolve later)
     if savings_ratio >= 0.3:
