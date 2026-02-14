@@ -11,12 +11,11 @@ def get_num(v, default=0):
 def compute_financial_health(user):
     income = get_num(user.get("financials", {}).get("monthly-income"))
     expenses = get_num(user.get("financials", {}).get("monthly-expenses"))
-    savings = get_num(user.get("financials", {}).get("monthly_savings"))
     debt = get_num(user.get("financials", {}).get("debt"))
 
     # Guard against division by zero
-    savings_ratio = savings / income if income > 0 else 0
     expense_ratio = expenses / income if income > 0 else 0
+    savings_ratio = 1 - expense_ratio
 
     # Simple health logic (can evolve later)
     if savings_ratio >= 0.3:
