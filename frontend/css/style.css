@@ -411,6 +411,7 @@ button:hover {
   border-radius: 12px;
   background: #ffffff;
   border-left: 5px solid #888;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.15);
 }
 
 .insight-card.high { border-left-color: #ff4d4f; }
