@@ -187,4 +187,4 @@ Developed as a focused, system-driven financial AI project with an emphasis on c
 
 ## Bugs
 
-The Onboarding wizard is still facing the Continuation problem and i was thinking to branch it and solve it independently while making new changes to the functionality of the prohject.
+The Onboarding wizard is still facing the Continuation problem and i was thinking to branch it and solve it independently while making new changes to the functionality of the project.
