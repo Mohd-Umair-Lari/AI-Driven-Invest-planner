@@ -112,6 +112,11 @@ finpass-ai
 │ ├── main.py
 │ ├── requirements.txt
 │ │
+│ ├── core/
+│ │ ├── insight.y
+│ │ ├── market_state.py
+│ │ ├── rule_engine.py
+│ │ └── financial_state.py
 │ ├── agent/
 │ │ ├── decision_engine.py
 │ │ ├── financial_agent.py
@@ -119,6 +124,12 @@ finpass-ai
 │ │
 │ ├── analytics/
 │ │ └── financial_analytics.py
+│ │
+│ ├── routes/
+│ │ └── intelligence_routes.py 
+│ │ 
+│ ├── services/
+│ │ └── intelligence_service.py
 │ │
 │ ├── ml/
 │ │ ├── goal_intelligence.py
