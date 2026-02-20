@@ -160,7 +160,11 @@ window.submitWizard = async () => {
       body: JSON.stringify(payload)
     });
 
-    // reload fresh user
+    await apiFetch("/api/onboarding/complete", {
+      method: "POST",
+      body: JSON.stringify({ email: user.email })
+    });
+
     const updated = await apiFetch(`/api/user/${user.email}`);
     localStorage.setItem("user", JSON.stringify(updated.user));
     localStorage.setItem("onboardingCompleted", "true");
@@ -168,13 +172,9 @@ window.submitWizard = async () => {
     window.location.href = "/dashboard.html";
 
   } catch (err) {
-    alert("Failed to save onboarding");
     console.error(err);
+    alert("Failed to complete onboarding");
   }
-  await fetch("/api/onboarding/complete", {
-    method: "POST",
-    body: JSON.stringify({ email: user.email })
-  });
 };
 (async () => {
   await loadResumeState();
