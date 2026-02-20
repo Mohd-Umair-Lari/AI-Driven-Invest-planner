@@ -10,7 +10,7 @@ btn.addEventListener("click", async () => {
     email: document.getElementById("email").value.trim(),
     password: document.getElementById("password").value,
     Age: document.getElementById("age").value,
-    "employement-status": document.getElementById("status").value,
+    employement_status : document.getElementById("status").value,
 
     // empty objects – filled later by wizard
     Goal: {},
