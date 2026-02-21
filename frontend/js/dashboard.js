@@ -161,7 +161,6 @@ async function loadAgentDecision(email) {
 
   const agent = data.agent || {};
 
-  const action = (agent.message || "UNKNOWN").toUpperCase();
   const message = agent.message || "Decision unavailable.";
   const reason = agent.reason || null;
 
