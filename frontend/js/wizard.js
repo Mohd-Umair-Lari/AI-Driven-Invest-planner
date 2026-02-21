@@ -31,17 +31,24 @@ function buildRegistrationPayload() {
 }
 
 function hydrateWizard(data) {
-  Object.entries(data).forEach(([section, values]) => {
-    if (typeof values !== "object") return;
+  if (data.Goal) {
+    document.getElementById("goal-name").value = data.Goal.goal ?? "";
+    document.getElementById("goal-amount").value = data.Goal["target-amt"] ?? "";
+    document.getElementById("goal-time").value = data.Goal["target-time"] ?? "";
+  }
 
-    Object.entries(values).forEach(([key, val]) => {
-      const el = document.getElementById(`${section}-${key}`);
-      if (el) {
-        if (el.type === "checkbox") el.checked = val;
-        else el.value = val;
-      }
-    });
-  });
+  if (data.financials) {
+    document.getElementById("income").value = data.financials["monthly-income"] ?? "";
+    document.getElementById("expenses").value = data.financials["monthly-expenses"] ?? "";
+    document.getElementById("debt").value = data.financials.debt ?? "";
+    document.getElementById("emergency").checked = data.financials["em-fund-opted"] ?? false;
+  }
+
+  if (data.investments) {
+    document.getElementById("risk").value = data.investments["risk-opt"] ?? "";
+    document.getElementById("mode").value = data.investments["prefered-mode"] ?? "";
+    document.getElementById("invest-amt").value = data.investments["invest-amt"] ?? "";
+  }
 }
 
 async function loadResumeState() {
