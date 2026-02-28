@@ -5,6 +5,7 @@ from flask import Flask, request, jsonify, Blueprint
 from flask_cors import CORS
 from pymongo import MongoClient
 from dotenv import load_dotenv
+from vertex_service import initialize_vertex, generate_financial_insights
 import certifi
 
 from analytics.financial_analytics import compute_financial_health
@@ -16,6 +17,7 @@ from routes.intelligence_routes import intelligence_bp
 
 env_path = os.path.join(os.path.dirname(__file__), "nosave", ".env")
 load_dotenv(dotenv_path=env_path)
+initialize_vertex()
 
 MONGO_URI = os.getenv("MONGO_URI", "").strip()
 DB_NAME = os.getenv("DB_NAME", "mockDB").strip()
@@ -294,6 +296,11 @@ def api_update_user(email):
 
     return jsonify({"status": "success"})
 
+@app.route("/api/deep-analysis", methods=["POST"])
+def deep_analysis():
+    user_data = request.json
+    ai_response = generate_financial_insights(user_data)
+    return jsonify(json.loads(ai_response))
 
 @app.route("/api/analytics/<email>", methods=["GET"])
 def analytics(email):
