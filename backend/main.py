@@ -334,6 +334,15 @@ def goal_intelligence(email):
         return jsonify({"error": "User not found"}), 404
     return jsonify({"goal_intelligence": compute_goal_intelligence(user)})
 
+@app.route("/test-vertex")
+def test_vertex():
+    try:
+        from vertexai.generative_models import GenerativeModel
+        model = GenerativeModel("gemini-1.5-flash")
+        response = model.generate_content("Return JSON: {\"message\": \"hello\"}")
+        return response.text
+    except Exception as e:
+        return str(e), 500
 
 @app.route("/api/agent/<email>", methods=["GET"])
 def agent_api(email):
