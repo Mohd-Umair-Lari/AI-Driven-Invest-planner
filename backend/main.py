@@ -22,7 +22,7 @@ env_path = os.path.join(os.path.dirname(__file__), "nosave", ".env")
 load_dotenv(dotenv_path=env_path)
 #initialize_vertex()
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-model = genai.GenerativeModel("gemini-1.5-flash")
+model = genai.GenerativeModel("gemini-1.0-pro")
 
 MONGO_URI = os.getenv("MONGO_URI", "").strip()
 DB_NAME = os.getenv("DB_NAME", "mockDB").strip()
@@ -351,13 +351,11 @@ def goal_intelligence(email):
 @app.route("/test-ai")
 def test_ai():
     try:
+        model = genai.GenerativeModel("gemini-1.0-pro")
         response = model.generate_content("Return JSON {\"hello\":\"world\"}")
         return response.text
     except Exception as e:
-        return jsonify({
-            "error": str(e),
-            "type": type(e).__name__
-        }), 500
+        return jsonify({"error": str(e)})
 
 @app.route("/api/agent/<email>", methods=["GET"])
 def agent_api(email):
