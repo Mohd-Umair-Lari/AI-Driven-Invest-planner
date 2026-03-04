@@ -6,7 +6,7 @@ from flask import Flask, request, jsonify, Blueprint
 from flask_cors import CORS
 from pymongo import MongoClient
 from dotenv import load_dotenv
-from vertex_service import initialize_vertex, generate_financial_insights
+#from vertex_service import initialize_vertex, generate_financial_insights
 import certifi
 from vertex_service import generate_financial_insights
 import google.generativeai as genai
@@ -21,7 +21,7 @@ from routes.intelligence_routes import intelligence_bp
 
 env_path = os.path.join(os.path.dirname(__file__), "nosave", ".env")
 load_dotenv(dotenv_path=env_path)
-initialize_vertex()
+#initialize_vertex()
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 model = genai.GenerativeModel("gemini-1.5-flash")
 
@@ -339,15 +339,15 @@ def goal_intelligence(email):
         return jsonify({"error": "User not found"}), 404
     return jsonify({"goal_intelligence": compute_goal_intelligence(user)})
 
-@app.route("/test-vertex")
-def test_vertex():
-    try:
-        from vertexai.generative_models import GenerativeModel
-        model = GenerativeModel("gemini-1.5-flash")
-        response = model.generate_content("Return JSON: {\"message\": \"hello\"}")
-        return response.text
-    except Exception as e:
-        return str(e), 500
+# @app.route("/test-vertex")
+# def test_vertex():
+#     try:
+#         from vertexai.generative_models import GenerativeModel
+#         model = GenerativeModel("gemini-1.5-flash")
+#         response = model.generate_content("Return JSON: {\"message\": \"hello\"}")
+#         return response.text
+#     except Exception as e:
+#         return str(e), 500
 
 @app.route("/test-ai")
 def test_ai():
