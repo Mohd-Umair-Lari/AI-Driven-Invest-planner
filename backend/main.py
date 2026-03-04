@@ -10,7 +10,6 @@ from dotenv import load_dotenv
 import certifi
 from vertex_service import generate_financial_insights
 import google.generativeai as genai
-import os
 
 from analytics.financial_analytics import compute_financial_health
 from ml.goal_predictor import generate_plan, goal_probability
