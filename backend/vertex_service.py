@@ -28,6 +28,9 @@ def generate_financial_insights(user_data):
     ]
     """
 
-    response = model.generate_content(prompt)
+    response = client.models.generate_content(
+        model="gemini-2.0-flash",
+        contents=prompt
+    )
 
     return response.text

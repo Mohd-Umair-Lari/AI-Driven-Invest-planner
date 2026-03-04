@@ -21,7 +21,7 @@ from routes.intelligence_routes import intelligence_bp
 env_path = os.path.join(os.path.dirname(__file__), "nosave", ".env")
 load_dotenv(dotenv_path=env_path)
 #initialize_vertex()
-client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+gemini_client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
 MONGO_URI = os.getenv("MONGO_URI", "").strip()
 DB_NAME = os.getenv("DB_NAME", "mockDB").strip()
@@ -350,7 +350,7 @@ def goal_intelligence(email):
 @app.route("/test-ai")
 def test_ai():
     try:
-        response = client.models.generate_content(
+        response = gemini_client.models.generate_content(
             model="gemini-2.0-flash",
             contents="Return JSON {\"hello\":\"world\"}"
         )
