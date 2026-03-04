@@ -350,10 +350,14 @@ def goal_intelligence(email):
 
 @app.route("/test-ai")
 def test_ai():
-
-    response = model.generate_content("Return JSON {\"hello\":\"world\"}")
-
-    return response.text
+    try:
+        response = model.generate_content("Return JSON {\"hello\":\"world\"}")
+        return response.text
+    except Exception as e:
+        return jsonify({
+            "error": str(e),
+            "type": type(e).__name__
+        }), 500
 
 @app.route("/api/agent/<email>", methods=["GET"])
 def agent_api(email):
