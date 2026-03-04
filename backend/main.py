@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 #from vertex_service import initialize_vertex, generate_financial_insights
 import certifi
 from vertex_service import generate_financial_insights
-import google.generativeai as genai
+from google import genai
 
 from analytics.financial_analytics import compute_financial_health
 from ml.goal_predictor import generate_plan, goal_probability
@@ -21,8 +21,7 @@ from routes.intelligence_routes import intelligence_bp
 env_path = os.path.join(os.path.dirname(__file__), "nosave", ".env")
 load_dotenv(dotenv_path=env_path)
 #initialize_vertex()
-genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-model = genai.GenerativeModel("gemini-1.0-pro")
+client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
 MONGO_URI = os.getenv("MONGO_URI", "").strip()
 DB_NAME = os.getenv("DB_NAME", "mockDB").strip()
@@ -351,11 +350,14 @@ def goal_intelligence(email):
 @app.route("/test-ai")
 def test_ai():
     try:
-        model = genai.GenerativeModel("gemini-1.0-pro")
-        response = model.generate_content("Return JSON {\"hello\":\"world\"}")
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents="Return JSON {\"hello\":\"world\"}"
+        )
+
         return response.text
     except Exception as e:
-        return jsonify({"error": str(e)})
+        return {"error": str(e)}
 
 @app.route("/api/agent/<email>", methods=["GET"])
 def agent_api(email):
