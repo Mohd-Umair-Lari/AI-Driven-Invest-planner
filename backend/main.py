@@ -8,6 +8,9 @@ from pymongo import MongoClient
 from dotenv import load_dotenv
 from vertex_service import initialize_vertex, generate_financial_insights
 import certifi
+from vertex_service import generate_financial_insights
+import google.generativeai as genai
+import os
 
 from analytics.financial_analytics import compute_financial_health
 from ml.goal_predictor import generate_plan, goal_probability
@@ -19,6 +22,8 @@ from routes.intelligence_routes import intelligence_bp
 env_path = os.path.join(os.path.dirname(__file__), "nosave", ".env")
 load_dotenv(dotenv_path=env_path)
 initialize_vertex()
+genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+model = genai.GenerativeModel("gemini-1.5-flash")
 
 MONGO_URI = os.getenv("MONGO_URI", "").strip()
 DB_NAME = os.getenv("DB_NAME", "mockDB").strip()
@@ -343,6 +348,13 @@ def test_vertex():
         return response.text
     except Exception as e:
         return str(e), 500
+
+@app.route("/test-ai")
+def test_ai():
+
+    response = model.generate_content("Return JSON {\"hello\":\"world\"}")
+
+    return response.text
 
 @app.route("/api/agent/<email>", methods=["GET"])
 def agent_api(email):
