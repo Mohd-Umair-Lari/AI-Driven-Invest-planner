@@ -180,6 +180,7 @@ Upcoming work focuses on:
 - Expanding investment logic depth
 - Improving behavioral signal modeling
 - Hardening edge cases and safeguards
+- New integration from Vertex and Gemini have been implemented that is currently in the development phase
 
 ---
 
