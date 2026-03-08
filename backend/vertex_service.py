@@ -21,7 +21,7 @@ def initialize_vertex():
         credentials=credentials
     )
 
-    model = GenerativeModel("gemini-1.5-flash")
+    model = GenerativeModel("gemini-1.0-pro")
 
 
 def generate_financial_insights(user_data):
