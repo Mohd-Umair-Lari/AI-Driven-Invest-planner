@@ -339,7 +339,7 @@ def goal_intelligence(email):
 def test_vertex():
     try:
         from vertexai.generative_models import GenerativeModel
-        model = GenerativeModel("gemini-1.5-flash")
+        model = GenerativeModel("gemini-2.5-pro")
         response = model.generate_content("Return JSON: {\"message\": \"hello\"}")
         return response.text
     except Exception as e:
