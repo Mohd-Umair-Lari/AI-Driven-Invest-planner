@@ -1,36 +1,53 @@
-from google import genai
 import os
+import json
+import vertexai
+from vertexai.generative_models import GenerativeModel
+from google.oauth2 import service_account
 
-client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+model = None
+
+
+def initialize_vertex():
+
+    global model
+
+    credentials = service_account.Credentials.from_service_account_info(
+        json.loads(os.environ["GCP_SERVICE_ACCOUNT"])
+    )
+
+    vertexai.init(
+        project=os.environ["GOOGLE_CLOUD_PROJECT"],
+        location=os.environ["GOOGLE_CLOUD_LOCATION"],
+        credentials=credentials
+    )
+
+    model = GenerativeModel("gemini-1.5-flash")
 
 
 def generate_financial_insights(user_data):
 
     prompt = f"""
-    You are a financial advisor for Indian investors.
+You are a financial advisor for Indian investors.
 
-    Income: {user_data['income']}
-    Expenses: {user_data['expenses']}
-    Debt: {user_data['debt']}
-    Investments: {user_data['investment']}
-    Goal: {user_data['goal_amount']} in {user_data['goal_time']} months
+Income: {user_data['income']}
+Expenses: {user_data['expenses']}
+Debt: {user_data['debt']}
+Investments: {user_data['investment']}
+Goal: {user_data['goal_amount']} in {user_data['goal_time']} months
 
-    Return strictly JSON array like:
+Return strictly JSON array like:
 
-    [
-      {{
-        "title": "...",
-        "description": "...",
-        "type": "positive|warning|suggestion|info",
-        "category": "Goal|Tax|Savings|Investment|Debt",
-        "impact": "High|Medium|Low"
-      }}
-    ]
-    """
+[
+ {{
+   "title": "...",
+   "description": "...",
+   "type": "positive|warning|suggestion|info",
+   "category": "Goal|Tax|Savings|Investment|Debt",
+   "impact": "High|Medium|Low"
+ }}
+]
+"""
 
-    response = client.models.generate_content(
-        model="gemini-2.0-flash",
-        contents=prompt
-    )
+    response = model.generate_content(prompt)
 
     return response.text

@@ -8,8 +8,7 @@ from pymongo import MongoClient
 from dotenv import load_dotenv
 #from vertex_service import initialize_vertex, generate_financial_insights
 import certifi
-from vertex_service import generate_financial_insights
-from google import genai
+from vertex_service import initialize_vertex, generate_financial_insights
 
 from analytics.financial_analytics import compute_financial_health
 from ml.goal_predictor import generate_plan, goal_probability
@@ -20,8 +19,7 @@ from routes.intelligence_routes import intelligence_bp
 
 env_path = os.path.join(os.path.dirname(__file__), "nosave", ".env")
 load_dotenv(dotenv_path=env_path)
-#initialize_vertex()
-gemini_client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+initialize_vertex()
 
 MONGO_URI = os.getenv("MONGO_URI", "").strip()
 DB_NAME = os.getenv("DB_NAME", "mockDB").strip()
@@ -337,27 +335,27 @@ def goal_intelligence(email):
         return jsonify({"error": "User not found"}), 404
     return jsonify({"goal_intelligence": compute_goal_intelligence(user)})
 
-# @app.route("/test-vertex")
-# def test_vertex():
-#     try:
-#         from vertexai.generative_models import GenerativeModel
-#         model = GenerativeModel("gemini-1.5-flash")
-#         response = model.generate_content("Return JSON: {\"message\": \"hello\"}")
-#         return response.text
-#     except Exception as e:
-#         return str(e), 500
-
-@app.route("/test-ai")
-def test_ai():
+@app.route("/test-vertex")
+def test_vertex():
     try:
-        response = gemini_client.models.generate_content(
-            model="gemini-2.0-flash",
-            contents="Return JSON {\"hello\":\"world\"}"
-        )
-
+        from vertexai.generative_models import GenerativeModel
+        model = GenerativeModel("gemini-1.5-flash")
+        response = model.generate_content("Return JSON: {\"message\": \"hello\"}")
         return response.text
     except Exception as e:
-        return {"error": str(e)}
+        return str(e), 500
+
+# @app.route("/test-ai")
+# def test_ai():
+#     try:
+#         response = gemini_client.models.generate_content(
+#             model="gemini-2.0-flash",
+#             contents="Return JSON {\"hello\":\"world\"}"
+#         )
+
+#         return response.text
+#     except Exception as e:
+#         return {"error": str(e)}
 
 @app.route("/api/agent/<email>", methods=["GET"])
 def agent_api(email):
