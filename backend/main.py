@@ -338,12 +338,12 @@ def goal_intelligence(email):
 @app.route("/test-vertex")
 def test_vertex():
     try:
-        from vertexai.generative_models import GenerativeModel
-        model = GenerativeModel("gemini-2.5-pro")
-        response = model.generate_content("Return JSON: {\"message\": \"hello\"}")
+        response = model.generate_content(
+            "Return JSON {\"message\":\"hello\"}"
+        )
         return response.text
     except Exception as e:
-        return str(e), 500
+        return jsonify({"error": str(e)}), 500
 
 # @app.route("/test-ai")
 # def test_ai():
