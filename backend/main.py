@@ -345,6 +345,51 @@ def test_vertex():
     except Exception as e:
         return str(e), 500
 
+@app.route("/analyze-finances", methods=["POST"])
+def analyze_finances():
+
+    data = request.json
+
+    income = data.get("income")
+    savings = data.get("savings")
+    expenses = data.get("expenses")
+    risk = data.get("risk")
+    goals = data.get("goals")
+
+    prompt = f"""
+You are a financial advisor AI.
+
+User Profile:
+Income: {income}
+Savings: {savings}
+Expenses: {expenses}
+Risk Appetite: {risk}
+Goals: {goals}
+
+Return JSON only with this format:
+
+{{
+  "financial_health_score": number,
+  "analysis": "short explanation",
+  "recommendations": [
+    "recommendation1",
+    "recommendation2",
+    "recommendation3"
+  ],
+  "investment_strategy": {{
+      "equity": percentage,
+      "debt": percentage,
+      "cash": percentage
+  }}
+}}
+"""
+
+    response = model.generate_content(prompt)
+
+    return jsonify({
+        "result": response.text
+    })
+
 # @app.route("/test-ai")
 # def test_ai():
 #     try:
