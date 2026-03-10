@@ -56,7 +56,6 @@ client = connect_mongo()
 db = client[DB_NAME]
 collection = db[COLLECTION_NAME]
 
-
 def ensure_onboarding(user):
     if "onboarding" not in user:
         onboarding = {
@@ -357,33 +356,34 @@ def analyze_finances():
     goals = data.get("goals")
 
     prompt = f"""
-You are a financial advisor AI.
+        You are a financial advisor AI.
 
-User Profile:
-Income: {income}
-Savings: {savings}
-Expenses: {expenses}
-Risk Appetite: {risk}
-Goals: {goals}
+        User Profile:
+        Income: {income}
+        Savings: {savings}
+        Expenses: {expenses}
+        Risk Appetite: {risk}
+        Goals: {goals}
 
-Return JSON only with this format:
+        Return JSON only with this format:
 
-{{
-  "financial_health_score": number,
-  "analysis": "short explanation",
-  "recommendations": [
-    "recommendation1",
-    "recommendation2",
-    "recommendation3"
-  ],
-  "investment_strategy": {{
-      "equity": percentage,
-      "debt": percentage,
-      "cash": percentage
-  }}
-}}
-"""
-
+        {{
+        "financial_health_score": number,
+        "analysis": "short explanation",
+        "recommendations": [
+            "recommendation1",
+            "recommendation2",
+            "recommendation3"
+        ],
+        "investment_strategy": {{
+            "equity": percentage,
+            "debt": percentage,
+            "cash": percentage
+        }}
+        }}
+        """
+    from vertexai.generative_models import GenerativeModel
+    model = GenerativeModel("gemini-2.5-pro")
     response = model.generate_content(prompt)
 
     return jsonify({
