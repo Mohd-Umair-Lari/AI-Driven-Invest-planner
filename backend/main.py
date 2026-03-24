@@ -1,4 +1,5 @@
 import os
+import re
 import json
 from datetime import datetime
 from bson import ObjectId
@@ -344,51 +345,85 @@ def test_vertex():
     except Exception as e:
         return str(e), 500
 
-@app.route("/analyze-finances", methods=["POST"])
+@app.route("/api/analyze-finances", methods=["POST"])
 def analyze_finances():
 
-    data = request.json
+    data = request.get_json(silent=True) or {}
+    email = data.get("email")
 
-    income = data.get("income")
-    savings = data.get("savings")
-    expenses = data.get("expenses")
-    risk = data.get("risk")
-    goals = data.get("goals")
+    if not email:
+        return jsonify({"error": "Email required"}), 400
+
+    user = collection.find_one({"email": email}, {"_id": 0})
+
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    financials = user.get("financials", {})
+    goal = user.get("Goal", {})
+    investments = user.get("investments", {})
+
+    income = financials.get("income")
+    expenses = financials.get("expenses")
+    savings = financials.get("savings")
+
+    risk = goal.get("risk") or financials.get("risk") or "moderate"
+    goals = goal
 
     prompt = f"""
-        You are a financial advisor AI.
+        You are an expert financial advisor AI.
 
-        User Profile:
-        Income: {income}
-        Savings: {savings}
-        Expenses: {expenses}
-        Risk Appetite: {risk}
-        Goals: {goals}
+        Analyze the user's financial condition deeply.
 
-        Return JSON only with this format:
+        User Financial Data:
+        - Income: {income}
+        - Expenses: {expenses}
+        - Savings: {savings}
+        - Investments: {investments}
+        - Risk Appetite: {risk}
+        - Goals: {goals}
 
+        STRICT RULES:
+        - Return ONLY valid JSON
+        - No markdown
+        - No explanation outside JSON
+
+        Format:
         {{
-        "financial_health_score": number,
-        "analysis": "short explanation",
+        "financial_health_score": number (0-100),
+        "analysis": "concise professional insight",
         "recommendations": [
-            "recommendation1",
-            "recommendation2",
-            "recommendation3"
+            "actionable recommendation 1",
+            "actionable recommendation 2",
+            "actionable recommendation 3"
         ],
         "investment_strategy": {{
-            "equity": percentage,
-            "debt": percentage,
-            "cash": percentage
+            "equity": number,
+            "debt": number,
+            "cash": number
         }}
         }}
-        """
+    """
+
     from vertexai.generative_models import GenerativeModel
     model = GenerativeModel("gemini-2.5-pro")
-    response = model.generate_content(prompt)
 
-    return jsonify({
-        "result": response.text
-    })
+    response = model.generate_content(prompt)
+    raw_text = response.text
+
+    print("RAW AI RESPONSE:", raw_text)
+
+    cleaned = re.sub(r"```json|```", "", raw_text).strip()
+
+    try:
+        parsed = json.loads(cleaned)
+        return jsonify(parsed)
+    except Exception as e:
+        return jsonify({
+            "error": "Invalid JSON from AI",
+            "raw": raw_text
+        }), 500
+    
 
 # @app.route("/test-ai")
 # def test_ai():
