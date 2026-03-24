@@ -298,11 +298,11 @@ def api_update_user(email):
 
     return jsonify({"status": "success"})
 
-@app.route("/api/deep-analysis", methods=["POST"])
-def deep_analysis():
-    user_data = request.json
-    ai_response = generate_financial_insights(user_data)
-    return jsonify(json.loads(ai_response))
+# @app.route("/api/deep-analysis", methods=["POST"])
+# def deep_analysis():
+#     user_data = request.json
+#     ai_response = generate_financial_insights(user_data)
+#     return jsonify(json.loads(ai_response))
 
 @app.route("/api/analytics/<email>", methods=["GET"])
 def analytics(email):
