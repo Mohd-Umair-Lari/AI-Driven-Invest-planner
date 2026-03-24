@@ -347,83 +347,49 @@ def test_vertex():
 
 @app.route("/api/analyze-finances", methods=["POST"])
 def analyze_finances():
-
-    data = request.get_json(silent=True) or {}
-    email = data.get("email")
-
-    if not email:
-        return jsonify({"error": "Email required"}), 400
-
-    user = collection.find_one({"email": email}, {"_id": 0})
-
-    if not user:
-        return jsonify({"error": "User not found"}), 404
-
-    financials = user.get("financials", {})
-    goal = user.get("Goal", {})
-    investments = user.get("investments", {})
-
-    income = financials.get("income")
-    expenses = financials.get("expenses")
-    savings = financials.get("savings")
-
-    risk = goal.get("risk") or financials.get("risk") or "moderate"
-    goals = goal
-
-    prompt = f"""
-        You are an expert financial advisor AI.
-
-        Analyze the user's financial condition deeply.
-
-        User Financial Data:
-        - Income: {income}
-        - Expenses: {expenses}
-        - Savings: {savings}
-        - Investments: {investments}
-        - Risk Appetite: {risk}
-        - Goals: {goals}
-
-        STRICT RULES:
-        - Return ONLY valid JSON
-        - No markdown
-        - No explanation outside JSON
-
-        Format:
-        {{
-        "financial_health_score": number (0-100),
-        "analysis": "concise professional insight",
-        "recommendations": [
-            "actionable recommendation 1",
-            "actionable recommendation 2",
-            "actionable recommendation 3"
-        ],
-        "investment_strategy": {{
-            "equity": number,
-            "debt": number,
-            "cash": number
-        }}
-        }}
-    """
-
-    from vertexai.generative_models import GenerativeModel
-    model = GenerativeModel("gemini-2.5-pro")
-
-    response = model.generate_content(prompt)
-    raw_text = response.text
-
-    print("RAW AI RESPONSE:", raw_text)
-
-    cleaned = re.sub(r"```json|```", "", raw_text).strip()
-
     try:
+        data = request.get_json(silent=True) or {}
+        email = data.get("email")
+
+        if not email:
+            return jsonify({"error": "Email required"}), 400
+
+        user = collection.find_one({"email": email}, {"_id": 0})
+
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+
+        financials = user.get("financials", {})
+        goal = user.get("Goal", {})
+        investments = user.get("investments", {})
+
+        income = financials.get("income")
+        expenses = financials.get("expenses")
+        savings = financials.get("savings")
+
+        prompt = f"..."
+
+        from vertexai.generative_models import GenerativeModel
+        model = GenerativeModel("gemini-2.5-pro")
+
+        response = model.generate_content(prompt)
+        raw_text = response.text
+
+        print("RAW AI RESPONSE:", raw_text)
+
+        import re
+        cleaned = re.sub(r"```json|```", "", raw_text).strip()
+
         parsed = json.loads(cleaned)
+
         return jsonify(parsed)
+
     except Exception as e:
+        print("ERROR:", str(e))
         return jsonify({
-            "error": "Invalid JSON from AI",
-            "raw": raw_text
+            "error": "Server failed",
+            "details": str(e)
         }), 500
-    
 
 # @app.route("/test-ai")
 # def test_ai():
