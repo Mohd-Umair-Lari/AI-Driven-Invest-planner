@@ -364,11 +364,10 @@ def analyze_finances(email):
 
         print("FINANCIALS:", financials)
 
-        income = financials.get("income")
-        expenses = financials.get("expenses")
-        savings = financials.get("savings")
+        income = financials.get("monthly-income")
+        expenses = financials.get("monthly-expenses")
+        debt = financials.get("debt")
 
-        # 🔴 Validation (VERY IMPORTANT)
         if income is None or expenses is None:
             return jsonify({
                 "error": "Incomplete financial data",
@@ -377,7 +376,6 @@ def analyze_finances(email):
 
         risk = goal.get("risk", "moderate")
 
-        # 🔹 Strong prompt
         prompt = f"""
             You are a professional financial advisor AI.
 
@@ -386,7 +384,7 @@ def analyze_finances(email):
             Data:
             Income: {income}
             Expenses: {expenses}
-            Savings: {savings}
+            debt: {debt}
             Investments: {investments}
             Risk Appetite: {risk}
             Goals: {goal}
