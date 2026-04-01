@@ -15,7 +15,7 @@ from analytics.financial_analytics import compute_financial_health
 from ml.goal_predictor import generate_plan, goal_probability
 from ml.goal_intelligence import compute_goal_intelligence
 from agent.financial_agent import run_agent
-from routes.intelligence_routes import intelligence_bp  
+from routes.intelligence_routes import intelligence_bp
 
 
 env_path = os.path.join(os.path.dirname(__file__), "nosave", ".env")
@@ -27,17 +27,22 @@ DB_NAME = os.getenv("DB_NAME", "mockDB").strip()
 COLLECTION_NAME = os.getenv("COLLECTION_NAME", "userGoals").strip()
 
 app = Flask(__name__)
+# CORS configuration: Allow all Vercel deployments + localhost + production domain
 CORS(
     app,
     resources={
         r"/api/*": {
             "origins": [
+                # Development/local
                 "http://localhost:3000",
                 "http://localhost:5173",
+                "http://localhost:8080",
                 "http://127.0.0.1:3000",
                 "http://127.0.0.1:5173",
-                "http://localhost:8080",
-                "https://ai-driven-invest-planner.vercel.app"
+                "http://127.0.0.1:8080",
+                # Production - Allow all Vercel subdomains with regex
+                re.compile(r"https://.*\.vercel\.app"),
+                "https://ai-driven-invest-planner.vercel.app",
             ]
         }
     },
