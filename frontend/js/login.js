@@ -16,11 +16,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const email = document.getElementById("login-email")?.value.trim();
     const password = document.getElementById("login-password")?.value.trim();
 
-    if (!email || !password) {
-      alert("Please enter email and password");
-      return;
-    }
-
     try {
       const res = await apiFetch("/api/login", {
         method: "POST",

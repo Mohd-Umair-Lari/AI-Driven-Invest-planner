@@ -113,31 +113,18 @@ def test_connection():
 @app.route("/api/login", methods=["POST"])
 def api_login():
     data = request.get_json(silent=True) or {}
-
     email = (data.get("email") or "").strip()
     password = (data.get("password") or "").strip()
 
-    if not email or not password:
-        return jsonify({"status": "error", "message": "Email and password required"}), 400
+    user = collection.find_one({"email": email})
 
-    user = collection.find_one(
-        {"email": email},
-        {"password": 1, "email": 1, "Name": 1, "Age": 1, "employment-status": 1, "Goal": 1, "financials": 1, "investments": 1, "progress": 1, "onboarding": 1}
-    )
-
-    if not user:
-        print(f"❌ User not found: {email}")
-        return jsonify({"status": "error", "message": "Invalid credentials"}), 401
+    if user and user.get("password") == password:
+        user.pop("password", None)
+        user["_id"] = str(user["_id"])
+        ensure_onboarding(user)
+        return jsonify({"status": "success", "user": user})
     
-    if not check_password_hash(user.get("password", ""), password):
-        print(f"❌ Invalid password for user: {email}")
-        return jsonify({"status": "error", "message": "Invalid credentials"}), 401
-
-    print(f"✅ Login successful for: {email}")
-    user.pop("password", None)
-    user["_id"] = str(user["_id"])
-    ensure_onboarding(user)
-    return jsonify({"status": "success", "user": user})
+    return jsonify({"status": "error", "message": "Invalid credentials"}), 401
 
 
 @app.route("/api/signup", methods=["POST"])
