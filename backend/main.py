@@ -32,6 +32,11 @@ CORS(
     resources={
         r"/api/*": {
             "origins": [
+                "http://localhost:3000",
+                "http://localhost:5173",
+                "http://127.0.0.1:3000",
+                "http://127.0.0.1:5173",
+                "http://localhost:8080",
                 "https://ai-driven-invest-planner.vercel.app"
             ]
         }
@@ -80,6 +85,26 @@ def health():
     }, 200
 
 
+@app.route("/api/test-connection", methods=["GET"])
+def test_connection():
+    """Test endpoint to verify backend is accessible"""
+    try:
+        # Try to ping the database
+        client.admin.command("ping")
+        return jsonify({
+            "status": "success",
+            "message": "Backend is running",
+            "database": "Connected",
+            "timestamp": datetime.utcnow().isoformat()
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": "Backend is running but database connection failed",
+            "error": str(e)
+        }), 500
+
+
 @app.route("/api/login", methods=["POST"])
 def api_login():
     data = request.get_json(silent=True) or {}
@@ -95,9 +120,15 @@ def api_login():
         {"password": 1, "email": 1, "Name": 1, "Age": 1, "employment-status": 1, "Goal": 1, "financials": 1, "investments": 1, "progress": 1, "onboarding": 1}
     )
 
-    if not user or not check_password_hash(user.get("password", ""), password):
+    if not user:
+        print(f"❌ User not found: {email}")
+        return jsonify({"status": "error", "message": "Invalid credentials"}), 401
+    
+    if not check_password_hash(user.get("password", ""), password):
+        print(f"❌ Invalid password for user: {email}")
         return jsonify({"status": "error", "message": "Invalid credentials"}), 401
 
+    print(f"✅ Login successful for: {email}")
     user.pop("password", None)
     user["_id"] = str(user["_id"])
     ensure_onboarding(user)
@@ -118,11 +149,14 @@ def api_signup():
     if collection.find_one({"email": email}):
         return jsonify({"status": "error", "message": "Email already registered"}), 409
 
+    hashed_pwd = generate_password_hash(password)
+    print(f"📝 Signup: {email} - Password hashed successfully")
+
     doc = {
         "_id": ObjectId(),
         "Name": name,
         "email": email,
-        "password": generate_password_hash(password),
+        "password": hashed_pwd,
         "Age": str(data.get("Age") or ""),
         "employment-status": data.get("employment-status", "Salaried"),
         "Goal": data.get("Goal", {}),

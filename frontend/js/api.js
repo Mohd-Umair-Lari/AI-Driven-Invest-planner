@@ -1,4 +1,4 @@
-const BASE_URL = "https://ai-driven-invest-planner.onrender.com";
+import { BACKEND_URL } from "./config.js";
 
 export async function fetchInsights(financialState) {
   return await apiFetch("/api/intelligence/insights", {
@@ -8,7 +8,7 @@ export async function fetchInsights(financialState) {
 }
 
 export async function apiFetch(endpoint, options = {}) {
-  const res = await fetch(`${BASE_URL}${endpoint}`, {
+  const res = await fetch(`${BACKEND_URL}${endpoint}`, {
     headers: {
       "Content-Type": "application/json",
       ...(options.headers || {})
