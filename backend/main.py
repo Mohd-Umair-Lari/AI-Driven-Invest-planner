@@ -8,7 +8,6 @@ from flask_cors import CORS
 from pymongo import MongoClient
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
-#from vertex_service import initialize_vertex, generate_financial_insights
 import certifi
 from vertex_service import initialize_vertex, generate_financial_insights
 
@@ -93,12 +92,13 @@ def api_login():
 
     user = collection.find_one(
         {"email": email},
-        {"password": 1, "email": 1, "Name": 1, "Age": 1, "employement-status": 1, "Goal": 1, "financials": 1, "investments": 1, "progress": 1, "onboarding": 1}
+        {"password": 1, "email": 1, "Name": 1, "Age": 1, "employment-status": 1, "Goal": 1, "financials": 1, "investments": 1, "progress": 1, "onboarding": 1}
     )
 
-    if not user:
+    if not user or not check_password_hash(user.get("password", ""), password):
         return jsonify({"status": "error", "message": "Invalid credentials"}), 401
 
+    user.pop("password", None)
     user["_id"] = str(user["_id"])
     ensure_onboarding(user)
     return jsonify({"status": "success", "user": user})
@@ -122,9 +122,9 @@ def api_signup():
         "_id": ObjectId(),
         "Name": name,
         "email": email,
-        "password": password,
+        "password": generate_password_hash(password),
         "Age": str(data.get("Age") or ""),
-        "employement-status": data.get("employement-status", "Salaried"),
+        "employment-status": data.get("employment-status", "Salaried"),
         "Goal": data.get("Goal", {}),
         "financials": data.get("financials", {}),
         "investments": data.get("investments", {}),
@@ -272,7 +272,7 @@ def complete_onboarding():
 
 @app.route("/api/user/<email>", methods=["GET"])
 def api_get_user(email):
-    user = collection.find_one({"email": email}, {"_id": 0})
+    user = collection.find_one({"email": email}, {"_id": 0, "password": 0})
     if not user:
         return jsonify({"status": "error", "message": "User not found"}), 404
     return jsonify({"status": "success", "user": user})
@@ -307,7 +307,7 @@ def api_update_user(email):
 
 @app.route("/api/analytics/<email>", methods=["GET"])
 def analytics(email):
-    user = collection.find_one({"email": email}, {"_id": 0})
+    user = collection.find_one({"email": email}, {"_id": 0, "password": 0})
     if not user:
         return jsonify({"status": "error", "message": "User not found"}), 404
     return jsonify({"analytics": compute_financial_health(user)})
@@ -315,7 +315,7 @@ def analytics(email):
 
 @app.route("/api/predict/<email>", methods=["GET"])
 def predict(email):
-    user = collection.find_one({"email": email}, {"_id": 0})
+    user = collection.find_one({"email": email}, {"_id": 0, "password": 0})
     if not user:
         return jsonify({"status": "error", "message": "User not found"}), 404
     return jsonify(goal_probability(user))
@@ -323,7 +323,7 @@ def predict(email):
 
 @app.route("/api/recommend/<email>", methods=["GET"])
 def recommend(email):
-    user = collection.find_one({"email": email}, {"_id": 0})
+    user = collection.find_one({"email": email}, {"_id": 0, "password": 0})
     if not user:
         return jsonify({"status": "error", "message": "User not found"}), 404
     return jsonify({"recommended_plan": generate_plan(user)})
@@ -331,7 +331,7 @@ def recommend(email):
 
 @app.route("/api/goal-intelligence/<email>", methods=["GET"])
 def goal_intelligence(email):
-    user = collection.find_one({"email": email}, {"_id": 0})
+    user = collection.find_one({"email": email}, {"_id": 0, "password": 0})
     if not user:
         return jsonify({"status": "error", "message": "User not found"}), 404
     return jsonify({"goal_intelligence": compute_goal_intelligence(user)})
@@ -353,7 +353,7 @@ def analyze_finances(email):
         print("EMAIL:", email)
 
         # 🔹 Fetch user
-        user = collection.find_one({"email": email}, {"_id": 0})
+        user = collection.find_one({"email": email}, {"_id": 0, "password": 0})
 
         if not user:
             return jsonify({"status": "error", "message": "User not found"}), 404
@@ -371,7 +371,8 @@ def analyze_finances(email):
 
         if income is None or expenses is None:
             return jsonify({
-                "error": "Incomplete financial data",
+                "status": "error",
+                "message": "Incomplete financial data",
                 "financials": financials
             }), 400
 
@@ -427,7 +428,8 @@ def analyze_finances(email):
     except Exception as e:
         print("🔥 ERROR:", str(e))
         return jsonify({
-            "error": "Server failed",
+            "status": "error",
+            "message": "Server failed",
             "details": str(e)
         }), 500
 
@@ -445,7 +447,7 @@ def analyze_finances(email):
 
 @app.route("/api/agent/<email>", methods=["GET"])
 def agent_api(email):
-    user = collection.find_one({"email": email}, {"_id": 0})
+    user = collection.find_one({"email": email}, {"_id": 0, "password": 0})
     if not user:
         return jsonify({"status": "error", "message": "User not found"}), 404
 
