@@ -7,6 +7,7 @@ from flask import Flask, request, jsonify, Blueprint
 from flask_cors import CORS
 from pymongo import MongoClient
 from dotenv import load_dotenv
+from werkzeug.security import generate_password_hash, check_password_hash
 #from vertex_service import initialize_vertex, generate_financial_insights
 import certifi
 from vertex_service import initialize_vertex, generate_financial_insights
@@ -91,8 +92,8 @@ def api_login():
         return jsonify({"status": "error", "message": "Email and password required"}), 400
 
     user = collection.find_one(
-        {"email": email, "password": password},
-        {"password": 0}
+        {"email": email},
+        {"password": 1, "email": 1, "Name": 1, "Age": 1, "employement-status": 1, "Goal": 1, "financials": 1, "investments": 1, "progress": 1, "onboarding": 1}
     )
 
     if not user:
@@ -149,7 +150,7 @@ def start_onboarding():
 
     user = collection.find_one({"email": email})
     if not user:
-        return jsonify({"error": "User not found"}), 404
+        return jsonify({"status": "error", "message": "User not found"}), 404
 
     ensure_onboarding(user)
 
@@ -177,11 +178,11 @@ def save_onboarding():
     payload = data.get("payload", {})
 
     if not email:
-        return jsonify({"error": "Email required"}), 400
+        return jsonify({"status": "error", "message": "Email required"}), 400
 
     user = collection.find_one({"email": email})
     if not user:
-        return jsonify({"error": "User not found"}), 404
+        return jsonify({"status": "error", "message": "User not found"}), 404
 
     existing = user.get("onboarding", {}).get("data", {})
 
@@ -211,7 +212,7 @@ def cancel_onboarding():
     current_step = data.get("current_step")
 
     if not email:
-        return jsonify({"error": "Email required"}), 400
+        return jsonify({"status": "error", "message": "Email required"}), 400
 
     update = {
         "onboarding.status": "cancelled",
@@ -253,7 +254,7 @@ def complete_onboarding():
 
     user = collection.find_one({"email": email})
     if not user:
-        return jsonify({"error": "User not found"}), 404
+        return jsonify({"status": "error", "message": "User not found"}), 404
 
     onboarding = {
         "status": "completed",
@@ -294,7 +295,7 @@ def api_update_user(email):
     )
 
     if result.matched_count == 0:
-        return jsonify({"error": "User not found"}), 404
+        return jsonify({"status": "error", "message": "User not found"}), 404
 
     return jsonify({"status": "success"})
 
@@ -308,7 +309,7 @@ def api_update_user(email):
 def analytics(email):
     user = collection.find_one({"email": email}, {"_id": 0})
     if not user:
-        return jsonify({"error": "User not found"}), 404
+        return jsonify({"status": "error", "message": "User not found"}), 404
     return jsonify({"analytics": compute_financial_health(user)})
 
 
@@ -316,7 +317,7 @@ def analytics(email):
 def predict(email):
     user = collection.find_one({"email": email}, {"_id": 0})
     if not user:
-        return jsonify({"error": "User not found"}), 404
+        return jsonify({"status": "error", "message": "User not found"}), 404
     return jsonify(goal_probability(user))
 
 
@@ -324,7 +325,7 @@ def predict(email):
 def recommend(email):
     user = collection.find_one({"email": email}, {"_id": 0})
     if not user:
-        return jsonify({"error": "User not found"}), 404
+        return jsonify({"status": "error", "message": "User not found"}), 404
     return jsonify({"recommended_plan": generate_plan(user)})
 
 
@@ -332,7 +333,7 @@ def recommend(email):
 def goal_intelligence(email):
     user = collection.find_one({"email": email}, {"_id": 0})
     if not user:
-        return jsonify({"error": "User not found"}), 404
+        return jsonify({"status": "error", "message": "User not found"}), 404
     return jsonify({"goal_intelligence": compute_goal_intelligence(user)})
 
 @app.route("/test-vertex")
@@ -355,7 +356,7 @@ def analyze_finances(email):
         user = collection.find_one({"email": email}, {"_id": 0})
 
         if not user:
-            return jsonify({"error": "User not found"}), 404
+            return jsonify({"status": "error", "message": "User not found"}), 404
 
         # 🔹 Extract data safely
         financials = user.get("financials", {})
@@ -446,7 +447,7 @@ def analyze_finances(email):
 def agent_api(email):
     user = collection.find_one({"email": email}, {"_id": 0})
     if not user:
-        return jsonify({"error": "User not found"}), 404
+        return jsonify({"status": "error", "message": "User not found"}), 404
 
     try:
         goal_intel = compute_goal_intelligence(user)
