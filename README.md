@@ -205,3 +205,6 @@ The Vertex AI feature has been integrated in the backend and the wiring with the
 ```
 The problem of Vertex API continues as it requires billing to be always active inorder to continue for the AI decisions integration still persisting for an alternate but not to worry will figure something by weekend.
 ```
+
+# Future Plans
+Need to integrate the latest AI features and will change the stack for the sake of interface.
