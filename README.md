@@ -207,4 +207,4 @@ The problem of Vertex API continues as it requires billing to be always active i
 ```
 
 # Future Plans
-Need to integrate the latest AI features and will change the stack for the sake of interface.
+Need to integrate the latest AI features and will change the stack for the sake of interface, will try to integrate selected frameworks
