@@ -7,7 +7,7 @@ from flask import Flask, request, jsonify, Blueprint
 from flask_cors import CORS
 from pymongo import MongoClient
 from dotenv import load_dotenv
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import generate_password_hash
 import certifi
 from vertex_service import initialize_vertex, generate_financial_insights
 
@@ -325,12 +325,6 @@ def api_update_user(email):
 
     return jsonify({"status": "success"})
 
-# @app.route("/api/deep-analysis", methods=["POST"])
-# def deep_analysis():
-#     user_data = request.json
-#     ai_response = generate_financial_insights(user_data)
-#     return jsonify(json.loads(ai_response))
-
 @app.route("/api/analytics/<email>", methods=["GET"])
 def analytics(email):
     user = collection.find_one({"email": email}, {"_id": 0, "password": 0})
@@ -462,19 +456,6 @@ Return format:
             "recommendations": ["Review your financial data", "Ensure all fields are complete"],
             "investment_strategy": {"equity": 50, "debt": 35, "cash": 15}
         }), 200
-
-
-# @app.route("/test-ai")
-# def test_ai():
-#     try:
-#         response = gemini_client.models.generate_content(
-#             model="gemini-2.0-flash",
-#             contents="Return JSON {\"hello\":\"world\"}"
-#         )
-
-#         return response.text
-#     except Exception as e:
-#         return {"error": str(e)}
 
 @app.route("/api/init-test-data/<email>", methods=["POST"])
 def init_test_data(email):
