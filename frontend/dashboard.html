@@ -2,6 +2,228 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FinPass AI | Dashboard</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="dashboard-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-icon">💰</div>
+        <h2>FinPass</h2>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" data-section="overview">
+          <span class="icon">📊</span> Dashboard
+        </a>
+        <a href="#" class="nav-item" data-section="analytics">
+          <span class="icon">📈</span> Analytics
+        </a>
+        <a href="#" class="nav-item" data-section="goals">
+          <span class="icon">🎯</span> Goals
+        </a>
+        <a href="#" class="nav-item" data-section="insights">
+          <span class="icon">💡</span> Insights
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="top-header">
+        <div class="header-left">
+          <h1>Welcome, <span id="user-name">User</span></h1>
+          <p class="header-subtitle">Here's your financial overview</p>
+        </div>
+        <div class="header-right">
+          <div class="user-badge">
+            <span id="user-email">user@example.com</span>
+            <span class="status-dot"></span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Dashboard Content -->
+      <div class="dashboard-content">
+        <!-- Overview Section -->
+        <section id="overview-section" class="section">
+          <!-- Key Metrics -->
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-icon income">💵</div>
+              <div class="metric-info">
+                <p class="metric-label">Monthly Income</p>
+                <p class="metric-value" id="metric-income">₹0</p>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-icon expense">💸</div>
+              <div class="metric-info">
+                <p class="metric-label">Monthly Expenses</p>
+                <p class="metric-value" id="metric-expense">₹0</p>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-icon savings">💳</div>
+              <div class="metric-info">
+                <p class="metric-label">Monthly Savings</p>
+                <p class="metric-value" id="metric-savings">₹0</p>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-icon debt">⚠️</div>
+              <div class="metric-info">
+                <p class="metric-label">Total Debt</p>
+                <p class="metric-value" id="metric-debt">₹0</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts Row -->
+          <div class="charts-row">
+            <div class="chart-container">
+              <h3>Income vs Expenses</h3>
+              <canvas id="incomeExpenseChart"></canvas>
+            </div>
+
+            <div class="chart-container">
+              <h3>Financial Health Score</h3>
+              <div class="health-score-container">
+                <canvas id="healthScoreChart"></canvas>
+                <div class="health-status" id="health-status">Good</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Goal Progress -->
+          <div class="goal-card">
+            <div class="goal-header">
+              <h3>🎯 Goal Progress</h3>
+              <span class="goal-badge" id="goal-status">On Track</span>
+            </div>
+            <div class="goal-content">
+              <div class="goal-item">
+                <p class="goal-label">Target Amount</p>
+                <p class="goal-value" id="goal-target">₹0</p>
+              </div>
+              <div class="goal-item">
+                <p class="goal-label">Expected Corpus</p>
+                <p class="goal-value" id="goal-corpus">₹0</p>
+              </div>
+              <div class="goal-item">
+                <p class="goal-label">Success Probability</p>
+                <p class="goal-value goal-probability" id="goal-prob">0%</p>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" id="goal-progress"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- User Profile -->
+          <div class="profile-grid">
+            <div class="profile-card">
+              <h3>Personal Information</h3>
+              <div class="profile-item">
+                <span class="label">Name</span>
+                <span class="value" id="profile-name">-</span>
+              </div>
+              <div class="profile-item">
+                <span class="label">Age</span>
+                <span class="value" id="profile-age">-</span>
+              </div>
+              <div class="profile-item">
+                <span class="label">Employment Status</span>
+                <span class="value" id="profile-status">-</span>
+              </div>
+            </div>
+
+            <div class="profile-card">
+              <h3>Investment Details</h3>
+              <div class="profile-item">
+                <span class="label">Risk Appetite</span>
+                <span class="value" id="investment-risk">-</span>
+              </div>
+              <div class="profile-item">
+                <span class="label">Monthly Investment</span>
+                <span class="value" id="investment-amt">-</span>
+              </div>
+              <div class="profile-item">
+                <span class="label">Goal Timeline</span>
+                <span class="value" id="investment-timeline">-</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Analytics Section -->
+        <section id="analytics-section" class="section" style="display:none;">
+          <h2>Financial Analytics</h2>
+          <div class="charts-row">
+            <div class="chart-container">
+              <h3>Expense Breakdown</h3>
+              <canvas id="expenseBreakdownChart"></canvas>
+            </div>
+            <div class="chart-container">
+              <h3>Savings Ratio Analysis</h3>
+              <canvas id="savingsRatioChart"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <!-- Goals Section -->
+        <section id="goals-section" class="section" style="display:none;">
+          <h2>Goal Intelligence</h2>
+          <div class="goal-details-card">
+            <div class="detail-row">
+              <span class="detail-label">Goal Probability</span>
+              <span class="detail-value" id="detail-probability">0%</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Verdict</span>
+              <span class="detail-value" id="detail-verdict">-</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">ROI Assumed</span>
+              <span class="detail-value" id="detail-roi">0%</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Insights Section -->
+        <section id="insights-section" class="section" style="display:none;">
+          <h2>AI Market Insights</h2>
+          <div id="insights-container" class="insights-grid"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Action Buttons (Floating) -->
+  <div class="action-buttons">
+    <button class="action-btn primary" id="btn-refresh" title="Refresh Data">🔄</button>
+    <button class="action-btn secondary" id="btn-agent" title="AI Advisor">🤖</button>
+  </div>
+
+  <script type="module" src="/js/dashboard.js"></script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
   <title>FinPass AI | Dashboard</title>
   <link rel="stylesheet" href="/css/style.css" />
 </head>
