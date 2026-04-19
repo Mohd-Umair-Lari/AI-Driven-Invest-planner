@@ -8,15 +8,31 @@ export async function fetchInsights(financialState) {
 }
 
 export async function apiFetch(endpoint, options = {}) {
-  const res = await fetch(`${BACKEND_URL}${endpoint}`, {
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers || {})
-    },
-    ...options
-  });
+  try {
+    const url = `${BACKEND_URL}${endpoint}`;
+    console.log(`📡 API Call: ${options.method || 'GET'} ${url}`);
+    
+    const res = await fetch(url, {
+      headers: {
+        "Content-Type": "application/json",
+        ...(options.headers || {})
+      },
+      ...options,
+      timeout: 15000
+    });
 
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message || "API Error");
-  return data;
+    const data = await res.json().catch(() => ({}));
+    
+    if (!res.ok) {
+      console.error(`❌ API Error [${res.status}]:`, data.message || res.statusText);
+      throw new Error(data.message || `HTTP ${res.status}: ${res.statusText}`);
+    }
+    
+    console.log(`✅ API Success: ${endpoint}`);
+    return data;
+  } catch (err) {
+    console.error(`🔥 API Exception:`, err.message);
+    throw err;
+  }
 }
+

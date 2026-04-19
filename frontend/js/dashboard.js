@@ -1,5 +1,512 @@
 import { apiFetch } from "./api.js";
 
+console.log("📊 Dashboard Initialized");
+
+let charts = {};
+let currentUser = null;
+
+// ===== HELPERS =====
+function formatCurrency(value) {
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(value || 0);
+}
+
+function safeExtract(obj, path, defaultVal = 0) {
+  if (!obj || typeof obj !== 'object') return defaultVal;
+  const keys = path.split('.');
+  let value = obj;
+  for (const key of keys) {
+    if (value && typeof value === 'object' && key in value) {
+      value = value[key];
+    } else {
+      return defaultVal;
+    }
+  }
+  return value ?? defaultVal;
+}
+
+// ===== LOAD USER =====
+async function loadUserData() {
+  let user = JSON.parse(localStorage.getItem("user"));
+  if (!user) {
+    window.location.href = "/index.html";
+    return null;
+  }
+  currentUser = user;
+  console.log("👤 User loaded:", user.Name);
+  return user;
+}
+
+// ===== POPULATE METRICS =====
+function populateMetrics(user) {
+  const income = safeExtract(user, 'financials.monthly-income', 0);
+  const expenses = safeExtract(user, 'financials.monthly-expenses', 0);
+  const debt = safeExtract(user, 'financials.debt', 0);
+  const savings = Math.max(0, income - expenses);
+  
+  document.getElementById('metric-income').textContent = formatCurrency(income);
+  document.getElementById('metric-expense').textContent = formatCurrency(expenses);
+  document.getElementById('metric-savings').textContent = formatCurrency(savings);
+  document.getElementById('metric-debt').textContent = formatCurrency(debt);
+  
+  return { income, expenses, debt, savings };
+}
+
+// ===== POPULATE PROFILE =====
+function populateProfile(user) {
+  document.getElementById('user-name').textContent = user.Name || 'User';
+  document.getElementById('user-email').textContent = user.email || 'user@example.com';
+  
+  document.getElementById('profile-name').textContent = user.Name || '-';
+  document.getElementById('profile-age').textContent = user.Age || '-';
+  document.getElementById('profile-status').textContent = user['employment-status'] || '-';
+  
+  const riskAppetite = safeExtract(user, 'Goal.risk', 'Moderate');
+  const investmentAmount = safeExtract(user, 'investments.amount', 0);
+  const goalDuration = safeExtract(user, 'Goal.duration_months', 0);
+  
+  document.getElementById('investment-risk').textContent = riskAppetite;
+  document.getElementById('investment-amt').textContent = formatCurrency(investmentAmount);
+  document.getElementById('investment-timeline').textContent = goalDuration ? `${goalDuration} months` : '-';
+}
+
+// ===== POPULATE GOAL DATA =====
+async function populateGoalData(user) {
+  try {
+    const response = await apiFetch(`/api/goal-intelligence/${user.email}`);
+    const goalData = response.goal_intelligence || {};
+    
+    const targetAmount = safeExtract(goalData, 'target_amount', 0);
+    const expectedCorpus = safeExtract(goalData, 'expected_corpus', 0);
+    const probability = safeExtract(goalData, 'goal_probability', 0);
+    
+    document.getElementById('goal-target').textContent = formatCurrency(targetAmount);
+    document.getElementById('goal-corpus').textContent = formatCurrency(expectedCorpus);
+    document.getElementById('goal-prob').textContent = `${probability}%`;
+    
+    const statusBadge = document.getElementById('goal-status');
+    if (probability >= 70) {
+      statusBadge.textContent = '✓ On Track';
+      statusBadge.style.background = '#10b981';
+    } else if (probability >= 50) {
+      statusBadge.textContent = '◐ At Risk';
+      statusBadge.style.background = '#f59e0b';
+    } else {
+      statusBadge.textContent = '✗ Off Track';
+      statusBadge.style.background = '#ef4444';
+    }
+    
+    const progressFill = document.getElementById('goal-progress');
+    progressFill.style.width = `${Math.min(100, probability)}%`;
+    
+    document.getElementById('detail-probability').textContent = `${probability}%`;
+    document.getElementById('detail-verdict').textContent = goalData.verdict || 'Analyzing...';
+    document.getElementById('detail-roi').textContent = `${goalData.roi_assumed || 0}%`;
+    
+    console.log("🎯 Goal data loaded");
+  } catch (err) {
+    console.warn('⚠️ Goal data unavailable:', err.message);
+  }
+}
+
+// ===== CHARTS =====
+function createIncomeExpenseChart(income, expenses) {
+  const ctx = document.getElementById('incomeExpenseChart');
+  if (!ctx) return;
+  
+  if (charts.incomeExpense) charts.incomeExpense.destroy();
+  
+  charts.incomeExpense = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Monthly'],
+      datasets: [
+        { label: 'Income', data: [income], backgroundColor: '#10b981', borderRadius: 8 },
+        { label: 'Expenses', data: [expenses], backgroundColor: '#ef4444', borderRadius: 8 }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: { legend: { display: true, position: 'top' } },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { callback: v => '₹' + v.toLocaleString('en-IN') }
+        }
+      }
+    }
+  });
+}
+
+function createHealthScoreChart(analytics) {
+  const ctx = document.getElementById('healthScoreChart');
+  if (!ctx) return;
+  
+  if (charts.healthScore) charts.healthScore.destroy();
+  
+  const score = analytics?.financial_health || 65;
+  const status = document.getElementById('health-status');
+  
+  if (score >= 75) {
+    status.textContent = 'Excellent';
+    status.style.color = '#10b981';
+  } else if (score >= 50) {
+    status.textContent = 'Good';
+    status.style.color = '#f59e0b';
+  } else {
+    status.textContent = 'Needs Work';
+    status.style.color = '#ef4444';
+  }
+  
+  charts.healthScore = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Health Score', 'Remaining'],
+      datasets: [{
+        data: [score, 100 - score],
+        backgroundColor: [
+          score >= 75 ? '#10b981' : score >= 50 ? '#f59e0b' : '#ef4444',
+          '#e5e7eb'
+        ],
+        borderWidth: 0
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false } } }
+  });
+}
+
+function createExpenseBreakdownChart() {
+  const ctx = document.getElementById('expenseBreakdownChart');
+  if (!ctx) return;
+  
+  if (charts.expenseBreakdown) charts.expenseBreakdown.destroy();
+  
+  charts.expenseBreakdown = new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: ['Fixed', 'Variable', 'Emergency'],
+      datasets: [{
+        data: [40, 40, 20],
+        backgroundColor: ['#4f46e5', '#7c3aed', '#f59e0b'],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: { legend: { position: 'bottom' } }
+    }
+  });
+}
+
+function createSavingsRatioChart(analytics) {
+  const ctx = document.getElementById('savingsRatioChart');
+  if (!ctx) return;
+  
+  if (charts.savingsRatio) charts.savingsRatio.destroy();
+  
+  const ratio = (analytics?.savings_ratio || 0.2) * 100;
+  
+  charts.savingsRatio = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+      datasets: [{
+        label: 'Savings Ratio %',
+        data: [18, 19, 20, 21, 19, ratio],
+        borderColor: '#10b981',
+        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+        borderWidth: 3,
+        fill: true,
+        tension: 0.4,
+        pointBackgroundColor: '#10b981',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        pointRadius: 5
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: { legend: { display: true, position: 'top' } },
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 100,
+          ticks: { callback: v => v + '%' }
+        }
+      }
+    }
+  });
+}
+
+// ===== LOAD ANALYTICS =====
+async function loadAnalytics(user) {
+  try {
+    const response = await apiFetch(`/api/analytics/${user.email}`);
+    const analytics = response.analytics || {};
+    
+    createExpenseBreakdownChart();
+    createSavingsRatioChart(analytics);
+    createHealthScoreChart(analytics);
+    console.log("📈 Analytics loaded");
+  } catch (err) {
+    console.warn('⚠️ Analytics unavailable:', err.message);
+  }
+}
+
+// ===== LOAD INSIGHTS =====
+async function loadInsights(user) {
+  try {
+    const container = document.getElementById('insights-container');
+    if (!container) return;
+    
+    const income = safeExtract(user, 'financials.monthly-income', 0);
+    const expenses = safeExtract(user, 'financials.monthly-expenses', 0);
+    const debt = safeExtract(user, 'financials.debt', 0);
+    
+    const insights = [];
+    
+    if (expenses > income * 0.8) {
+      insights.push({
+        category: 'Spending',
+        impact_area: 'Monthly Budget',
+        message: 'Your expenses are high. Consider cutting discretionary spending.',
+        severity: 'high',
+        confidence_score: 0.9
+      });
+    }
+    
+    if (debt > income * 3) {
+      insights.push({
+        category: 'Debt',
+        impact_area: 'Liability',
+        message: 'Your debt-to-income ratio is concerning. Prioritize debt reduction.',
+        severity: 'high',
+        confidence_score: 0.85
+      });
+    }
+    
+    if (income - expenses > income * 0.2) {
+      insights.push({
+        category: 'Saving',
+        impact_area: 'Wealth Growth',
+        message: 'Great savings rate! Consider diversifying investments.',
+        severity: 'low',
+        confidence_score: 0.95
+      });
+    }
+    
+    if (insights.length === 0) {
+      insights.push({
+        category: 'General',
+        impact_area: 'Overview',
+        message: 'Your financial situation is stable. Monitor spending and continue investing.',
+        severity: 'low',
+        confidence_score: 0.8
+      });
+    }
+    
+    renderInsights(insights);
+    console.log("💡 Insights generated");
+  } catch (err) {
+    console.warn('⚠️ Insights unavailable:', err.message);
+  }
+}
+
+function renderInsights(insights) {
+  const container = document.getElementById('insights-container');
+  if (!container) return;
+  
+  container.innerHTML = '';
+  insights.forEach(insight => {
+    const card = document.createElement('div');
+    card.className = `insight-card ${insight.severity}`;
+    
+    card.innerHTML = `
+      <div class="insight-top">
+        <span class="insight-category">${insight.category}</span>
+        <span class="insight-impact">${insight.impact_area}</span>
+      </div>
+      <div class="insight-message">${insight.message}</div>
+      <div class="insight-confidence">
+        Confidence: ${Math.round((insight.confidence_score || 0) * 100)}%
+      </div>
+    `;
+    
+    container.appendChild(card);
+  });
+}
+
+// ===== AI ADVISOR =====
+async function loadAIAdvisor(user) {
+  try {
+    const response = await apiFetch(`/api/analyze-finances/${user.email}`);
+    
+    if (response.status === 'error') {
+      openModal(`<h2>⚠️ Analysis Error</h2><p>${response.message}</p>`);
+      return;
+    }
+    
+    const analysis = response;
+    const message = `
+      <h2>🤖 AI Financial Analysis</h2>
+      <div style="background: #f3e8ff; padding: 16px; border-radius: 10px; margin: 16px 0;">
+        <p><strong>Health Score:</strong> ${analysis.financial_health_score || 'N/A'}/100</p>
+        <p><strong>Analysis:</strong> ${analysis.analysis || 'Analyzing your finances...'}</p>
+      </div>
+      <div style="margin: 16px 0;">
+        <p style="font-weight: 600; margin-bottom: 8px;">📋 Recommendations:</p>
+        <ul style="margin-left: 20px; line-height: 1.8;">
+          ${(analysis.recommendations || ['Monitor your spending regularly', 'Diversify your investments']).map(r => `<li>${r}</li>`).join('')}
+        </ul>
+      </div>
+      <div style="background: #dbeafe; padding: 12px; border-radius: 10px; margin-top: 16px;">
+        <p style="font-weight: 600; margin-bottom: 8px;">📈 Suggested Allocation:</p>
+        <p>Equity: ${analysis.investment_strategy?.equity || '60'}% | Debt: ${analysis.investment_strategy?.debt || '30'}% | Cash: ${analysis.investment_strategy?.cash || '10'}%</p>
+      </div>
+    `;
+    
+    openModal(message);
+    console.log("🤖 AI Advisor response loaded");
+  } catch (err) {
+    console.warn('⚠️ AI Advisor unavailable:', err.message);
+    openModal(`<h2>📊 Financial Summary</h2><p>AI analysis temporarily unavailable. Your dashboard data is fully functional.</p><p><small>Status: ${err.message}</small></p>`);
+  }
+}
+
+// ===== MODAL =====
+function openModal(html) {
+  const modal = document.createElement('div');
+  modal.className = 'modal-backdrop';
+  modal.innerHTML = `
+    <div class="modal-card">
+      <button class="modal-close" onclick="this.closest('.modal-backdrop').remove();">&times;</button>
+      <div>${html}</div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) modal.remove();
+  });
+}
+
+// ===== SECTION NAVIGATION =====
+function setupSectionNavigation() {
+  const navItems = document.querySelectorAll('.nav-item');
+  const sections = document.querySelectorAll('.section');
+  
+  navItems.forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      
+      const section = item.dataset.section;
+      navItems.forEach(n => n.classList.remove('active'));
+      item.classList.add('active');
+      
+      sections.forEach(s => s.style.display = 'none');
+      
+      const targetSection = document.getElementById(`${section}-section`);
+      if (targetSection) targetSection.style.display = 'block';
+      
+      if (section === 'analytics' && currentUser) loadAnalytics(currentUser);
+      else if (section === 'insights' && currentUser) loadInsights(currentUser);
+    });
+  });
+}
+
+// ===== INITIALIZE =====
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const user = await loadUserData();
+    if (!user) return;
+    
+    const financials = populateMetrics(user);
+    populateProfile(user);
+    await populateGoalData(user);
+    
+    createIncomeExpenseChart(financials.income, financials.expenses);
+    
+    try {
+      const analyticsResponse = await apiFetch(`/api/analytics/${user.email}`);
+      createHealthScoreChart(analyticsResponse.analytics || {});
+    } catch (err) {
+      console.warn('⚠️ Initial analytics failed:', err.message);
+    }
+    
+    await loadInsights(user);
+    setupSectionNavigation();
+    
+    document.getElementById('btn-refresh')?.addEventListener('click', () => {
+      window.location.reload();
+    });
+    
+    document.getElementById('btn-agent')?.addEventListener('click', () => {
+      loadAIAdvisor(user);
+    });
+    
+    console.log("✅ Dashboard Ready");
+  } catch (err) {
+    console.error("🔥 Dashboard init failed:", err);
+  }
+});
+
+// ===== LOGOUT =====
+window.logout = () => {
+  if (confirm('Logout?')) {
+    localStorage.removeItem('user');
+    window.location.href = '/index.html';
+  }
+};
+
+// Modal styles
+const style = document.createElement('style');
+style.textContent = `
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  .modal-card {
+    position: relative;
+    background: white;
+    width: 90%;
+    max-width: 600px;
+    padding: 32px;
+    border-radius: 16px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+  .modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: #f3e8ff;
+    border-radius: 50%;
+    font-size: 24px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .modal-close:hover {
+    background: #e0d5ff;
+  }
+`;
+document.head.appendChild(style);
+import { apiFetch } from "./api.js";
+
 console.log("📊 Dashboard loaded");
 
 let charts = {};
