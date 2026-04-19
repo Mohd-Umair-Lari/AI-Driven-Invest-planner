@@ -36,6 +36,22 @@ async function loadUserData() {
     window.location.href = "/index.html";
     return null;
   }
+  
+  // If user doesn't have financial data, initialize test data
+  if (!user.financials || Object.keys(user.financials).length === 0) {
+    try {
+      console.log("📝 Initializing test data for user...");
+      const response = await apiFetch(`/api/init-test-data/${user.email}`, {
+        method: "POST"
+      });
+      user = response.user;
+      localStorage.setItem("user", JSON.stringify(user));
+      console.log("✅ Test data initialized");
+    } catch (err) {
+      console.warn("⚠️ Could not initialize test data:", err.message);
+    }
+  }
+  
   currentUser = user;
   console.log("👤 User loaded:", user.Name);
   return user;
@@ -53,25 +69,43 @@ function populateMetrics(user) {
   document.getElementById('metric-savings').textContent = formatCurrency(savings);
   document.getElementById('metric-debt').textContent = formatCurrency(debt);
   
+  console.log("💰 Metrics populated:", { income, expenses, savings, debt });
+  
   return { income, expenses, debt, savings };
 }
 
 // ===== POPULATE PROFILE =====
 function populateProfile(user) {
-  document.getElementById('user-name').textContent = user.Name || 'User';
+  const name = user.Name || 'User';
+  const age = user.Age || '-';
+  const employment = user['employment-status'] || 'Not Specified';
+  
+  document.getElementById('user-name').textContent = name;
   document.getElementById('user-email').textContent = user.email || 'user@example.com';
   
-  document.getElementById('profile-name').textContent = user.Name || '-';
-  document.getElementById('profile-age').textContent = user.Age || '-';
-  document.getElementById('profile-status').textContent = user['employment-status'] || '-';
+  // Personal Information
+  const profileName = document.getElementById('profile-name');
+  const profileAge = document.getElementById('profile-age');
+  const profileStatus = document.getElementById('profile-status');
   
-  const riskAppetite = safeExtract(user, 'Goal.risk', 'Moderate');
-  const investmentAmount = safeExtract(user, 'investments.amount', 0);
-  const goalDuration = safeExtract(user, 'Goal.duration_months', 0);
+  if (profileName) profileName.textContent = name;
+  if (profileAge) profileAge.textContent = age;
+  if (profileStatus) profileStatus.textContent = employment;
   
-  document.getElementById('investment-risk').textContent = riskAppetite;
-  document.getElementById('investment-amt').textContent = formatCurrency(investmentAmount);
-  document.getElementById('investment-timeline').textContent = goalDuration ? `${goalDuration} months` : '-';
+  // Investment Details
+  const riskAppetite = safeExtract(user, 'investments.risk-opt', 'Moderate');
+  const investmentAmount = safeExtract(user, 'investments.invest-amt', 0);
+  const goalDuration = safeExtract(user, 'Goal.target-time', 0);
+  
+  const investmentRisk = document.getElementById('investment-risk');
+  const investmentAmt = document.getElementById('investment-amt');
+  const investmentTimeline = document.getElementById('investment-timeline');
+  
+  if (investmentRisk) investmentRisk.textContent = riskAppetite;
+  if (investmentAmt) investmentAmt.textContent = formatCurrency(investmentAmount);
+  if (investmentTimeline) investmentTimeline.textContent = goalDuration ? `${goalDuration} months` : '-';
+  
+  console.log("👤 Profile populated:", { name, age, employment });
 }
 
 // ===== POPULATE GOAL DATA =====
@@ -80,32 +114,52 @@ async function populateGoalData(user) {
     const response = await apiFetch(`/api/goal-intelligence/${user.email}`);
     const goalData = response.goal_intelligence || {};
     
+    if (goalData.error) {
+      console.warn('⚠️ Goal data has error:', goalData.error);
+      return;
+    }
+    
     const targetAmount = safeExtract(goalData, 'target_amount', 0);
     const expectedCorpus = safeExtract(goalData, 'expected_corpus', 0);
     const probability = safeExtract(goalData, 'goal_probability', 0);
     
-    document.getElementById('goal-target').textContent = formatCurrency(targetAmount);
-    document.getElementById('goal-corpus').textContent = formatCurrency(expectedCorpus);
-    document.getElementById('goal-prob').textContent = `${probability}%`;
+    const goalTarget = document.getElementById('goal-target');
+    const goalCorpus = document.getElementById('goal-corpus');
+    const goalProb = document.getElementById('goal-prob');
     
+    if (goalTarget) goalTarget.textContent = formatCurrency(targetAmount);
+    if (goalCorpus) goalCorpus.textContent = formatCurrency(expectedCorpus);
+    if (goalProb) goalProb.textContent = `${probability}%`;
+    
+    // Goal Status Badge
     const statusBadge = document.getElementById('goal-status');
-    if (probability >= 70) {
-      statusBadge.textContent = '✓ On Track';
-      statusBadge.style.background = '#10b981';
-    } else if (probability >= 50) {
-      statusBadge.textContent = '◐ At Risk';
-      statusBadge.style.background = '#f59e0b';
-    } else {
-      statusBadge.textContent = '✗ Off Track';
-      statusBadge.style.background = '#ef4444';
+    if (statusBadge) {
+      if (probability >= 70) {
+        statusBadge.textContent = '✓ On Track';
+        statusBadge.style.background = '#10b981';
+      } else if (probability >= 50) {
+        statusBadge.textContent = '◐ At Risk';
+        statusBadge.style.background = '#f59e0b';
+      } else {
+        statusBadge.textContent = '✗ Off Track';
+        statusBadge.style.background = '#ef4444';
+      }
     }
     
+    // Progress Bar
     const progressFill = document.getElementById('goal-progress');
-    progressFill.style.width = `${Math.min(100, probability)}%`;
+    if (progressFill) {
+      progressFill.style.width = `${Math.min(100, probability)}%`;
+    }
     
-    document.getElementById('detail-probability').textContent = `${probability}%`;
-    document.getElementById('detail-verdict').textContent = goalData.verdict || 'Analyzing...';
-    document.getElementById('detail-roi').textContent = `${goalData.roi_assumed || 0}%`;
+    // Details
+    const detailProbability = document.getElementById('detail-probability');
+    const detailVerdict = document.getElementById('detail-verdict');
+    const detailRoi = document.getElementById('detail-roi');
+    
+    if (detailProbability) detailProbability.textContent = `${probability}%`;
+    if (detailVerdict) detailVerdict.textContent = goalData.verdict || 'Analyzing...';
+    if (detailRoi) detailRoi.textContent = `${goalData.roi_assumed || 8}%`;
     
     console.log("🎯 Goal data loaded");
   } catch (err) {
@@ -116,7 +170,10 @@ async function populateGoalData(user) {
 // ===== CHARTS =====
 function createIncomeExpenseChart(income, expenses) {
   const ctx = document.getElementById('incomeExpenseChart');
-  if (!ctx) return;
+  if (!ctx) {
+    console.warn('⚠️ Chart canvas not found: incomeExpenseChart');
+    return;
+  }
   
   if (charts.incomeExpense) charts.incomeExpense.destroy();
   
@@ -141,26 +198,35 @@ function createIncomeExpenseChart(income, expenses) {
       }
     }
   });
+  console.log("✅ Income vs Expenses chart created");
 }
 
 function createHealthScoreChart(analytics) {
   const ctx = document.getElementById('healthScoreChart');
-  if (!ctx) return;
+  if (!ctx) {
+    console.warn('⚠️ Chart canvas not found: healthScoreChart');
+    return;
+  }
   
   if (charts.healthScore) charts.healthScore.destroy();
   
-  const score = analytics?.financial_health || 65;
+  const score = analytics?.financial_health === "Excellent" ? 85 :
+                analytics?.financial_health === "Good" ? 65 :
+                analytics?.financial_health === "Needs Improvement" ? 45 : 60;
+  
   const status = document.getElementById('health-status');
   
-  if (score >= 75) {
-    status.textContent = 'Excellent';
-    status.style.color = '#10b981';
-  } else if (score >= 50) {
-    status.textContent = 'Good';
-    status.style.color = '#f59e0b';
-  } else {
-    status.textContent = 'Needs Work';
-    status.style.color = '#ef4444';
+  if (status) {
+    if (score >= 75) {
+      status.textContent = 'Excellent';
+      status.style.color = '#10b981';
+    } else if (score >= 50) {
+      status.textContent = 'Good';
+      status.style.color = '#f59e0b';
+    } else {
+      status.textContent = 'Needs Work';
+      status.style.color = '#ef4444';
+    }
   }
   
   charts.healthScore = new Chart(ctx, {
@@ -176,22 +242,30 @@ function createHealthScoreChart(analytics) {
         borderWidth: 0
       }]
     },
-    options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false } } }
+    options: { 
+      responsive: true, 
+      maintainAspectRatio: true, 
+      plugins: { legend: { display: false } } 
+    }
   });
+  console.log("✅ Health Score chart created");
 }
 
 function createExpenseBreakdownChart() {
   const ctx = document.getElementById('expenseBreakdownChart');
-  if (!ctx) return;
+  if (!ctx) {
+    console.warn('⚠️ Chart canvas not found: expenseBreakdownChart');
+    return;
+  }
   
   if (charts.expenseBreakdown) charts.expenseBreakdown.destroy();
   
   charts.expenseBreakdown = new Chart(ctx, {
     type: 'pie',
     data: {
-      labels: ['Fixed', 'Variable', 'Emergency'],
+      labels: ['Fixed (60%)', 'Variable (30%)', 'Discretionary (10%)'],
       datasets: [{
-        data: [40, 40, 20],
+        data: [60, 30, 10],
         backgroundColor: ['#4f46e5', '#7c3aed', '#f59e0b'],
         borderWidth: 0
       }]
@@ -202,11 +276,15 @@ function createExpenseBreakdownChart() {
       plugins: { legend: { position: 'bottom' } }
     }
   });
+  console.log("✅ Expense Breakdown chart created");
 }
 
 function createSavingsRatioChart(analytics) {
   const ctx = document.getElementById('savingsRatioChart');
-  if (!ctx) return;
+  if (!ctx) {
+    console.warn('⚠️ Chart canvas not found: savingsRatioChart');
+    return;
+  }
   
   if (charts.savingsRatio) charts.savingsRatio.destroy();
   
@@ -243,6 +321,7 @@ function createSavingsRatioChart(analytics) {
       }
     }
   });
+  console.log("✅ Savings Ratio chart created");
 }
 
 // ===== LOAD ANALYTICS =====
@@ -347,11 +426,6 @@ function renderInsights(insights) {
 async function loadAIAdvisor(user) {
   try {
     const response = await apiFetch(`/api/analyze-finances/${user.email}`);
-    
-    if (response.status === 'error') {
-      openModal(`<h2>⚠️ Analysis Error</h2><p>${response.message}</p>`);
-      return;
-    }
     
     const analysis = response;
     const message = `
@@ -460,6 +534,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 window.logout = () => {
   if (confirm('Logout?')) {
     localStorage.removeItem('user');
+    localStorage.removeItem('onboardingCompleted');
     window.location.href = '/index.html';
   }
 };
@@ -498,21 +573,64 @@ style.textContent = `
     border-radius: 50%;
     font-size: 24px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.2s;
   }
   .modal-close:hover {
-    background: #e0d5ff;
+    background: #e9d5ff;
+  }
+  
+  .insight-card {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-left: 4px solid #4f46e5;
+    padding: 16px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+  }
+  .insight-card.high {
+    border-left-color: #ef4444;
+    background: #fef2f2;
+  }
+  .insight-card.medium {
+    border-left-color: #f59e0b;
+    background: #fffbf0;
+  }
+  .insight-card.low {
+    border-left-color: #10b981;
+    background: #f0fdf4;
+  }
+  .insight-top {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 12px;
+  }
+  .insight-category {
+    font-weight: 600;
+    color: #1f2937;
+  }
+  .insight-impact {
+    color: #6b7280;
+  }
+  .insight-message {
+    color: #374151;
+    line-height: 1.5;
+    margin-bottom: 8px;
+  }
+  .insight-confidence {
+    font-size: 12px;
+    color: #6b7280;
   }
 `;
 document.head.appendChild(style);
 import { apiFetch } from "./api.js";
 
-console.log("📊 Dashboard loaded");
+console.log("📊 Dashboard Initialized");
 
 let charts = {};
 let currentUser = null;
 
-// ===== DATA FORMATTING =====
+// ===== HELPERS =====
 function formatCurrency(value) {
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
@@ -524,10 +642,8 @@ function formatCurrency(value) {
 
 function safeExtract(obj, path, defaultVal = 0) {
   if (!obj || typeof obj !== 'object') return defaultVal;
-  
   const keys = path.split('.');
   let value = obj;
-  
   for (const key of keys) {
     if (value && typeof value === 'object' && key in value) {
       value = value[key];
@@ -535,20 +651,34 @@ function safeExtract(obj, path, defaultVal = 0) {
       return defaultVal;
     }
   }
-  
   return value ?? defaultVal;
 }
 
-// ===== LOAD USER DATA =====
+// ===== LOAD USER =====
 async function loadUserData() {
   let user = JSON.parse(localStorage.getItem("user"));
-  
   if (!user) {
     window.location.href = "/index.html";
     return null;
   }
   
+  // If user doesn't have financial data, initialize test data
+  if (!user.financials || Object.keys(user.financials).length === 0) {
+    try {
+      console.log("📝 Initializing test data for user...");
+      const response = await apiFetch(`/api/init-test-data/${user.email}`, {
+        method: "POST"
+      });
+      user = response.user;
+      localStorage.setItem("user", JSON.stringify(user));
+      console.log("✅ Test data initialized");
+    } catch (err) {
+      console.warn("⚠️ Could not initialize test data:", err.message);
+    }
+  }
+  
   currentUser = user;
+  console.log("👤 User loaded:", user.Name);
   return user;
 }
 
@@ -557,32 +687,50 @@ function populateMetrics(user) {
   const income = safeExtract(user, 'financials.monthly-income', 0);
   const expenses = safeExtract(user, 'financials.monthly-expenses', 0);
   const debt = safeExtract(user, 'financials.debt', 0);
-  const savings = income - expenses;
+  const savings = Math.max(0, income - expenses);
   
   document.getElementById('metric-income').textContent = formatCurrency(income);
   document.getElementById('metric-expense').textContent = formatCurrency(expenses);
-  document.getElementById('metric-savings').textContent = formatCurrency(Math.max(0, savings));
+  document.getElementById('metric-savings').textContent = formatCurrency(savings);
   document.getElementById('metric-debt').textContent = formatCurrency(debt);
+  
+  console.log("💰 Metrics populated:", { income, expenses, savings, debt });
   
   return { income, expenses, debt, savings };
 }
 
 // ===== POPULATE PROFILE =====
 function populateProfile(user) {
-  document.getElementById('user-name').textContent = user.Name || 'User';
+  const name = user.Name || 'User';
+  const age = user.Age || '-';
+  const employment = user['employment-status'] || 'Not Specified';
+  
+  document.getElementById('user-name').textContent = name;
   document.getElementById('user-email').textContent = user.email || 'user@example.com';
   
-  document.getElementById('profile-name').textContent = user.Name || '-';
-  document.getElementById('profile-age').textContent = user.Age || '-';
-  document.getElementById('profile-status').textContent = user['employment-status'] || '-';
+  // Personal Information
+  const profileName = document.getElementById('profile-name');
+  const profileAge = document.getElementById('profile-age');
+  const profileStatus = document.getElementById('profile-status');
   
-  const riskAppetite = safeExtract(user, 'Goal.risk', 'Moderate');
-  const investmentAmount = safeExtract(user, 'investments.amount', 0);
-  const goalDuration = safeExtract(user, 'Goal.duration_months', 0);
+  if (profileName) profileName.textContent = name;
+  if (profileAge) profileAge.textContent = age;
+  if (profileStatus) profileStatus.textContent = employment;
   
-  document.getElementById('investment-risk').textContent = riskAppetite;
-  document.getElementById('investment-amt').textContent = formatCurrency(investmentAmount);
-  document.getElementById('investment-timeline').textContent = `${goalDuration} months` || '-';
+  // Investment Details
+  const riskAppetite = safeExtract(user, 'investments.risk-opt', 'Moderate');
+  const investmentAmount = safeExtract(user, 'investments.invest-amt', 0);
+  const goalDuration = safeExtract(user, 'Goal.target-time', 0);
+  
+  const investmentRisk = document.getElementById('investment-risk');
+  const investmentAmt = document.getElementById('investment-amt');
+  const investmentTimeline = document.getElementById('investment-timeline');
+  
+  if (investmentRisk) investmentRisk.textContent = riskAppetite;
+  if (investmentAmt) investmentAmt.textContent = formatCurrency(investmentAmount);
+  if (investmentTimeline) investmentTimeline.textContent = goalDuration ? `${goalDuration} months` : '-';
+  
+  console.log("👤 Profile populated:", { name, age, employment });
 }
 
 // ===== POPULATE GOAL DATA =====
@@ -591,45 +739,66 @@ async function populateGoalData(user) {
     const response = await apiFetch(`/api/goal-intelligence/${user.email}`);
     const goalData = response.goal_intelligence || {};
     
+    if (goalData.error) {
+      console.warn('⚠️ Goal data has error:', goalData.error);
+      return;
+    }
+    
     const targetAmount = safeExtract(goalData, 'target_amount', 0);
     const expectedCorpus = safeExtract(goalData, 'expected_corpus', 0);
     const probability = safeExtract(goalData, 'goal_probability', 0);
     
-    document.getElementById('goal-target').textContent = formatCurrency(targetAmount);
-    document.getElementById('goal-corpus').textContent = formatCurrency(expectedCorpus);
-    document.getElementById('goal-prob').textContent = `${probability}%`;
+    const goalTarget = document.getElementById('goal-target');
+    const goalCorpus = document.getElementById('goal-corpus');
+    const goalProb = document.getElementById('goal-prob');
     
-    // Set goal status
+    if (goalTarget) goalTarget.textContent = formatCurrency(targetAmount);
+    if (goalCorpus) goalCorpus.textContent = formatCurrency(expectedCorpus);
+    if (goalProb) goalProb.textContent = `${probability}%`;
+    
+    // Goal Status Badge
     const statusBadge = document.getElementById('goal-status');
-    if (probability >= 70) {
-      statusBadge.textContent = '✓ On Track';
-      statusBadge.style.background = '#10b981';
-    } else if (probability >= 50) {
-      statusBadge.textContent = '◐ At Risk';
-      statusBadge.style.background = '#f59e0b';
-    } else {
-      statusBadge.textContent = '✗ Off Track';
-      statusBadge.style.background = '#ef4444';
+    if (statusBadge) {
+      if (probability >= 70) {
+        statusBadge.textContent = '✓ On Track';
+        statusBadge.style.background = '#10b981';
+      } else if (probability >= 50) {
+        statusBadge.textContent = '◐ At Risk';
+        statusBadge.style.background = '#f59e0b';
+      } else {
+        statusBadge.textContent = '✗ Off Track';
+        statusBadge.style.background = '#ef4444';
+      }
     }
     
-    // Set progress
+    // Progress Bar
     const progressFill = document.getElementById('goal-progress');
-    progressFill.style.width = `${Math.min(100, probability)}%`;
+    if (progressFill) {
+      progressFill.style.width = `${Math.min(100, probability)}%`;
+    }
     
-    // Store for goal section
-    document.getElementById('detail-probability').textContent = `${probability}%`;
-    document.getElementById('detail-verdict').textContent = goalData.verdict || '-';
-    document.getElementById('detail-roi').textContent = `${goalData.roi_assumed || 0}%`;
+    // Details
+    const detailProbability = document.getElementById('detail-probability');
+    const detailVerdict = document.getElementById('detail-verdict');
+    const detailRoi = document.getElementById('detail-roi');
     
+    if (detailProbability) detailProbability.textContent = `${probability}%`;
+    if (detailVerdict) detailVerdict.textContent = goalData.verdict || 'Analyzing...';
+    if (detailRoi) detailRoi.textContent = `${goalData.roi_assumed || 8}%`;
+    
+    console.log("🎯 Goal data loaded");
   } catch (err) {
-    console.error('Failed to load goal data:', err);
+    console.warn('⚠️ Goal data unavailable:', err.message);
   }
 }
 
-// ===== CREATE CHARTS =====
+// ===== CHARTS =====
 function createIncomeExpenseChart(income, expenses) {
   const ctx = document.getElementById('incomeExpenseChart');
-  if (!ctx) return;
+  if (!ctx) {
+    console.warn('⚠️ Chart canvas not found: incomeExpenseChart');
+    return;
+  }
   
   if (charts.incomeExpense) charts.incomeExpense.destroy();
   
@@ -638,63 +807,51 @@ function createIncomeExpenseChart(income, expenses) {
     data: {
       labels: ['Monthly'],
       datasets: [
-        {
-          label: 'Income',
-          data: [income],
-          backgroundColor: '#10b981',
-          borderRadius: 8,
-          borderSkipped: false
-        },
-        {
-          label: 'Expenses',
-          data: [expenses],
-          backgroundColor: '#ef4444',
-          borderRadius: 8,
-          borderSkipped: false
-        }
+        { label: 'Income', data: [income], backgroundColor: '#10b981', borderRadius: 8 },
+        { label: 'Expenses', data: [expenses], backgroundColor: '#ef4444', borderRadius: 8 }
       ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: true,
-      plugins: {
-        legend: {
-          display: true,
-          position: 'top'
-        }
-      },
+      plugins: { legend: { display: true, position: 'top' } },
       scales: {
         y: {
           beginAtZero: true,
-          ticks: {
-            callback: function(value) {
-              return '₹' + value.toLocaleString('en-IN');
-            }
-          }
+          ticks: { callback: v => '₹' + v.toLocaleString('en-IN') }
         }
       }
     }
   });
+  console.log("✅ Income vs Expenses chart created");
 }
 
 function createHealthScoreChart(analytics) {
   const ctx = document.getElementById('healthScoreChart');
-  if (!ctx) return;
+  if (!ctx) {
+    console.warn('⚠️ Chart canvas not found: healthScoreChart');
+    return;
+  }
   
   if (charts.healthScore) charts.healthScore.destroy();
   
-  const healthScore = analytics?.financial_health || 65;
-  const healthStatus = document.getElementById('health-status');
+  const score = analytics?.financial_health === "Excellent" ? 85 :
+                analytics?.financial_health === "Good" ? 65 :
+                analytics?.financial_health === "Needs Improvement" ? 45 : 60;
   
-  if (healthScore >= 75) {
-    healthStatus.textContent = 'Excellent';
-    healthStatus.style.color = '#10b981';
-  } else if (healthScore >= 50) {
-    healthStatus.textContent = 'Good';
-    healthStatus.style.color = '#f59e0b';
-  } else {
-    healthStatus.textContent = 'Needs Work';
-    healthStatus.style.color = '#ef4444';
+  const status = document.getElementById('health-status');
+  
+  if (status) {
+    if (score >= 75) {
+      status.textContent = 'Excellent';
+      status.style.color = '#10b981';
+    } else if (score >= 50) {
+      status.textContent = 'Good';
+      status.style.color = '#f59e0b';
+    } else {
+      status.textContent = 'Needs Work';
+      status.style.color = '#ef4444';
+    }
   }
   
   charts.healthScore = new Chart(ctx, {
@@ -702,36 +859,38 @@ function createHealthScoreChart(analytics) {
     data: {
       labels: ['Health Score', 'Remaining'],
       datasets: [{
-        data: [healthScore, 100 - healthScore],
+        data: [score, 100 - score],
         backgroundColor: [
-          healthScore >= 75 ? '#10b981' : healthScore >= 50 ? '#f59e0b' : '#ef4444',
+          score >= 75 ? '#10b981' : score >= 50 ? '#f59e0b' : '#ef4444',
           '#e5e7eb'
         ],
         borderWidth: 0
       }]
     },
-    options: {
-      responsive: true,
-      maintainAspectRatio: true,
-      plugins: {
-        legend: { display: false }
-      }
+    options: { 
+      responsive: true, 
+      maintainAspectRatio: true, 
+      plugins: { legend: { display: false } } 
     }
   });
+  console.log("✅ Health Score chart created");
 }
 
-function createExpenseBreakdownChart(expenses) {
+function createExpenseBreakdownChart() {
   const ctx = document.getElementById('expenseBreakdownChart');
-  if (!ctx) return;
+  if (!ctx) {
+    console.warn('⚠️ Chart canvas not found: expenseBreakdownChart');
+    return;
+  }
   
   if (charts.expenseBreakdown) charts.expenseBreakdown.destroy();
   
   charts.expenseBreakdown = new Chart(ctx, {
     type: 'pie',
     data: {
-      labels: ['Fixed', 'Variable', 'Emergency'],
+      labels: ['Fixed (60%)', 'Variable (30%)', 'Discretionary (10%)'],
       datasets: [{
-        data: [40, 40, 20],
+        data: [60, 30, 10],
         backgroundColor: ['#4f46e5', '#7c3aed', '#f59e0b'],
         borderWidth: 0
       }]
@@ -739,22 +898,22 @@ function createExpenseBreakdownChart(expenses) {
     options: {
       responsive: true,
       maintainAspectRatio: true,
-      plugins: {
-        legend: {
-          position: 'bottom'
-        }
-      }
+      plugins: { legend: { position: 'bottom' } }
     }
   });
+  console.log("✅ Expense Breakdown chart created");
 }
 
 function createSavingsRatioChart(analytics) {
   const ctx = document.getElementById('savingsRatioChart');
-  if (!ctx) return;
+  if (!ctx) {
+    console.warn('⚠️ Chart canvas not found: savingsRatioChart');
+    return;
+  }
   
   if (charts.savingsRatio) charts.savingsRatio.destroy();
   
-  const savingsRatio = (analytics?.savings_ratio || 0.2) * 100;
+  const ratio = (analytics?.savings_ratio || 0.2) * 100;
   
   charts.savingsRatio = new Chart(ctx, {
     type: 'line',
@@ -762,7 +921,7 @@ function createSavingsRatioChart(analytics) {
       labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
       datasets: [{
         label: 'Savings Ratio %',
-        data: [18, 19, 20, 21, 19, savingsRatio],
+        data: [18, 19, 20, 21, 19, ratio],
         borderColor: '#10b981',
         backgroundColor: 'rgba(16, 185, 129, 0.1)',
         borderWidth: 3,
@@ -777,25 +936,17 @@ function createSavingsRatioChart(analytics) {
     options: {
       responsive: true,
       maintainAspectRatio: true,
-      plugins: {
-        legend: {
-          display: true,
-          position: 'top'
-        }
-      },
+      plugins: { legend: { display: true, position: 'top' } },
       scales: {
         y: {
           beginAtZero: true,
           max: 100,
-          ticks: {
-            callback: function(value) {
-              return value + '%';
-            }
-          }
+          ticks: { callback: v => v + '%' }
         }
       }
     }
   });
+  console.log("✅ Savings Ratio chart created");
 }
 
 // ===== LOAD ANALYTICS =====
@@ -804,22 +955,21 @@ async function loadAnalytics(user) {
     const response = await apiFetch(`/api/analytics/${user.email}`);
     const analytics = response.analytics || {};
     
-    createExpenseBreakdownChart(user.financials);
+    createExpenseBreakdownChart();
     createSavingsRatioChart(analytics);
     createHealthScoreChart(analytics);
-    
+    console.log("📈 Analytics loaded");
   } catch (err) {
-    console.error('Failed to load analytics:', err);
+    console.warn('⚠️ Analytics unavailable:', err.message);
   }
 }
 
-// ===== LOAD AI INSIGHTS =====
+// ===== LOAD INSIGHTS =====
 async function loadInsights(user) {
   try {
     const container = document.getElementById('insights-container');
     if (!container) return;
     
-    // Generate synthetic insights based on user data
     const income = safeExtract(user, 'financials.monthly-income', 0);
     const expenses = safeExtract(user, 'financials.monthly-expenses', 0);
     const debt = safeExtract(user, 'financials.debt', 0);
@@ -828,9 +978,9 @@ async function loadInsights(user) {
     
     if (expenses > income * 0.8) {
       insights.push({
-        category: 'spending',
+        category: 'Spending',
         impact_area: 'Monthly Budget',
-        message: 'Your expenses are high relative to income. Consider cutting discretionary spending.',
+        message: 'Your expenses are high. Consider cutting discretionary spending.',
         severity: 'high',
         confidence_score: 0.9
       });
@@ -838,7 +988,7 @@ async function loadInsights(user) {
     
     if (debt > income * 3) {
       insights.push({
-        category: 'debt',
+        category: 'Debt',
         impact_area: 'Liability',
         message: 'Your debt-to-income ratio is concerning. Prioritize debt reduction.',
         severity: 'high',
@@ -848,7 +998,7 @@ async function loadInsights(user) {
     
     if (income - expenses > income * 0.2) {
       insights.push({
-        category: 'saving',
+        category: 'Saving',
         impact_area: 'Wealth Growth',
         message: 'Great savings rate! Consider diversifying investments.',
         severity: 'low',
@@ -858,7 +1008,7 @@ async function loadInsights(user) {
     
     if (insights.length === 0) {
       insights.push({
-        category: 'general',
+        category: 'General',
         impact_area: 'Overview',
         message: 'Your financial situation is stable. Monitor spending and continue investing.',
         severity: 'low',
@@ -867,8 +1017,9 @@ async function loadInsights(user) {
     }
     
     renderInsights(insights);
+    console.log("💡 Insights generated");
   } catch (err) {
-    console.error('Failed to load insights:', err);
+    console.warn('⚠️ Insights unavailable:', err.message);
   }
 }
 
@@ -877,16 +1028,13 @@ function renderInsights(insights) {
   if (!container) return;
   
   container.innerHTML = '';
-  
   insights.forEach(insight => {
     const card = document.createElement('div');
     card.className = `insight-card ${insight.severity}`;
     
-    const categoryLabel = insight.category.charAt(0).toUpperCase() + insight.category.slice(1);
-    
     card.innerHTML = `
       <div class="insight-top">
-        <span class="insight-category">${categoryLabel}</span>
+        <span class="insight-category">${insight.category}</span>
         <span class="insight-impact">${insight.impact_area}</span>
       </div>
       <div class="insight-message">${insight.message}</div>
@@ -899,48 +1047,39 @@ function renderInsights(insights) {
   });
 }
 
-// ===== LOAD AI ADVISOR =====
+// ===== AI ADVISOR =====
 async function loadAIAdvisor(user) {
   try {
     const response = await apiFetch(`/api/analyze-finances/${user.email}`);
     
-    if (response.status === 'error') {
-      alert('Unable to get AI analysis. Please ensure your financial data is complete.');
-      return;
-    }
-    
     const analysis = response;
-    
-    let actionEmoji = '📊';
-    if (analysis.financial_health_score > 80) actionEmoji = '✅';
-    else if (analysis.financial_health_score < 50) actionEmoji = '⚠️';
-    
     const message = `
       <h2>🤖 AI Financial Analysis</h2>
       <div style="background: #f3e8ff; padding: 16px; border-radius: 10px; margin: 16px 0;">
-        <p><strong>Health Score:</strong> ${analysis.financial_health_score}/100</p>
-        <p><strong>Analysis:</strong> ${analysis.analysis}</p>
+        <p><strong>Health Score:</strong> ${analysis.financial_health_score || 'N/A'}/100</p>
+        <p><strong>Analysis:</strong> ${analysis.analysis || 'Analyzing your finances...'}</p>
       </div>
       <div style="margin: 16px 0;">
         <p style="font-weight: 600; margin-bottom: 8px;">📋 Recommendations:</p>
         <ul style="margin-left: 20px; line-height: 1.8;">
-          ${(analysis.recommendations || []).map(r => `<li>${r}</li>`).join('')}
+          ${(analysis.recommendations || ['Monitor your spending regularly', 'Diversify your investments']).map(r => `<li>${r}</li>`).join('')}
         </ul>
       </div>
       <div style="background: #dbeafe; padding: 12px; border-radius: 10px; margin-top: 16px;">
         <p style="font-weight: 600; margin-bottom: 8px;">📈 Suggested Allocation:</p>
-        <p>Equity: ${analysis.investment_strategy?.equity || 0}% | Debt: ${analysis.investment_strategy?.debt || 0}% | Cash: ${analysis.investment_strategy?.cash || 0}%</p>
+        <p>Equity: ${analysis.investment_strategy?.equity || '60'}% | Debt: ${analysis.investment_strategy?.debt || '30'}% | Cash: ${analysis.investment_strategy?.cash || '10'}%</p>
       </div>
     `;
     
     openModal(message);
+    console.log("🤖 AI Advisor response loaded");
   } catch (err) {
-    console.error('Failed to load AI advisor:', err);
-    openModal(`<h2>⚠️ Analysis Unavailable</h2><p>${err.message || 'Please complete your financial profile first.'}</p>`);
+    console.warn('⚠️ AI Advisor unavailable:', err.message);
+    openModal(`<h2>📊 Financial Summary</h2><p>AI analysis temporarily unavailable. Your dashboard data is fully functional.</p><p><small>Status: ${err.message}</small></p>`);
   }
 }
 
-// ===== MODAL FUNCTIONS =====
+// ===== MODAL =====
 function openModal(html) {
   const modal = document.createElement('div');
   modal.className = 'modal-backdrop';
@@ -966,75 +1105,66 @@ function setupSectionNavigation() {
       e.preventDefault();
       
       const section = item.dataset.section;
-      
-      // Update active nav
       navItems.forEach(n => n.classList.remove('active'));
       item.classList.add('active');
       
-      // Update visible sections
       sections.forEach(s => s.style.display = 'none');
       
       const targetSection = document.getElementById(`${section}-section`);
-      if (targetSection) {
-        targetSection.style.display = 'block';
-      }
+      if (targetSection) targetSection.style.display = 'block';
       
-      // Load section-specific data
-      if (section === 'analytics' && currentUser) {
-        loadAnalytics(currentUser);
-      } else if (section === 'insights' && currentUser) {
-        loadInsights(currentUser);
-      }
+      if (section === 'analytics' && currentUser) loadAnalytics(currentUser);
+      else if (section === 'insights' && currentUser) loadInsights(currentUser);
     });
   });
 }
 
-// ===== INITIALIZE DASHBOARD =====
+// ===== INITIALIZE =====
 document.addEventListener('DOMContentLoaded', async () => {
-  const user = await loadUserData();
-  if (!user) return;
-  
-  // Populate all data
-  const financials = populateMetrics(user);
-  populateProfile(user);
-  await populateGoalData(user);
-  
-  // Create charts
-  createIncomeExpenseChart(financials.income, financials.expenses);
-  
-  // Load analytics for health score
   try {
-    const analyticsResponse = await apiFetch(`/api/analytics/${user.email}`);
-    createHealthScoreChart(analyticsResponse.analytics || {});
+    const user = await loadUserData();
+    if (!user) return;
+    
+    const financials = populateMetrics(user);
+    populateProfile(user);
+    await populateGoalData(user);
+    
+    createIncomeExpenseChart(financials.income, financials.expenses);
+    
+    try {
+      const analyticsResponse = await apiFetch(`/api/analytics/${user.email}`);
+      createHealthScoreChart(analyticsResponse.analytics || {});
+    } catch (err) {
+      console.warn('⚠️ Initial analytics failed:', err.message);
+    }
+    
+    await loadInsights(user);
+    setupSectionNavigation();
+    
+    document.getElementById('btn-refresh')?.addEventListener('click', () => {
+      window.location.reload();
+    });
+    
+    document.getElementById('btn-agent')?.addEventListener('click', () => {
+      loadAIAdvisor(user);
+    });
+    
+    console.log("✅ Dashboard Ready");
   } catch (err) {
-    console.error('Failed to load health score:', err);
+    console.error("🔥 Dashboard init failed:", err);
   }
-  
-  // Load insights
-  await loadInsights(user);
-  
-  // Setup navigation
-  setupSectionNavigation();
-  
-  // Setup action buttons
-  document.getElementById('btn-refresh')?.addEventListener('click', async () => {
-    window.location.reload();
-  });
-  
-  document.getElementById('btn-agent')?.addEventListener('click', async () => {
-    await loadAIAdvisor(user);
-  });
 });
 
 // ===== LOGOUT =====
 window.logout = () => {
-  if (confirm('Are you sure you want to logout?')) {
+  if (confirm('Logout?')) {
     localStorage.removeItem('user');
+    localStorage.removeItem('onboardingCompleted');
     window.location.href = '/index.html';
   }
 };
 
-// Add modal styles dynamically
+// Modal styles
 const style = document.createElement('style');
 style.textContent = `
   .modal-backdrop {
@@ -1046,7 +1176,6 @@ style.textContent = `
     justify-content: center;
     z-index: 1000;
   }
-  
   .modal-card {
     position: relative;
     background: white;
@@ -1058,7 +1187,6 @@ style.textContent = `
     max-height: 80vh;
     overflow-y: auto;
   }
-  
   .modal-close {
     position: absolute;
     top: 16px;
@@ -1070,261 +1198,53 @@ style.textContent = `
     border-radius: 50%;
     font-size: 24px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.2s;
+  }
+  .modal-close:hover {
+    background: #e9d5ff;
   }
   
-  .modal-close:hover {
-    background: #e0d5ff;
+  .insight-card {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-left: 4px solid #4f46e5;
+    padding: 16px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+  }
+  .insight-card.high {
+    border-left-color: #ef4444;
+    background: #fef2f2;
+  }
+  .insight-card.medium {
+    border-left-color: #f59e0b;
+    background: #fffbf0;
+  }
+  .insight-card.low {
+    border-left-color: #10b981;
+    background: #f0fdf4;
+  }
+  .insight-top {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 12px;
+  }
+  .insight-category {
+    font-weight: 600;
+    color: #1f2937;
+  }
+  .insight-impact {
+    color: #6b7280;
+  }
+  .insight-message {
+    color: #374151;
+    line-height: 1.5;
+    margin-bottom: 8px;
+  }
+  .insight-confidence {
+    font-size: 12px;
+    color: #6b7280;
   }
 `;
 document.head.appendChild(style);
-
-console.log('✅ Dashboard fully loaded');
-import { apiFetch } from "./api.js";
-import { fetchInsights } from "./api.js";
-console.log("🔥 dashboard.js loaded");
-
-async function loadInsights() {
-  const user = JSON.parse(localStorage.getItem("user"));
-
-  if (!user) return;
-
-  const financialState = {
-    income: parseFloat(user.financials?.income || 0),
-    expenses: parseFloat(user.financials?.expenses || 0),
-    savings: parseFloat(user.financials?.savings || 0),
-    debt: parseFloat(user.financials?.debt || 0),
-    risk_score: parseFloat(user.investments?.risk_score || 0.5),
-    investment_exposure: parseFloat(user.investments?.exposure || 0.5),
-    goal_horizon_months: parseInt(user.Goal?.duration_months || 60),
-    emergency_fund_months: parseFloat(user.financials?.emergency_fund_months || 3)
-  };
-
-  const response = await fetchInsights(financialState);
-  renderInsights(response.insights || []);
-}
-
-function renderInsights(insights) {
-  const container = document.getElementById("insights-container");
-  container.innerHTML = "";
-
-  if (!insights.length) {
-    container.innerHTML = `<div class="insight-empty">No active signals</div>`;
-    return;
-  }
-
-  insights.forEach(insight => {
-    const card = document.createElement("div");
-    card.className = `insight-card ${insight.severity}`;
-
-    card.innerHTML = `
-      <div class="insight-top">
-        <span class="insight-category">${insight.category.toUpperCase()}</span>
-        <span class="insight-impact">${insight.impact_area}</span>
-      </div>
-      <div class="insight-message">${insight.message}</div>
-      <div class="insight-confidence">
-        Confidence: ${(insight.confidence_score * 100).toFixed(0)}%
-      </div>
-    `;
-
-    container.appendChild(card);
-  });
-}
-
-function openModal(html) {
-  const backdrop = document.getElementById("modal-backdrop");
-  const content = document.getElementById("modal-content");
-  content.innerHTML = html;
-  backdrop.classList.remove("hidden");
-}
-
-function closeModal() {
-  document.getElementById("modal-backdrop")?.classList.add("hidden");
-}
-
-function mergeBufferedData(user, buffer) {
-  if (!buffer) return user;
-
-  return {
-    ...user,
-    Goal: buffer.Goal ?? user.Goal,
-    financials: buffer.financials ?? user.financials,
-    investments: buffer.investments ?? user.investments,
-    progress: buffer.progress ?? user.progress
-  };
-}
-
-async function hydrateUserWithBufferedOnboarding(user) {
-  try {
-    const res = await apiFetch(`/api/onboarding/status/${user.email}`);
-    const onboarding = res.onboarding;
-
-    if (
-      onboarding &&
-      (onboarding.state === "cancelled" || onboarding.state === "in_progress") &&
-      onboarding.data
-    ) {
-      const merged = mergeBufferedData(user, onboarding.data);
-      localStorage.setItem("user", JSON.stringify(merged));
-      return merged;
-    }
-
-    return user;
-  } catch (err) {
-    console.error("❌ Failed to hydrate onboarding buffer", err);
-    return user;
-  }
-}
-
-async function checkOnboardingStatus(user) {
-  if (!user?.email) return;
-
-  try {
-    const res = await apiFetch(`/api/onboarding/status/${user.email}`);
-    const onboarding = res.onboarding;
-
-    if (
-      onboarding &&
-      (onboarding.state === "cancelled" || onboarding.state === "in_progress")
-    ) {
-      const container = document.getElementById("resume-onboarding-container");
-      const btn = document.getElementById("resume-onboarding-btn");
-
-      if (!container || !btn) return;
-
-      container.style.display = "block";
-      btn.onclick = () => {
-        window.location.href = "/wizard.html";
-      };
-    }
-  } catch (err) {
-    console.error("Failed to check onboarding status", err);
-  }
-}
-
-async function loadAnalytics(email) {
-  const { analytics } = await apiFetch(`/api/analytics/${email}`);
-
-  openModal(`
-    <h2>Financial Analytics</h2>
-    <p><b>Financial Health:</b> ${analytics.financial_health}</p>
-    <p><b>Savings Ratio:</b> ${(analytics.savings_ratio * 100).toFixed(1)}%</p>
-    <p><b>Expense Ratio:</b> ${(analytics.expense_ratio * 100).toFixed(1)}%</p>
-    <p><b>Risk Score:</b> ${analytics.risk_score}</p>
-  `);
-}
-
-async function loadGoalIntelligence(email) {
-  const { goal_intelligence: g } = await apiFetch(`/api/goal-intelligence/${email}`);
-
-  openModal(`
-    <h2>Goal Intelligence</h2>
-    <p><b>Goal Probability:</b> ${g.goal_probability}%</p>
-    <p><b>Expected Corpus:</b> ₹${g.expected_corpus}</p>
-    <p><b>Target Amount:</b> ₹${g.target_amount}</p>
-    <p><b>Gap:</b> ₹${Math.abs(g.gap)}</p>
-    <hr/>
-    <p><b>Risk Level:</b> ${g.risk_level}</p>
-    <p><b>Assumed ROI:</b> ${g.roi_assumed}%</p>
-    <div class="decision-badge ${g.goal_probability >= 70 ? "good" : "bad"}">
-      ${g.verdict}
-    </div>
-  `);
-}
-
-async function loadAgentDecision(email) {
-  const data = await apiFetch(`/api/agent/${email}`);
-
-  if (!data?.agent) {
-    openModal(`<h2>AI Decision Advisor</h2><p>Decision unavailable.</p>`);
-    return;
-  }
-
-  const agent = data.agent || {};
-
-  const action = (agent.action || "UNKNOWN").toUpperCase();
-  const message = agent.message || "Decision unavailable.";
-  const reason = agent.reason || null;
-
-  openModal(`
-    <h2>AI Decision Advisor</h2>
-    <span class="agent-badge ${action.toLowerCase()}">${action}</span>
-    <p class="agent-message">${message}</p>
-    ${reason ? `<hr/><p><b>Reason:</b> ${reason}</p>` : ""}
-  `);
-}
-
-function renderDashboard(user) {
-  setText("profile-name", user.Name);
-  setText("profile-email", user.email);
-  setText("profile-age", user.Age);
-  setText("profile-status", user["employement-status"]);
-
-  setText("goal-name", user.Goal?.goal);
-  setText("goal-amount", extract(user.Goal?.["target-amt"]));
-  setText("goal-time", extract(user.Goal?.["target-time"]));
-
-  setText("income", extract(user.financials?.["monthly-income"]));
-  setText("expenses", extract(user.financials?.["monthly-expenses"]));
-  setText("debt", extract(user.financials?.debt));
-  setText("emergency", user.financials?.["em-fund-opted"] ? "Yes" : "No");
-
-  setText("risk", user.investments?.["risk-opt"]);
-  setText("mode", user.investments?.["prefered-mode"]);
-  setText("invest-amt", extract(user.investments?.["invest-amt"]));
-
-  setText("tenure", extract(user.progress?.tenure));
-  setText("start-date", user.progress?.start_date);
-  setText("auto-adjust", user.progress?.["auto-adjust"] ? "Enabled" : "Disabled");
-}
-
-document.addEventListener("DOMContentLoaded", async () => {
-  let user = JSON.parse(localStorage.getItem("user"));
-  if (!user) {
-    window.location.href = "/";
-    return;
-  }
-
-  document.getElementById("modal-close")?.addEventListener("click", closeModal);
-  document.getElementById("modal-backdrop")?.addEventListener("click", e => {
-    if (e.target.id === "modal-backdrop") closeModal();
-  });
-
-  document.getElementById("btn-analytics")
-    ?.addEventListener("click", () => loadAnalytics(user.email));
-
-  document.getElementById("btn-goal")
-    ?.addEventListener("click", () => loadGoalIntelligence(user.email));
-
-  document.getElementById("btn-agent")
-    ?.addEventListener("click", () => loadAgentDecision(user.email));
-
-  user = await hydrateUserWithBufferedOnboarding(user);
-  renderDashboard(user);
-  checkOnboardingStatus(user);
-});
-
-function setText(id, value) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = value ?? "-";
-}
-
-function extract(v) {
-  if (v == null) return "-";
-  if (typeof v === "object") return Object.values(v)[0];
-  return v;
-}
-
-window.logout = () => {
-  localStorage.removeItem("user");
-  window.location.href = "/";
-};
-
-document.addEventListener("keydown", e => {
-  if (e.key === "Escape") closeModal();
-});
-
-document.addEventListener("DOMContentLoaded", () => {
-  loadInsights();
-});

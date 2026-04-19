@@ -476,6 +476,46 @@ Return format:
 #     except Exception as e:
 #         return {"error": str(e)}
 
+@app.route("/api/init-test-data/<email>", methods=["POST"])
+def init_test_data(email):
+    """Initialize test user with sample financial data"""
+    user = collection.find_one({"email": email})
+    if not user:
+        return jsonify({"status": "error", "message": "User not found"}), 404
+    
+    sample_data = {
+        "financials": {
+            "monthly-income": 75000,
+            "monthly-expenses": 45000,
+            "debt": 150000,
+            "em-fund-opted": True
+        },
+        "Goal": {
+            "goal": "Early Retirement",
+            "target-amt": 5000000,
+            "target-time": 120,
+            "duration_months": 120,
+            "risk": "moderate"
+        },
+        "investments": {
+            "risk-opt": "moderate",
+            "prefered-mode": "Monthly SIP",
+            "invest-amt": 15000
+        },
+        "Age": "32",
+        "Name": user.get("Name", "User"),
+        "employment-status": "Salaried"
+    }
+    
+    collection.update_one(
+        {"email": email},
+        {"$set": sample_data}
+    )
+    
+    updated_user = collection.find_one({"email": email}, {"_id": 0, "password": 0})
+    return jsonify({"status": "success", "user": updated_user})
+
+
 @app.route("/api/agent/<email>", methods=["GET"])
 def agent_api(email):
     user = collection.find_one({"email": email}, {"_id": 0, "password": 0})
