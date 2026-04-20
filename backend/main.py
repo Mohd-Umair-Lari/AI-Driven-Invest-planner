@@ -7,7 +7,7 @@ from flask import Flask, request, jsonify, Blueprint
 from flask_cors import CORS
 from pymongo import MongoClient
 from dotenv import load_dotenv
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 import certifi
 from vertex_service import initialize_vertex, generate_financial_insights
 
@@ -20,7 +20,10 @@ from routes.intelligence_routes import intelligence_bp
 
 env_path = os.path.join(os.path.dirname(__file__), "nosave", ".env")
 load_dotenv(dotenv_path=env_path)
-initialize_vertex()
+try:
+    initialize_vertex()
+except Exception as e:
+    print(f"⚠️ Vertex AI initialization skipped: {e}")
 
 MONGO_URI = os.getenv("MONGO_URI", "").strip()
 DB_NAME = os.getenv("DB_NAME", "mockDB").strip()
@@ -118,12 +121,22 @@ def api_login():
 
     user = collection.find_one({"email": email})
 
-    if user and user.get("password") == password:
-        user.pop("password", None)
-        user["_id"] = str(user["_id"])
-        ensure_onboarding(user)
-        return jsonify({"status": "success", "user": user})
-    
+    if user:
+        stored_password = user.get("password", "")
+        # Support both hashed passwords (new registrations) and plain-text (legacy)
+        password_valid = False
+        try:
+            password_valid = check_password_hash(stored_password, password)
+        except Exception:
+            # Fallback for legacy plain-text passwords
+            password_valid = (stored_password == password)
+
+        if password_valid:
+            user.pop("password", None)
+            user["_id"] = str(user["_id"])
+            ensure_onboarding(user)
+            return jsonify({"status": "success", "user": user})
+
     return jsonify({"status": "error", "message": "Invalid credentials"}), 401
 
 

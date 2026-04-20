@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       localStorage.setItem("user", JSON.stringify(res.user));
-      window.location.href = "/dashboard.html";
+      window.location.href = "./dashboard.html";
 
     } catch (err) {
       console.error("Login failed:", err);

@@ -1,0 +1,11 @@
+{
+  "cleanUrls": false,
+  "headers": [
+    {
+      "source": "/js/(.*)\\.js",
+      "headers": [
+        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" }
+      ]
+    }
+  ]
+}

@@ -123,7 +123,7 @@ window.cancelOnboarding = async () => {
       })
     });
 
-    window.location.href = "/dashboard.html";
+    window.location.href = "./dashboard.html";
   } catch (err) {
     console.error("Failed to cancel onboarding", err);
     alert("Failed to pause onboarding");
@@ -176,7 +176,7 @@ window.submitWizard = async () => {
     localStorage.setItem("user", JSON.stringify(updated.user));
     localStorage.setItem("onboardingCompleted", "true");
 
-    window.location.href = "/dashboard.html";
+    window.location.href = "./dashboard.html";
 
   } catch (err) {
     console.error(err);

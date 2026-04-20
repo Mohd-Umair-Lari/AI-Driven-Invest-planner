@@ -8,6 +8,9 @@ export async function fetchInsights(financialState) {
 }
 
 export async function apiFetch(endpoint, options = {}) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15000);
+
   try {
     const url = `${BACKEND_URL}${endpoint}`;
     console.log(`📡 API Call: ${options.method || 'GET'} ${url}`);
@@ -17,10 +20,11 @@ export async function apiFetch(endpoint, options = {}) {
         "Content-Type": "application/json",
         ...(options.headers || {})
       },
-      ...options,
-      timeout: 15000
+      signal: controller.signal,
+      ...options
     });
 
+    clearTimeout(timeoutId);
     const data = await res.json().catch(() => ({}));
     
     if (!res.ok) {
@@ -31,8 +35,14 @@ export async function apiFetch(endpoint, options = {}) {
     console.log(`✅ API Success: ${endpoint}`);
     return data;
   } catch (err) {
+    clearTimeout(timeoutId);
+    if (err.name === 'AbortError') {
+      console.error(`⏱️ API Timeout: ${endpoint}`);
+      throw new Error('Request timed out. The server may be slow — please try again.');
+    }
     console.error(`🔥 API Exception:`, err.message);
     throw err;
   }
 }
+
 

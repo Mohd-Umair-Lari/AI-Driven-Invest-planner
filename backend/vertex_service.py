@@ -8,16 +8,25 @@ model = None
 
 
 def initialize_vertex():
-
     global model
 
+    gcp_sa = os.environ.get("GCP_SERVICE_ACCOUNT")
+    gcp_project = os.environ.get("GOOGLE_CLOUD_PROJECT")
+    gcp_location = os.environ.get("GOOGLE_CLOUD_LOCATION", "us-central1")
+
+    if not gcp_sa or not gcp_project:
+        raise EnvironmentError(
+            "GCP_SERVICE_ACCOUNT or GOOGLE_CLOUD_PROJECT env vars are not set. "
+            "Vertex AI features will be unavailable."
+        )
+
     credentials = service_account.Credentials.from_service_account_info(
-        json.loads(os.environ["GCP_SERVICE_ACCOUNT"])
+        json.loads(gcp_sa)
     )
 
     vertexai.init(
-        project=os.environ["GOOGLE_CLOUD_PROJECT"],
-        location=os.environ["GOOGLE_CLOUD_LOCATION"],
+        project=gcp_project,
+        location=gcp_location,
         credentials=credentials
     )
 
