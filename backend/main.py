@@ -123,12 +123,14 @@ def api_login():
 
     if user:
         stored_password = user.get("password", "")
-        # Support both hashed passwords (new registrations) and plain-text (legacy)
-        password_valid = False
-        try:
+        # werkzeug hashes always start with the method prefix (scrypt:, pbkdf2:, argon2:)
+        # check_password_hash returns False (not an exception) for plain-text input,
+        # so try/except is NOT the right approach — use prefix detection instead.
+        IS_HASHED = stored_password.startswith(("scrypt:", "pbkdf2:", "argon2:", "sha256$", "sha512$"))
+        if IS_HASHED:
             password_valid = check_password_hash(stored_password, password)
-        except Exception:
-            # Fallback for legacy plain-text passwords
+        else:
+            # Legacy: plain-text password stored directly in DB
             password_valid = (stored_password == password)
 
         if password_valid:
@@ -138,6 +140,7 @@ def api_login():
             return jsonify({"status": "success", "user": user})
 
     return jsonify({"status": "error", "message": "Invalid credentials"}), 401
+
 
 
 @app.route("/api/signup", methods=["POST"])
