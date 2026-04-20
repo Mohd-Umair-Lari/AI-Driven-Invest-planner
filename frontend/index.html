@@ -1,40 +1,116 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login | FinPass AI - Smart Financial Planning</title>
-  <link rel="stylesheet" href="./css/style.css" />
+  <title>Login | FinPass AI – Smart Financial Planning</title>
+  <meta name="description" content="Sign in to FinPass AI – your intelligent, AI-powered financial advisor for long-term wealth planning." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: {
+            brand: { 50:'#eef2ff', 500:'#6366f1', 600:'#4f46e5', 700:'#4338ca' },
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.5s ease-out',
+            'slide-up': 'slideUp 0.5s ease-out',
+          },
+          keyframes: {
+            fadeIn: { from: { opacity: '0' }, to: { opacity: '1' } },
+            slideUp: { from: { opacity: '0', transform: 'translateY(24px)' }, to: { opacity: '1', transform: 'translateY(0)' } },
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .glass { background: rgba(255,255,255,0.04); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); }
+    .input-field {
+      width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 0.625rem; padding: 0.75rem 1rem; color: #f1f5f9; font-size: 0.9375rem;
+      transition: border-color 0.2s, box-shadow 0.2s; outline: none;
+    }
+    .input-field::placeholder { color: #64748b; }
+    .input-field:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
+    .btn-primary {
+      width: 100%; padding: 0.8125rem 1.5rem;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: white; font-weight: 600; font-size: 1rem; border-radius: 0.625rem;
+      border: none; cursor: pointer; transition: opacity 0.2s, transform 0.15s;
+    }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+    .mesh-bg {
+      background: radial-gradient(ellipse at 20% 50%, rgba(99,102,241,0.15) 0%, transparent 60%),
+                  radial-gradient(ellipse at 80% 20%, rgba(139,92,246,0.12) 0%, transparent 55%),
+                  radial-gradient(ellipse at 60% 80%, rgba(16,185,129,0.08) 0%, transparent 50%),
+                  #0b0f1a;
+    }
+  </style>
 </head>
-<body>
-  <div class="auth-wrapper">
-    <div class="auth-card">
-      <div style="text-align: center; margin-bottom: 32px;">
-        <div style="font-size: 48px; margin-bottom: 12px;">💰</div>
-        <h1 style="font-size: 28px; margin-bottom: 8px;">FinPass AI</h1>
-        <p style="color: #6b7280; font-size: 14px;">Your Intelligent Financial Advisor</p>
+<body class="mesh-bg min-h-screen flex items-center justify-center p-4">
+
+  <!-- Floating Orbs -->
+  <div class="fixed inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute -top-40 -left-40 w-96 h-96 bg-indigo-600 rounded-full mix-blend-screen filter blur-3xl opacity-10 animate-pulse"></div>
+    <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-violet-600 rounded-full mix-blend-screen filter blur-3xl opacity-10 animate-pulse" style="animation-delay:2s"></div>
+  </div>
+
+  <div class="w-full max-w-md animate-slide-up relative z-10">
+
+    <!-- Logo -->
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/30 mb-4">
+        <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
       </div>
-      
-      <h2 style="font-size: 24px; margin-bottom: 8px; color: #111827;">Welcome Back</h2>
-      <p style="color: #6b7280; margin-bottom: 24px; font-size: 14px;">Sign in to manage your finances</p>
-      
-      <input type="email" id="login-email" placeholder="Enter your email" />
-      <input type="password" id="login-password" placeholder="Enter your password" />
-      
-      <button id="login-btn" style="width: 100%; font-size: 16px; padding: 12px; margin-bottom: 12px;">Login</button>
-      
-      <p style="text-align: center; margin-top: 16px; font-size: 14px;">
+      <h1 class="text-2xl font-bold text-white tracking-tight">FinPass AI</h1>
+      <p class="text-slate-400 text-sm mt-1">Your intelligent financial advisor</p>
+    </div>
+
+    <!-- Card -->
+    <div class="glass rounded-2xl p-8 shadow-2xl">
+      <h2 class="text-xl font-semibold text-white mb-1">Welcome back</h2>
+      <p class="text-slate-400 text-sm mb-6">Sign in to manage your finances</p>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider">Email Address</label>
+          <input type="email" id="login-email" placeholder="you@example.com" class="input-field" />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider">Password</label>
+          <input type="password" id="login-password" placeholder="••••••••" class="input-field" />
+        </div>
+      </div>
+
+      <button id="login-btn" class="btn-primary mt-6">
+        Sign In
+      </button>
+
+      <p class="text-center text-slate-400 text-sm mt-5">
         Don't have an account?
-        <a href="./register.html" style="font-weight: 600; color: #4f46e5; text-decoration: none;">Create one</a>
+        <a href="./register.html" class="text-indigo-400 font-medium hover:text-indigo-300 transition-colors">Create one</a>
       </p>
-      
-      <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
-        <p style="color: #6b7280; font-size: 12px; text-align: center; margin: 0;">
-          Demo: lol@example.com / 12345678
+
+      <!-- Demo Credentials -->
+      <div class="mt-6 pt-5 border-t border-white/5">
+        <p class="text-center text-xs text-slate-500">
+          Demo &nbsp;·&nbsp; <span class="text-slate-400">lol@example.com</span> &nbsp;/&nbsp; <span class="text-slate-400">12345678</span>
         </p>
       </div>
     </div>
+
+    <p class="text-center text-xs text-slate-600 mt-6">© 2025 FinPass AI · For educational use only</p>
   </div>
+
   <script type="module" src="./js/login.js"></script>
 </body>
 </html>

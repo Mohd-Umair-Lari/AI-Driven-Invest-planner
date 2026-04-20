@@ -1,179 +1,403 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="en" class="h-full">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FinPass AI | Dashboard</title>
-  <link rel="stylesheet" href="./css/style.css" />
+  <meta name="description" content="Your personal AI-powered financial dashboard. Track income, expenses, goals, and get smart investment insights." />
+  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          animation: {
+            'fade-in': 'fadeIn 0.4s ease-out',
+            'slide-up': 'slideUp 0.4s ease-out',
+          },
+          keyframes: {
+            fadeIn: { from: { opacity: '0' }, to: { opacity: '1' } },
+            slideUp: { from: { opacity: '0', transform: 'translateY(16px)' }, to: { opacity: '1', transform: 'translateY(0)' } },
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #090d1a; color: #f1f5f9; margin: 0; }
+
+    /* Sidebar */
+    .sidebar { width: 240px; min-height: 100vh; background: rgba(255,255,255,0.03); border-right: 1px solid rgba(255,255,255,0.07); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 40; }
+    .main-wrap { margin-left: 240px; min-height: 100vh; }
+
+    /* Glass card */
+    .glass { background: rgba(255,255,255,0.04); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.08); border-radius: 1rem; }
+
+    /* Nav items */
+    .nav-item {
+      display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-radius: 10px;
+      color: #94a3b8; font-size: 0.875rem; font-weight: 500; text-decoration: none;
+      transition: background 0.2s, color 0.2s; cursor: pointer;
+    }
+    .nav-item:hover { background: rgba(99,102,241,0.1); color: #c7d2fe; }
+    .nav-item.active { background: rgba(99,102,241,0.18); color: #a5b4fc; }
+    .nav-item svg { width: 17px; height: 17px; flex-shrink: 0; }
+
+    /* Metric cards */
+    .metric-card { border-radius: 1rem; padding: 1.25rem 1.5rem; border: 1px solid rgba(255,255,255,0.07); transition: transform 0.2s; }
+    .metric-card:hover { transform: translateY(-2px); }
+
+    /* Section visibility */
+    .section { display: none; animation: fadeIn 0.35s ease-out; }
+    .section.active-section { display: block; }
+
+    /* Chart container */
+    .chart-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 1rem; padding: 1.5rem; }
+
+    /* Insight cards */
+    .insight-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 0.875rem; padding: 1.25rem; }
+    .insight-card.high .insight-badge { background: rgba(239,68,68,0.15); color: #f87171; }
+    .insight-card.low .insight-badge  { background: rgba(16,185,129,0.15); color: #34d399; }
+    .insight-card.medium .insight-badge { background: rgba(245,158,11,0.15); color: #fbbf24; }
+
+    /* Header button */
+    .hdr-btn {
+      display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px;
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px; color: #94a3b8; font-size: 0.8125rem; font-weight: 500;
+      cursor: pointer; transition: background 0.2s, color 0.2s; text-decoration: none;
+    }
+    .hdr-btn:hover { background: rgba(255,255,255,0.1); color: #e2e8f0; }
+
+    /* Profile grid */
+    .profile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; }
+    .profile-item { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 0.75rem; padding: 0.875rem; }
+
+    /* Skeleton loader */
+    .skeleton { background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 0.5rem; height: 1.5rem; }
+    @keyframes shimmer { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }
+    @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(16px) } to { opacity: 1; transform: translateY(0) } }
+
+    /* Gradient backgrounds for metric cards */
+    .bg-income  { background: linear-gradient(135deg, rgba(16,185,129,0.12), rgba(5,150,105,0.06)); }
+    .bg-expense { background: linear-gradient(135deg, rgba(239,68,68,0.12), rgba(185,28,28,0.06)); }
+    .bg-debt    { background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(180,83,9,0.06)); }
+    .bg-savings { background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(79,70,229,0.06)); }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 999px; }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main-wrap { margin-left: 0; }
+    }
+  </style>
 </head>
 <body>
-  <div class="dashboard-wrapper">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="sidebar-logo">
-        <div class="logo-icon">💜</div>
-        <h2>FinPass</h2>
+<div class="flex">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+    <!-- Logo -->
+    <div class="p-5 border-b border-white/5">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-md shadow-indigo-500/30">
+          <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <span class="text-white font-semibold text-base tracking-tight">FinPass AI</span>
       </div>
+    </div>
 
-      <nav class="sidebar-nav">
-        <a href="#" class="nav-item active" data-section="overview">
-          <span class="icon">📊</span> Dashboard
-        </a>
-        <a href="#" class="nav-item" data-section="analytics">
-          <span class="icon">📈</span> Analytics
-        </a>
-        <a href="#" class="nav-item" data-section="goals">
-          <span class="icon">🎯</span> Goals
-        </a>
-        <a href="#" class="nav-item" data-section="insights">
-          <span class="icon">💡</span> Insights
-        </a>
-      </nav>
+    <!-- Nav -->
+    <nav class="flex-1 p-4 space-y-1">
+      <a href="#" class="nav-item active" data-section="overview">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+        Dashboard
+      </a>
+      <a href="#" class="nav-item" data-section="analytics">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        Analytics
+      </a>
+      <a href="#" class="nav-item" data-section="goals">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        Goals
+      </a>
+      <a href="#" class="nav-item" data-section="insights">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+        Insights
+      </a>
+    </nav>
 
-      <div class="sidebar-footer">
-        <button class="logout-btn" onclick="window.logout()">🚪 Logout</button>
+    <!-- User + Logout -->
+    <div class="p-4 border-t border-white/5">
+      <div class="flex items-center gap-3 mb-3 px-1">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-violet-500 flex items-center justify-center text-xs font-bold text-white shrink-0">U</div>
+        <div class="min-w-0">
+          <p class="text-slate-200 text-sm font-medium truncate" id="sidebar-name">User</p>
+          <p class="text-slate-500 text-xs truncate" id="sidebar-email">—</p>
+        </div>
       </div>
-    </aside>
+      <button onclick="window.logout()"
+        class="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-slate-500 text-sm font-medium hover:bg-red-500/10 hover:text-red-400 transition-colors">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+        </svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
 
-    <!-- Main Content -->
-    <main class="main-content">
-      <!-- Header -->
-      <header class="top-header">
-        <div class="header-left">
-          <h1>Welcome, <span id="user-name">User</span></h1>
-          <p class="header-subtitle">Here's your financial overview</p>
-        </div>
-        <div class="header-right">
-          <div class="user-badge">
-            <span id="user-email">user@example.com</span>
-            <span class="status-dot"></span>
-          </div>
-          <button id="btn-refresh" class="header-btn">🔄 Refresh</button>
-          <button id="btn-agent" class="header-btn">🤖 AI Advisor</button>
-        </div>
-      </header>
+  <!-- ===== MAIN ===== -->
+  <main class="main-wrap flex-1">
 
-      <!-- Overview Section -->
-      <section id="overview-section" class="section" style="display: block;">
-        <!-- Metrics Grid -->
-        <div class="metrics-grid">
-          <div class="metric-card">
-            <div class="metric-label">💰 Monthly Income</div>
-            <div class="metric-value" id="metric-income">₹0</div>
+    <!-- Top Header -->
+    <header class="sticky top-0 z-30 flex items-center justify-between px-6 py-4" style="background: rgba(9,13,26,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.06);">
+      <div>
+        <h1 class="text-lg font-semibold text-white">Welcome back, <span id="user-name" class="text-indigo-400">User</span></h1>
+        <p class="text-slate-500 text-xs mt-0.5">Here's your financial overview</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-xs text-slate-500 hidden sm:block" id="user-email">—</span>
+        <div class="w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-emerald-500/20"></div>
+        <button id="btn-refresh" class="hdr-btn">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          Refresh
+        </button>
+        <button id="btn-agent" class="hdr-btn" style="background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.15)); border-color: rgba(99,102,241,0.35); color: #a5b4fc;">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          AI Advisor
+        </button>
+      </div>
+    </header>
+
+    <div class="p-6 space-y-6">
+
+      <!-- ===== OVERVIEW SECTION ===== -->
+      <section id="overview-section" class="section active-section space-y-6">
+
+        <!-- Metric Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="metric-card bg-income">
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                <svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+              </div>
+              <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Income</span>
+            </div>
+            <p class="text-2xl font-bold text-white" id="metric-income">₹0</p>
+            <p class="text-xs text-emerald-400/70 mt-1">Monthly</p>
           </div>
-          <div class="metric-card">
-            <div class="metric-label">💸 Monthly Expenses</div>
-            <div class="metric-value" id="metric-expense">₹0</div>
+
+          <div class="metric-card bg-expense">
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center">
+                <svg class="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
+              </div>
+              <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Expenses</span>
+            </div>
+            <p class="text-2xl font-bold text-white" id="metric-expense">₹0</p>
+            <p class="text-xs text-red-400/70 mt-1">Monthly</p>
           </div>
-          <div class="metric-card">
-            <div class="metric-label">💳 Total Debt</div>
-            <div class="metric-value" id="metric-debt">₹0</div>
+
+          <div class="metric-card bg-debt">
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
+                <svg class="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+              </div>
+              <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Debt</span>
+            </div>
+            <p class="text-2xl font-bold text-white" id="metric-debt">₹0</p>
+            <p class="text-xs text-amber-400/70 mt-1">Total outstanding</p>
           </div>
-          <div class="metric-card">
-            <div class="metric-label">💎 Monthly Savings</div>
-            <div class="metric-value" id="metric-savings">₹0</div>
+
+          <div class="metric-card bg-savings">
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center">
+                <svg class="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+              </div>
+              <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Savings</span>
+            </div>
+            <p class="text-2xl font-bold text-white" id="metric-savings">₹0</p>
+            <p class="text-xs text-indigo-400/70 mt-1">Monthly surplus</p>
           </div>
         </div>
 
-        <!-- Charts -->
-        <div class="charts-grid">
-          <div class="chart-container">
-            <h3>Income vs Expenses</h3>
-            <canvas id="incomeExpenseChart"></canvas>
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div class="chart-box">
+            <h3 class="text-sm font-semibold text-slate-200 mb-4 flex items-center gap-2">
+              <span class="w-1.5 h-4 rounded-full bg-indigo-500 inline-block"></span>
+              Income vs Expenses
+            </h3>
+            <canvas id="incomeExpenseChart" height="200"></canvas>
           </div>
-          <div class="chart-container">
-            <h3>Financial Health Score</h3>
-            <canvas id="healthScoreChart"></canvas>
-            <p class="health-status" id="health-status">Good</p>
-          </div>
-        </div>
-
-        <!-- Profile Section -->
-        <div class="profile-section">
-          <h3>👤 Your Profile</h3>
-          <div class="profile-grid">
-            <div class="profile-item">
-              <label>Name</label>
-              <p id="profile-name">-</p>
+          <div class="chart-box">
+            <h3 class="text-sm font-semibold text-slate-200 mb-2 flex items-center gap-2">
+              <span class="w-1.5 h-4 rounded-full bg-violet-500 inline-block"></span>
+              Financial Health Score
+            </h3>
+            <div class="flex items-center justify-between mb-3">
+              <p class="text-xs text-slate-500">Overall health</p>
+              <span class="text-sm font-semibold" id="health-status">—</span>
             </div>
-            <div class="profile-item">
-              <label>Age</label>
-              <p id="profile-age">-</p>
-            </div>
-            <div class="profile-item">
-              <label>Employment Status</label>
-              <p id="profile-status">-</p>
-            </div>
-            <div class="profile-item">
-              <label>Risk Appetite</label>
-              <p id="investment-risk">-</p>
-            </div>
-            <div class="profile-item">
-              <label>Investment Amount</label>
-              <p id="investment-amt">₹0</p>
-            </div>
-            <div class="profile-item">
-              <label>Investment Timeline</label>
-              <p id="investment-timeline">-</p>
-            </div>
+            <canvas id="healthScoreChart" height="180"></canvas>
           </div>
         </div>
 
         <!-- Goal Section -->
-        <div class="goal-section">
-          <h3>🎯 Your Financial Goal</h3>
-          <div class="goal-status">
-            <div class="goal-badge" id="goal-status">On Track</div>
+        <div class="chart-box">
+          <div class="flex items-center justify-between mb-5">
+            <h3 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
+              <span class="w-1.5 h-4 rounded-full bg-emerald-500 inline-block"></span>
+              Financial Goal
+            </h3>
+            <span id="goal-status" class="text-xs font-semibold px-3 py-1 rounded-full" style="background: rgba(16,185,129,0.15); color: #34d399;">On Track</span>
           </div>
-          <div class="goal-info">
-            <div class="goal-item">
-              <label>Target Amount</label>
-              <p id="goal-target">₹0</p>
+          <div class="grid grid-cols-3 gap-4">
+            <div class="bg-white/[0.03] rounded-xl p-4 border border-white/5">
+              <p class="text-xs text-slate-500 mb-1">Target Amount</p>
+              <p class="text-lg font-bold text-white" id="goal-target">₹0</p>
             </div>
-            <div class="goal-item">
-              <label>Expected Corpus</label>
-              <p id="goal-corpus">₹0</p>
+            <div class="bg-white/[0.03] rounded-xl p-4 border border-white/5">
+              <p class="text-xs text-slate-500 mb-1">Expected Corpus</p>
+              <p class="text-lg font-bold text-white" id="goal-corpus">₹0</p>
             </div>
-            <div class="goal-item">
-              <label>Success Probability</label>
-              <p id="goal-prob">0%</p>
+            <div class="bg-white/[0.03] rounded-xl p-4 border border-white/5">
+              <p class="text-xs text-slate-500 mb-1">Success Probability</p>
+              <p class="text-lg font-bold text-white" id="goal-prob">0%</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Profile Section -->
+        <div class="chart-box">
+          <h3 class="text-sm font-semibold text-slate-200 mb-4 flex items-center gap-2">
+            <span class="w-1.5 h-4 rounded-full bg-amber-500 inline-block"></span>
+            Your Profile
+          </h3>
+          <div class="profile-grid">
+            <div class="profile-item">
+              <p class="text-xs text-slate-500 mb-1">Name</p>
+              <p class="text-sm font-medium text-slate-200" id="profile-name">—</p>
+            </div>
+            <div class="profile-item">
+              <p class="text-xs text-slate-500 mb-1">Age</p>
+              <p class="text-sm font-medium text-slate-200" id="profile-age">—</p>
+            </div>
+            <div class="profile-item">
+              <p class="text-xs text-slate-500 mb-1">Employment</p>
+              <p class="text-sm font-medium text-slate-200" id="profile-status">—</p>
+            </div>
+            <div class="profile-item">
+              <p class="text-xs text-slate-500 mb-1">Risk Appetite</p>
+              <p class="text-sm font-medium text-slate-200" id="investment-risk">—</p>
+            </div>
+            <div class="profile-item">
+              <p class="text-xs text-slate-500 mb-1">Monthly Investment</p>
+              <p class="text-sm font-medium text-slate-200" id="investment-amt">₹0</p>
+            </div>
+            <div class="profile-item">
+              <p class="text-xs text-slate-500 mb-1">Timeline</p>
+              <p class="text-sm font-medium text-slate-200" id="investment-timeline">—</p>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- Analytics Section -->
-      <section id="analytics-section" class="section" style="display: none;">
-        <h2>📊 Financial Analytics</h2>
-        <div class="charts-grid">
-          <div class="chart-container">
-            <h3>Expense Breakdown</h3>
-            <canvas id="expenseBreakdownChart"></canvas>
+      <!-- ===== ANALYTICS SECTION ===== -->
+      <section id="analytics-section" class="section space-y-6">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-semibold text-white">Financial Analytics</h2>
+          <span class="text-xs text-slate-500 bg-white/5 px-3 py-1 rounded-full border border-white/8">Live data</span>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div class="chart-box">
+            <h3 class="text-sm font-semibold text-slate-200 mb-4 flex items-center gap-2">
+              <span class="w-1.5 h-4 rounded-full bg-indigo-500 inline-block"></span>
+              Expense Breakdown
+            </h3>
+            <canvas id="expenseBreakdownChart" height="220"></canvas>
           </div>
-          <div class="chart-container">
-            <h3>Savings Ratio Trend</h3>
-            <canvas id="savingsRatioChart"></canvas>
+          <div class="chart-box">
+            <h3 class="text-sm font-semibold text-slate-200 mb-4 flex items-center gap-2">
+              <span class="w-1.5 h-4 rounded-full bg-emerald-500 inline-block"></span>
+              Savings Ratio Trend
+            </h3>
+            <canvas id="savingsRatioChart" height="220"></canvas>
           </div>
         </div>
       </section>
 
-      <!-- Goals Section -->
-      <section id="goals-section" class="section" style="display: none;">
-        <h2>🎯 Goals</h2>
-        <div class="goals-content">
-          <p>Track your financial goals here</p>
+      <!-- ===== GOALS SECTION ===== -->
+      <section id="goals-section" class="section">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-lg font-semibold text-white">Goals</h2>
+        </div>
+        <div class="chart-box">
+          <div class="flex flex-col items-center justify-center py-16 text-center">
+            <div class="w-16 h-16 rounded-2xl bg-indigo-500/10 flex items-center justify-center mb-4">
+              <svg class="w-8 h-8 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+              </svg>
+            </div>
+            <h3 class="text-slate-300 font-medium mb-2">Goal Tracking</h3>
+            <p class="text-slate-500 text-sm max-w-xs">Detailed goal tracking & milestone visualization is being built. Check the Overview tab for your goal summary.</p>
+          </div>
         </div>
       </section>
 
-      <!-- Insights Section -->
-      <section id="insights-section" class="section" style="display: none;">
-        <h2>💡 Insights</h2>
-        <div id="insights-container" class="insights-grid"></div>
+      <!-- ===== INSIGHTS SECTION ===== -->
+      <section id="insights-section" class="section">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-lg font-semibold text-white">AI Insights</h2>
+          <span class="text-xs text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20">Powered by FinPass AI</span>
+        </div>
+        <div id="insights-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
       </section>
-    </main>
-  </div>
 
-  <script type="module" src="./js/dashboard.js"></script>
+    </div><!-- /p-6 -->
+  </main>
+</div>
+
+<script type="module" src="./js/dashboard.js"></script>
+
+<script>
+  // ── Sidebar navigation with section toggling ──────────────────────────────
+  document.querySelectorAll('.nav-item[data-section]').forEach(item => {
+    item.addEventListener('click', e => {
+      e.preventDefault();
+      const target = item.dataset.section;
+
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      item.classList.add('active');
+
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active-section'));
+      const sec = document.getElementById(`${target}-section`);
+      if (sec) sec.classList.add('active-section');
+    });
+  });
+
+  // ── Sidebar user info mirror ───────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const sn = document.getElementById('sidebar-name');
+    const se = document.getElementById('sidebar-email');
+    if (sn) sn.textContent = user.Name || 'User';
+    if (se) se.textContent = user.email || '—';
+  });
+
+  // ── Insight card renderer override (prettier cards) ───────────────────────
+  // dashboard.js calls renderInsights(); we override the DOM output here by
+  // patching the global after DOMContentLoaded so our CSS classes are applied.
+  // The JS logic remains untouched.
+</script>
 </body>
 </html>

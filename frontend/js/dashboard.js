@@ -367,43 +367,57 @@ function renderInsights(insights) {
   const container = document.getElementById('insights-container');
   if (!container) return;
 
+  const severityMap = {
+    high:   { badge: 'bg-red-500/15 text-red-400',    icon: '🔴', border: 'border-red-500/15' },
+    medium: { badge: 'bg-amber-500/15 text-amber-400', icon: '🟡', border: 'border-amber-500/15' },
+    low:    { badge: 'bg-emerald-500/15 text-emerald-400', icon: '🟢', border: 'border-emerald-500/15' },
+  };
+
   container.innerHTML = '';
   insights.forEach(insight => {
+    const s = severityMap[insight.severity] || severityMap.low;
     const card = document.createElement('div');
-    card.className = `insight-card ${insight.severity}`;
+    card.className = `insight-card border ${s.border} rounded-2xl p-5 space-y-3`;
+    card.style.background = 'rgba(255,255,255,0.03)';
 
     card.innerHTML = `
-      <div class="insight-top">
-        <span class="insight-category">${insight.category}</span>
-        <span class="insight-impact">${insight.impact_area}</span>
+      <div class="flex items-start justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <span class="text-base">${s.icon}</span>
+          <span class="text-sm font-semibold text-slate-200">${insight.category}</span>
+        </div>
+        <span class="insight-badge text-xs font-medium px-2.5 py-1 rounded-full shrink-0 ${s.badge}">${insight.impact_area}</span>
       </div>
-      <div class="insight-message">${insight.message}</div>
-      <div class="insight-confidence">
-        Confidence: ${Math.round((insight.confidence_score || 0) * 100)}%
+      <p class="text-slate-400 text-sm leading-relaxed">${insight.message}</p>
+      <div class="flex items-center justify-between pt-1">
+        <div class="flex-1 bg-white/5 rounded-full h-1.5 mr-3">
+          <div class="h-1.5 rounded-full" style="width:${Math.round((insight.confidence_score||0)*100)}%; background: linear-gradient(90deg,#6366f1,#8b5cf6);"></div>
+        </div>
+        <span class="text-xs text-slate-500">Confidence: ${Math.round((insight.confidence_score||0)*100)}%</span>
       </div>
     `;
-
     container.appendChild(card);
   });
 }
 
 // ===== SECTION NAVIGATION =====
 function setupSectionNavigation() {
-  const navItems = document.querySelectorAll('.nav-item');
+  // Navigation is handled in dashboard.html inline script via data-section.
+  // This function is kept for compatibility but page-level script does the work.
+  const navItems = document.querySelectorAll('.nav-item[data-section]');
   const sections = document.querySelectorAll('.section');
 
   navItems.forEach(item => {
     item.addEventListener('click', (e) => {
       e.preventDefault();
-
       const section = item.dataset.section;
+
       navItems.forEach(n => n.classList.remove('active'));
       item.classList.add('active');
 
-      sections.forEach(s => s.style.display = 'none');
-
+      sections.forEach(s => s.classList.remove('active-section'));
       const targetSection = document.getElementById(`${section}-section`);
-      if (targetSection) targetSection.style.display = 'block';
+      if (targetSection) targetSection.classList.add('active-section');
 
       if (section === 'analytics' && currentUser) loadAnalytics(currentUser);
       else if (section === 'insights' && currentUser) loadInsights(currentUser);

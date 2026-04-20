@@ -1,70 +1,270 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
   <meta charset="UTF-8" />
-  <title>FinPass | Onboarding</title>
-  <link rel="stylesheet" href="./css/style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FinPass AI | Onboarding</title>
+  <meta name="description" content="Set up your financial profile to receive personalized investment advice." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          animation: {
+            'fade-in': 'fadeIn 0.4s ease-out',
+            'slide-up': 'slideUp 0.4s ease-out',
+          },
+          keyframes: {
+            fadeIn: { from: { opacity: '0' }, to: { opacity: '1' } },
+            slideUp: { from: { opacity: '0', transform: 'translateY(20px)' }, to: { opacity: '1', transform: 'translateY(0)' } },
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .glass { background: rgba(255,255,255,0.04); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); }
+    .mesh-bg {
+      background: radial-gradient(ellipse at 30% 40%, rgba(99,102,241,0.12) 0%, transparent 60%),
+                  radial-gradient(ellipse at 70% 70%, rgba(139,92,246,0.1) 0%, transparent 55%),
+                  #0b0f1a;
+    }
+    .input-field {
+      width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 0.625rem; padding: 0.75rem 1rem; color: #f1f5f9; font-size: 0.9375rem;
+      transition: border-color 0.2s, box-shadow 0.2s; outline: none;
+    }
+    .input-field::placeholder { color: #64748b; }
+    .input-field:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
+    .select-field {
+      width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 0.625rem; padding: 0.75rem 1rem; color: #f1f5f9; font-size: 0.9375rem;
+      transition: border-color 0.2s; outline: none; cursor: pointer; appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1rem;
+    }
+    .select-field option { background: #1e293b; color: #f1f5f9; }
+    .select-field:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
+    /* Step visibility */
+    .step { display: none; }
+    .step.active { display: block; animation: slideUp 0.35s ease-out; }
+    /* Dot states */
+    .dot { transition: background 0.3s, transform 0.3s; }
+    .dot.active { transform: scale(1.25); }
+  </style>
 </head>
-<body>
-  <div class="wizard">
-    <div class="progress">
-      <span class="dot active"></span>
-      <span class="dot"></span>
-      <span class="dot"></span>
-      <span class="dot"></span>
-    </div>
-    <div class="step active">
-      <h2>Goal Setup</h2>
-      <input id="goal-name" placeholder="Goal (e.g Car Purchase)" />
-      <input id="goal-amount" placeholder="Target Amount" type="number" />
-      <input id="goal-time" placeholder="Target Time (months)" type="number" />
-      <div class="controls">
-        <button class="btn primary" onclick="cancelOnboarding()">Cancel</button>
-        <button class="btn primary" onclick="nextStep()">Next</button>
-      </div>
-    </div>
-    <div class="step">
-      <h2>Financials</h2>
-      <input id="income" placeholder="Monthly Income" type="number" />
-      <input id="expenses" placeholder="Monthly Expenses" type="number" />
-      <input id="debt" placeholder="Debt" type="number" />
-      <label>
-        <input type="checkbox" id="emergency" /> Emergency Fund?
-      </label>
-      <div class="controls">
-        <button class="btn primary" onclick="prevStep()">Back</button>
-        <button class="btn pprimary" onclick="cancelOnboarding()">Cancel</button>
-        <button class="btn primary" onclick="nextStep()">Next</button>
-      </div>
-    </div>
-    <div class="step">
-      <h2>Investments</h2>
-      <select id="risk">
-        <option value="Low">Low</option>
-        <option value="Medium">Medium</option>
-        <option value="High">High</option>
-      </select>
-      <select id="mode">
-        <option value="SIP">SIP</option>
-        <option value="Lumpsum">Lumpsum</option>
-      </select>
-      <input id="invest-amt" placeholder="Investment Amount" type="number" />
-      <div class="controls">
-        <button class="btn primary" onclick="prevStep()">Back</button>
-        <button class="btn primary" onclick="cancelOnboarding()">Cancel</button>
-        <button class="btn primary" onclick="nextStep()">Next</button>
-      </div>
-    </div>
-    <div class="step">
-      <h2>Confirm & Finish</h2>
-      <p>We will analyze your finances and build your plan.</p>
-      <div class="controls">
-        <button class="btn primary" onclick="prevStep()">Back</button>
-        <button class="btn primary" onclick="cancelOnboarding()">Cancel</button>
-        <button class="btn primary" onclick="submitWizard()">Finish</button>
-      </div>
-    </div>
+<body class="mesh-bg min-h-screen flex items-center justify-center p-4">
+
+  <div class="fixed inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute top-10 left-10 w-72 h-72 bg-indigo-600 rounded-full mix-blend-screen filter blur-3xl opacity-8 animate-pulse"></div>
+    <div class="absolute bottom-10 right-10 w-72 h-72 bg-violet-600 rounded-full mix-blend-screen filter blur-3xl opacity-8 animate-pulse" style="animation-delay:2s"></div>
   </div>
+
+  <div class="w-full max-w-lg relative z-10">
+
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/30 mb-3">
+        <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+      </div>
+      <h1 class="text-2xl font-bold text-white">Set Up Your Profile</h1>
+      <p class="text-slate-400 text-sm mt-1">Complete these steps to get personalised advice</p>
+    </div>
+
+    <!-- Progress Dots -->
+    <div class="flex items-center justify-center gap-2 mb-8">
+      <span class="dot w-3 h-3 rounded-full bg-indigo-500 active"></span>
+      <span class="w-8 h-px bg-slate-700"></span>
+      <span class="dot w-3 h-3 rounded-full bg-slate-700"></span>
+      <span class="w-8 h-px bg-slate-700"></span>
+      <span class="dot w-3 h-3 rounded-full bg-slate-700"></span>
+      <span class="w-8 h-px bg-slate-700"></span>
+      <span class="dot w-3 h-3 rounded-full bg-slate-700"></span>
+    </div>
+
+    <!-- Card -->
+    <div class="glass rounded-2xl p-8 shadow-2xl">
+
+      <!-- Step 1: Goal Setup -->
+      <div class="step active">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center">
+            <svg class="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <div>
+            <p class="text-xs text-slate-500 uppercase tracking-wider">Step 1 of 4</p>
+            <h2 class="text-lg font-semibold text-white">Goal Setup</h2>
+          </div>
+        </div>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider">Financial Goal</label>
+            <input id="goal-name" type="text" placeholder="e.g. Early Retirement, Car Purchase" class="input-field" />
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider">Target Amount (₹)</label>
+              <input id="goal-amount" type="number" placeholder="5,000,000" class="input-field" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider">Timeline (months)</label>
+              <input id="goal-time" type="number" placeholder="120" class="input-field" />
+            </div>
+          </div>
+        </div>
+        <div class="flex gap-3 mt-6">
+          <button onclick="cancelOnboarding()" class="flex-1 py-3 rounded-xl border border-slate-700 text-slate-400 text-sm font-medium hover:border-slate-500 hover:text-slate-300 transition-colors">
+            Save & Exit
+          </button>
+          <button onclick="nextStep()" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-semibold hover:opacity-90 transition-opacity">
+            Next Step →
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: Financials -->
+      <div class="step">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+            <svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+            </svg>
+          </div>
+          <div>
+            <p class="text-xs text-slate-500 uppercase tracking-wider">Step 2 of 4</p>
+            <h2 class="text-lg font-semibold text-white">Your Financials</h2>
+          </div>
+        </div>
+        <div class="space-y-4">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider">Monthly Income (₹)</label>
+              <input id="income" type="number" placeholder="75,000" class="input-field" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider">Monthly Expenses (₹)</label>
+              <input id="expenses" type="number" placeholder="45,000" class="input-field" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider">Total Debt (₹)</label>
+            <input id="debt" type="number" placeholder="150,000" class="input-field" />
+          </div>
+          <label class="flex items-center gap-3 p-3 rounded-xl border border-white/10 cursor-pointer hover:border-indigo-500/40 transition-colors">
+            <input type="checkbox" id="emergency" class="w-4 h-4 accent-indigo-500 rounded" />
+            <span class="text-slate-300 text-sm">I have an emergency fund (3–6 months of expenses)</span>
+          </label>
+        </div>
+        <div class="flex gap-3 mt-6">
+          <button onclick="prevStep()" class="flex-1 py-3 rounded-xl border border-slate-700 text-slate-400 text-sm font-medium hover:border-slate-500 hover:text-slate-300 transition-colors">
+            ← Back
+          </button>
+          <button onclick="cancelOnboarding()" class="py-3 px-4 rounded-xl border border-slate-700 text-slate-500 text-sm hover:text-slate-400 transition-colors">
+            Exit
+          </button>
+          <button onclick="nextStep()" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-semibold hover:opacity-90 transition-opacity">
+            Next Step →
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 3: Investments -->
+      <div class="step">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
+            <svg class="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+            </svg>
+          </div>
+          <div>
+            <p class="text-xs text-slate-500 uppercase tracking-wider">Step 3 of 4</p>
+            <h2 class="text-lg font-semibold text-white">Investment Preferences</h2>
+          </div>
+        </div>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider">Risk Appetite</label>
+            <select id="risk" class="select-field">
+              <option value="Low">Low – Capital preservation</option>
+              <option value="Medium">Medium – Balanced growth</option>
+              <option value="High">High – Aggressive growth</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider">Investment Mode</label>
+            <select id="mode" class="select-field">
+              <option value="SIP">SIP – Monthly systematic investment</option>
+              <option value="Lumpsum">Lumpsum – One-time investment</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider">Monthly Investment Amount (₹)</label>
+            <input id="invest-amt" type="number" placeholder="15,000" class="input-field" />
+          </div>
+        </div>
+        <div class="flex gap-3 mt-6">
+          <button onclick="prevStep()" class="flex-1 py-3 rounded-xl border border-slate-700 text-slate-400 text-sm font-medium hover:border-slate-500 hover:text-slate-300 transition-colors">
+            ← Back
+          </button>
+          <button onclick="cancelOnboarding()" class="py-3 px-4 rounded-xl border border-slate-700 text-slate-500 text-sm hover:text-slate-400 transition-colors">
+            Exit
+          </button>
+          <button onclick="nextStep()" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-semibold hover:opacity-90 transition-opacity">
+            Next Step →
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 4: Confirm -->
+      <div class="step">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center">
+            <svg class="w-4 h-4 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div>
+            <p class="text-xs text-slate-500 uppercase tracking-wider">Step 4 of 4</p>
+            <h2 class="text-lg font-semibold text-white">Review & Confirm</h2>
+          </div>
+        </div>
+        <div class="bg-indigo-500/10 border border-indigo-500/20 rounded-xl p-5 mb-6">
+          <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-indigo-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div>
+              <p class="text-indigo-300 text-sm font-medium mb-1">All set!</p>
+              <p class="text-slate-400 text-sm leading-relaxed">
+                We'll analyse your financial profile and build a personalised investment plan using AI-powered insights.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="flex gap-3">
+          <button onclick="prevStep()" class="flex-1 py-3 rounded-xl border border-slate-700 text-slate-400 text-sm font-medium hover:border-slate-500 hover:text-slate-300 transition-colors">
+            ← Back
+          </button>
+          <button onclick="cancelOnboarding()" class="py-3 px-4 rounded-xl border border-slate-700 text-slate-500 text-sm hover:text-slate-400 transition-colors">
+            Exit
+          </button>
+          <button onclick="submitWizard()" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-semibold hover:opacity-90 transition-opacity">
+            🚀 Finish Setup
+          </button>
+        </div>
+      </div>
+
+    </div><!-- /glass card -->
+  </div>
+
   <script type="module" src="./js/wizard.js"></script>
 </body>
 </html>
