@@ -199,7 +199,6 @@ Developed as a focused, system-driven financial AI project with an emphasis on c
 
 ## Bugs
 
-The Onboarding wizard is still facing the Continuation problem and i was thinking to branch it and solve it independently while making new changes to the functionality of the project.
 
 The Vertex AI feature has been integrated in the backend and the wiring with the actual architecture remains and the frontend interface build will be followed later to it.
 ```
