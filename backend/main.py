@@ -512,7 +512,19 @@ def init_test_data(email):
     updated_user = collection.find_one({"email": email}, {"_id": 0, "password": 0})
     return jsonify({"status": "success", "user": updated_user})
 
+@app.route("/ai/investment-insight", methods=["POST"])
+def investment_insight():
+    data = request.json
 
+    user_profile = data.get("user_profile")
+    allocation = data.get("allocation")
+
+    response = generate_investment_insight(user_profile, allocation)
+
+    return jsonify({
+        "insight": response
+    })
+    
 @app.route("/api/agent/<email>", methods=["GET"])
 def agent_api(email):
     user = collection.find_one({"email": email}, {"_id": 0, "password": 0})

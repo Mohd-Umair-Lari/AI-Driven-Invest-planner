@@ -1,5 +1,16 @@
 from agent.decision_engine import agent_decision
 from agent.what_if import simulate_sip_change
+# backend/agent/financial_agent.py
+from ai.groq_client import generate_response
+from ai.prompts import investment_explanation_prompt
+
+
+def generate_investment_insight(user_profile, allocation):
+    prompt = investment_explanation_prompt(user_profile, allocation)
+    
+    ai_response = generate_response(prompt)
+
+    return ai_response
 
 def run_agent(goal_intelligence):
     # Guard: if goal_intelligence has an error (incomplete user data), return early
