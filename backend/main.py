@@ -526,19 +526,57 @@ def init_test_data(email):
     updated_user = collection.find_one({"email": email}, {"_id": 0, "password": 0})
     return jsonify({"status": "success", "user": updated_user})
 
-@app.route("/ai/investment-insight", methods=["POST"])
-def investment_insight():
-    data = request.json
+@app.route("/api/ai/investment-insight/<email>", methods=["GET"])
+def investment_insight(email):
+    """
+    Generate an AI-powered investment insight for a user.
+    Fetches user data from DB using email and calls Groq LLaMA-3.
+    """
+    user = collection.find_one({"email": email}, {"_id": 0, "password": 0})
+    if not user:
+        return jsonify({"status": "error", "message": "User not found"}), 404
 
-    user_profile = data.get("user_profile")
-    allocation = data.get("allocation")
+    financials = user.get("financials", {})
+    goal = user.get("Goal", {})
+    investments = user.get("investments", {})
 
-    response = generate_investment_insight(user_profile, allocation)
+    income = float(financials.get("monthly-income") or 0)
+    expenses = float(financials.get("monthly-expenses") or 0)
+    risk = goal.get("risk", "moderate")
 
-    return jsonify({
-        "insight": response
-    })
-    
+    if income == 0:
+        return jsonify({
+            "status": "error",
+            "message": "User financial profile is incomplete. Please complete onboarding first."
+        }), 400
+
+    user_profile = {
+        "income": income,
+        "expenses": expenses,
+        "risk": risk,
+        "goal": goal.get("goal", "Wealth Building")
+    }
+    allocation = {
+        "equity": 60 if risk == "high" else 50 if risk == "medium" else 30,
+        "debt": 25 if risk == "high" else 35 if risk == "medium" else 50,
+        "cash": 15 if risk == "high" else 15 if risk == "medium" else 20
+    }
+
+    try:
+        insight = generate_investment_insight(user_profile, allocation)
+        return jsonify({
+            "status": "success",
+            "email": email,
+            "user_profile": user_profile,
+            "allocation": allocation,
+            "insight": insight
+        })
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": f"AI insight generation failed: {str(e)}"
+        }), 500
+
 @app.route("/api/agent/<email>", methods=["GET"])
 def agent_api(email):
     user = collection.find_one({"email": email}, {"_id": 0, "password": 0})
