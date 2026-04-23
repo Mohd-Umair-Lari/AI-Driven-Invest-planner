@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
 import certifi
 from vertex_service import initialize_vertex, generate_financial_insights
+from agent.financial_agent import generate_investment_insight
 
 from analytics.financial_analytics import compute_financial_health
 from ml.goal_predictor import generate_plan, goal_probability
@@ -23,7 +24,7 @@ load_dotenv(dotenv_path=env_path)
 try:
     initialize_vertex()
 except Exception as e:
-    print(f"⚠️ Vertex AI initialization skipped: {e}")
+    print(f"⚠️ Groq AI initialization skipped: {e}")
 
 MONGO_URI = os.getenv("MONGO_URI", "").strip()
 DB_NAME = os.getenv("DB_NAME", "mockDB").strip()
@@ -372,13 +373,13 @@ def goal_intelligence(email):
         return jsonify({"status": "error", "message": "User not found"}), 404
     return jsonify({"goal_intelligence": compute_goal_intelligence(user)})
 
-@app.route("/test-vertex")
-def test_vertex():
+@app.route("/test-groq")
+def test_groq():
+    """Health-check endpoint to verify Groq AI is reachable."""
     try:
-        from vertexai.generative_models import GenerativeModel
-        model = GenerativeModel("gemini-2.5-pro")
-        response = model.generate_content("Return JSON: {\"message\": \"hello\"}")
-        return response.text
+        from ai.groq_client import generate_response
+        result = generate_response('Return exactly this JSON: {"message": "hello"}')
+        return result, 200
     except Exception as e:
         return str(e), 500
 
@@ -399,6 +400,7 @@ def analyze_finances(email):
         expenses = float(financials.get("monthly-expenses") or 0)
         debt = float(financials.get("debt") or 0)
         risk = goal.get("risk", "moderate")
+        invest_amt = float(investments.get("invest-amt") or 0)
 
         if income == 0:
             return jsonify({
@@ -406,34 +408,50 @@ def analyze_finances(email):
                 "message": "Please complete your financial profile first"
             }), 400
 
-        # Try Vertex AI, but fallback to basic analysis if it fails
-        try:
-            from vertexai.generative_models import GenerativeModel
-            model = GenerativeModel("gemini-2.5-pro")
+        # Build user profile dict for Groq prompt
+        user_profile = {
+            "income": income,
+            "expenses": expenses,
+            "risk": risk,
+            "goal": goal.get("goal", "Wealth Building")
+        }
+        allocation = {
+            "equity": 60 if risk == "high" else 50 if risk == "medium" else 30,
+            "debt": 25 if risk == "high" else 35 if risk == "medium" else 50,
+            "cash": 15 if risk == "high" else 15 if risk == "medium" else 20
+        }
 
-            prompt = f"""Analyze this financial profile and return ONLY valid JSON (no markdown):
+        # Try Groq AI
+        try:
+            from ai.groq_client import generate_response
+            from ai.formatter import clean_response
+
+            prompt = f"""Analyze this financial profile and return ONLY valid JSON (no markdown, no explanation):
 Income: {income}
 Expenses: {expenses}
 Debt: {debt}
+Monthly Investment: {invest_amt}
 Risk Appetite: {risk}
+Financial Goal: {goal.get('goal', 'Wealth Building')}
+Target Amount: {goal.get('target-amt', 0)}
+Target Timeline: {goal.get('target-time', 0)} months
 
-Return format:
-{{"financial_health_score": 0-100, "analysis": "brief insight", "recommendations": ["r1", "r2", "r3"], "investment_strategy": {{"equity": 0-100, "debt": 0-100, "cash": 0-100}}}}"""
+Return ONLY this JSON format:
+{{"financial_health_score": <0-100>, "analysis": "<2-3 sentence insight>", "recommendations": ["<r1>", "<r2>", "<r3>"], "investment_strategy": {{"equity": <0-100>, "debt": <0-100>, "cash": <0-100>}}}}"""
 
-            response = model.generate_content(prompt, timeout=10)
-            raw_text = response.text
-            cleaned = re.sub(r"```json|```", "", raw_text).strip()
+            raw = generate_response(prompt)
+            cleaned = clean_response(re.sub(r"```json|```", "", raw))
             parsed = json.loads(cleaned)
-            print("✅ Vertex AI analysis successful")
+            print("✅ Groq AI analysis successful")
             return jsonify(parsed)
 
         except Exception as ai_err:
-            print(f"⚠️ Vertex AI failed ({type(ai_err).__name__}), using fallback")
-            
-            # Fallback analysis based on user data
+            print(f"⚠️ Groq AI failed ({type(ai_err).__name__}: {ai_err}), using fallback")
+
+            # Rule-based fallback
             savings_rate = (income - expenses) / income if income > 0 else 0
             debt_ratio = debt / income if income > 0 else 0
-            
+
             health_score = 50
             if savings_rate > 0.3:
                 health_score += 25
@@ -441,26 +459,22 @@ Return format:
                 health_score += 15
             if expenses < income * 0.7:
                 health_score += 10
-            
+
             recommendations = []
             if debt_ratio > 2:
-                recommendations.append("Focus on reducing debt")
+                recommendations.append("Focus on reducing high-interest debt first")
             if savings_rate < 0.1:
-                recommendations.append("Increase your savings rate")
+                recommendations.append("Aim to save at least 20% of your monthly income")
             if risk == "high":
-                recommendations.append("Diversify your portfolio")
+                recommendations.append("Diversify across equity, debt and international funds")
             if not recommendations:
-                recommendations = ["Continue your current financial plan", "Monitor monthly expenses"]
-            
+                recommendations = ["Continue your current financial plan", "Monitor monthly expenses regularly"]
+
             fallback = {
                 "financial_health_score": min(100, health_score),
-                "analysis": f"Your financial health is {'strong' if health_score > 70 else 'moderate' if health_score > 50 else 'needs improvement'}. Savings rate: {savings_rate*100:.1f}%",
+                "analysis": f"Your financial health is {'strong' if health_score > 70 else 'moderate' if health_score > 50 else 'needs improvement'}. Savings rate: {savings_rate * 100:.1f}%.",
                 "recommendations": recommendations[:3],
-                "investment_strategy": {
-                    "equity": 60 if risk == "high" else 50 if risk == "medium" else 30,
-                    "debt": 25 if risk == "high" else 35 if risk == "medium" else 50,
-                    "cash": 15 if risk == "high" else 15 if risk == "medium" else 20
-                }
+                "investment_strategy": allocation
             }
             return jsonify(fallback)
 
@@ -468,7 +482,7 @@ Return format:
         print(f"❌ Error in analyze_finances: {str(e)}")
         return jsonify({
             "financial_health_score": 60,
-            "analysis": "Unable to generate detailed analysis",
+            "analysis": "Unable to generate detailed analysis. Please ensure your profile is complete.",
             "recommendations": ["Review your financial data", "Ensure all fields are complete"],
             "investment_strategy": {"equity": 50, "debt": 35, "cash": 15}
         }), 200

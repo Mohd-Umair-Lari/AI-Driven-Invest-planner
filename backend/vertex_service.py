@@ -1,50 +1,52 @@
-import os
-import json
-import vertexai
-from vertexai.generative_models import GenerativeModel
-from google.oauth2 import service_account
+# groq_service.py (replaces vertex_service.py)
+# All Vertex AI / Gemini logic removed. Now powered by Groq (LLaMA-3).
 
-model = None
+import os
+from groq import Groq
+
+_client = None
 
 
 def initialize_vertex():
-    global model
-
-    gcp_sa = os.environ.get("GCP_SERVICE_ACCOUNT")
-    gcp_project = os.environ.get("GOOGLE_CLOUD_PROJECT")
-    gcp_location = os.environ.get("GOOGLE_CLOUD_LOCATION", "us-central1")
-
-    if not gcp_sa or not gcp_project:
+    """
+    Previously initialised Vertex AI. Now validates the Groq client on startup.
+    Raises EnvironmentError if GROQ_API_KEY is missing.
+    """
+    global _client
+    api_key = os.environ.get("GROQ_API_KEY")
+    if not api_key:
         raise EnvironmentError(
-            "GCP_SERVICE_ACCOUNT or GOOGLE_CLOUD_PROJECT env vars are not set. "
-            "Vertex AI features will be unavailable."
+            "GROQ_API_KEY env var is not set. AI features will be unavailable."
         )
-
-    credentials = service_account.Credentials.from_service_account_info(
-        json.loads(gcp_sa)
-    )
-
-    vertexai.init(
-        project=gcp_project,
-        location=gcp_location,
-        credentials=credentials
-    )
-
-    model = GenerativeModel("gemini-2.5-pro")
+    _client = Groq(api_key=api_key)
 
 
-def generate_financial_insights(user_data):
+def _get_client() -> Groq:
+    global _client
+    if _client is None:
+        api_key = os.environ.get("GROQ_API_KEY")
+        if not api_key:
+            raise EnvironmentError("GROQ_API_KEY is not set.")
+        _client = Groq(api_key=api_key)
+    return _client
 
-    prompt = f"""
-You are a financial advisor for Indian investors.
 
-Income: {user_data['income']}
-Expenses: {user_data['expenses']}
-Debt: {user_data['debt']}
-Investments: {user_data['investment']}
-Goal: {user_data['goal_amount']} in {user_data['goal_time']} months
+def generate_financial_insights(user_data: dict) -> str:
+    """
+    Generate structured financial insights using Groq (LLaMA-3).
+    Returns a JSON array string.
+    """
+    client = _get_client()
 
-Return strictly JSON array like:
+    prompt = f"""You are a financial advisor for Indian investors.
+
+Income: {user_data.get('income', 0)}
+Expenses: {user_data.get('expenses', 0)}
+Debt: {user_data.get('debt', 0)}
+Investments: {user_data.get('investment', 0)}
+Goal: {user_data.get('goal_amount', 0)} in {user_data.get('goal_time', 0)} months
+
+Return ONLY a valid JSON array (no markdown, no explanation) like:
 
 [
  {{
@@ -54,9 +56,18 @@ Return strictly JSON array like:
    "category": "Goal|Tax|Savings|Investment|Debt",
    "impact": "High|Medium|Low"
  }}
-]
-"""
+]"""
 
-    response = model.generate_content(prompt)
+    response = client.chat.completions.create(
+        messages=[
+            {
+                "role": "system",
+                "content": "You are a financial assistant. Always respond with valid JSON only, no markdown."
+            },
+            {"role": "user", "content": prompt}
+        ],
+        model="llama3-8b-8192",
+        temperature=0.4
+    )
 
-    return response.text
+    return response.choices[0].message.content

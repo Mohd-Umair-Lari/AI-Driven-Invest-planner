@@ -1,6 +1,5 @@
 from agent.decision_engine import agent_decision
 from agent.what_if import simulate_sip_change
-# backend/agent/financial_agent.py
 from ai.groq_client import generate_response
 from ai.prompts import investment_explanation_prompt
 
