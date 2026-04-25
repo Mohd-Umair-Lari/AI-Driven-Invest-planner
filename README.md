@@ -200,7 +200,8 @@ Developed as a focused, system-driven financial AI project with an emphasis on c
 ## Bugs
 
 
-The Vertex AI feature has been integrated in the backend and the wiring with the actual architecture remains and the frontend interface build will be followed later to it.
+Vertex AI was producing a lot of isues regarding the billing as well as the models were getting deprecated, so I stopped working on it, However I'll try to integrate the latest AI features using Groq AI.
+
 ```
 # Future Plans
 Need to integrate the latest AI features and will change the stack for the sake of interface, will try to integrate selected frameworks
