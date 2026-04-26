@@ -304,6 +304,104 @@ async function loadAnalytics(user) {
   }
 }
 
+// ===== LOAD GOALS SECTION =====
+async function loadGoalsSection(user) {
+  try {
+    // ── Goal Intelligence ──────────────────────────────────────────────────────
+    const goalRes = await apiFetch(`/api/goal-intelligence/${user.email}`);
+    const gd = goalRes.goal_intelligence || {};
+
+    const goalName     = user?.Goal?.goal || '—';
+    const targetAmt    = gd.target_amount  || safeExtract(user, 'Goal.target-amt', 0);
+    const timeline     = gd.goal_horizon_months || safeExtract(user, 'Goal.target-time', 0);
+    const risk         = user?.Goal?.risk || safeExtract(user, 'investments.risk-opt', 'moderate');
+    const corpus       = gd.expected_corpus || 0;
+    const probability  = gd.goal_probability || 0;
+    const sip          = safeExtract(user, 'investments.invest-amt', 0);
+
+    document.getElementById('g-name').textContent     = goalName;
+    document.getElementById('g-target').textContent   = formatCurrency(targetAmt);
+    document.getElementById('g-timeline').textContent = timeline ? `${timeline} months` : '—';
+    document.getElementById('g-risk').textContent     = risk;
+    document.getElementById('g-corpus').textContent   = formatCurrency(corpus);
+    document.getElementById('g-sip').textContent      = formatCurrency(sip);
+    document.getElementById('g-prob-ring').textContent = `${probability}%`;
+
+    // ── Progress Ring Chart ────────────────────────────────────────────────────
+    const ringCtx = document.getElementById('goalProgressChart');
+    if (ringCtx) {
+      if (charts.goalProgress) charts.goalProgress.destroy();
+      const color = probability >= 70 ? '#10b981' : probability >= 50 ? '#f59e0b' : '#ef4444';
+      charts.goalProgress = new Chart(ringCtx, {
+        type: 'doughnut',
+        data: {
+          datasets: [{
+            data: [probability, 100 - probability],
+            backgroundColor: [color, 'rgba(255,255,255,0.05)'],
+            borderWidth: 0,
+            borderRadius: 6
+          }]
+        },
+        options: {
+          cutout: '78%',
+          responsive: false,
+          plugins: { legend: { display: false }, tooltip: { enabled: false } }
+        }
+      });
+    }
+
+    // ── Allocation Donut Chart ─────────────────────────────────────────────────
+    const allocCtx = document.getElementById('goalAllocationChart');
+    if (allocCtx) {
+      if (charts.goalAlloc) charts.goalAlloc.destroy();
+      const equity = risk === 'high' ? 60 : risk === 'medium' ? 50 : 30;
+      const debt   = risk === 'high' ? 25 : risk === 'medium' ? 35 : 50;
+      const cash   = 100 - equity - debt;
+      charts.goalAlloc = new Chart(allocCtx, {
+        type: 'doughnut',
+        data: {
+          labels: [`Equity (${equity}%)`, `Debt (${debt}%)`, `Cash (${cash}%)`],
+          datasets: [{
+            data: [equity, debt, cash],
+            backgroundColor: ['#6366f1', '#8b5cf6', '#f59e0b'],
+            borderWidth: 0,
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 12 } } } }
+        }
+      });
+    }
+
+    // ── AI Investment Insight ──────────────────────────────────────────────────
+    const loadingEl = document.getElementById('insight-loading');
+    const contentEl = document.getElementById('insight-content');
+    const errorEl   = document.getElementById('insight-error');
+    const textEl    = document.getElementById('insight-text');
+
+    try {
+      const insightRes = await apiFetch(`/api/ai/investment-insight/${user.email}`);
+      const insightText = insightRes.insight || 'No insight available.';
+
+      if (loadingEl) loadingEl.classList.add('hidden');
+      if (contentEl) contentEl.classList.remove('hidden');
+      if (textEl) textEl.textContent = insightText;
+      console.log('🤖 AI insight loaded');
+    } catch (aiErr) {
+      console.warn('⚠️ AI insight failed:', aiErr.message);
+      if (loadingEl) loadingEl.classList.add('hidden');
+      if (errorEl) errorEl.classList.remove('hidden');
+    }
+
+    console.log('🎯 Goals section loaded');
+  } catch (err) {
+    console.warn('⚠️ Goals section failed:', err.message);
+  }
+}
+
 // ===== LOAD INSIGHTS =====
 async function loadInsights(user) {
   try {
@@ -420,6 +518,7 @@ function setupSectionNavigation() {
       if (targetSection) targetSection.classList.add('active-section');
 
       if (section === 'analytics' && currentUser) loadAnalytics(currentUser);
+      else if (section === 'goals' && currentUser) loadGoalsSection(currentUser);
       else if (section === 'insights' && currentUser) loadInsights(currentUser);
     });
   });

@@ -204,4 +204,4 @@ Vertex AI was producing a lot of isues regarding the billing as well as the mode
 
 ```
 # Future Plans
-Need to integrate the latest AI features and will change the stack for the sake of interface, will try to integrate selected frameworks
+Need to integrate the latest AI features and will change the stack for the sake of interface, will try to integrate selected frameworks.
