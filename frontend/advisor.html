@@ -1,26 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FinPass AI | AI Advisor</title>
-  <meta name="description" content="Your personalised AI-powered financial plan — income analysis, investment schemes, and wealth-building tactics tailored to you." />
+  <meta name="description"
+    content="Your personalised AI-powered financial plan — income analysis, investment schemes, and wealth-building tactics tailored to you." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     :root {
-      --bg:       #090d1a;
-      --surface:  rgba(255,255,255,0.04);
-      --border:   rgba(255,255,255,0.08);
-      --text:     #f1f5f9;
-      --muted:    #64748b;
-      --indigo:   #6366f1;
-      --violet:   #8b5cf6;
-      --emerald:  #10b981;
-      --amber:    #f59e0b;
-      --red:      #ef4444;
+      --bg: #090d1a;
+      --surface: rgba(255, 255, 255, 0.04);
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #f1f5f9;
+      --muted: #64748b;
+      --indigo: #6366f1;
+      --violet: #8b5cf6;
+      --emerald: #10b981;
+      --amber: #f59e0b;
+      --red: #ef4444;
     }
 
     body {
@@ -33,359 +42,720 @@
     /* ── Animated background ── */
     body::before {
       content: '';
-      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
       background:
-        radial-gradient(ellipse 80% 50% at 20% 10%, rgba(99,102,241,0.12) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(139,92,246,0.10) 0%, transparent 60%);
+        radial-gradient(ellipse 80% 50% at 20% 10%, rgba(99, 102, 241, 0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(139, 92, 246, 0.10) 0%, transparent 60%);
     }
 
     /* ── Layout ── */
-    .page { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
 
     /* ── Back button ── */
     .back-btn {
-      display: inline-flex; align-items: center; gap: 8px;
-      color: var(--muted); font-size: 0.875rem; text-decoration: none;
-      padding: 8px 14px; border-radius: 10px;
-      border: 1px solid var(--border); background: var(--surface);
-      transition: color .2s, background .2s; margin-bottom: 2rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 0.875rem;
+      text-decoration: none;
+      padding: 8px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      transition: color .2s, background .2s;
+      margin-bottom: 2rem;
       cursor: pointer;
     }
-    .back-btn:hover { color: var(--text); background: rgba(255,255,255,0.07); }
+
+    .back-btn:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.07);
+    }
 
     /* ── Hero header ── */
     .hero {
-      display: flex; align-items: flex-start; justify-content: space-between;
-      gap: 1.5rem; margin-bottom: 2.5rem; flex-wrap: wrap;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+      flex-wrap: wrap;
     }
-    .hero-left { flex: 1; }
+
+    .hero-left {
+      flex: 1;
+    }
+
     .hero-badge {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: rgba(99,102,241,0.12); border: 1px solid rgba(99,102,241,0.3);
-      color: #a5b4fc; font-size: 0.75rem; font-weight: 600;
-      padding: 5px 12px; border-radius: 999px; margin-bottom: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: #a5b4fc;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 999px;
+      margin-bottom: 0.75rem;
       letter-spacing: 0.04em;
     }
-    .hero-badge span { width: 6px; height: 6px; border-radius: 50%; background: #6366f1; animation: pulse 2s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 
-    .hero h1 { font-size: 2rem; font-weight: 800; color: var(--text); line-height: 1.2; }
-    .hero h1 em { font-style: normal; background: linear-gradient(90deg,#6366f1,#8b5cf6,#a78bfa); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-    .hero-sub { color: var(--muted); font-size: 0.9rem; margin-top: 0.5rem; }
+    .hero-badge span {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #6366f1;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: .4
+      }
+    }
+
+    .hero h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.2;
+    }
+
+    .hero h1 em {
+      font-style: normal;
+      background: linear-gradient(90deg, #6366f1, #8b5cf6, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-sub {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+    }
 
     /* ── Profile strip ── */
     .profile-strip {
-      display: flex; flex-wrap: wrap; gap: 0.75rem;
-      padding: 1rem 1.25rem; border-radius: 1rem;
-      background: var(--surface); border: 1px solid var(--border);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      padding: 1rem 1.25rem;
+      border-radius: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
       margin-bottom: 2rem;
     }
-    .pstat { display: flex; flex-direction: column; min-width: 110px; flex: 1; }
-    .pstat-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 3px; }
-    .pstat-value { font-size: 0.95rem; font-weight: 600; color: var(--text); }
-    .pstat-value.green  { color: var(--emerald); }
-    .pstat-value.amber  { color: var(--amber); }
-    .pstat-value.indigo { color: #a5b4fc; }
+
+    .pstat {
+      display: flex;
+      flex-direction: column;
+      min-width: 110px;
+      flex: 1;
+    }
+
+    .pstat-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 3px;
+    }
+
+    .pstat-value {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .pstat-value.green {
+      color: var(--emerald);
+    }
+
+    .pstat-value.amber {
+      color: var(--amber);
+    }
+
+    .pstat-value.indigo {
+      color: #a5b4fc;
+    }
 
     /* ── Loading state ── */
-    #loading-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 2rem; text-align: center; gap: 1.5rem; }
+    #loading-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4rem 2rem;
+      text-align: center;
+      gap: 1.5rem;
+    }
+
     .spinner-ring {
-      width: 56px; height: 56px; border-radius: 50%;
-      border: 3px solid rgba(99,102,241,0.15);
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: 3px solid rgba(99, 102, 241, 0.15);
       border-top-color: var(--indigo);
       animation: spin .9s linear infinite;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    #loading-state h3 { font-size: 1.1rem; font-weight: 600; color: var(--text); }
-    #loading-state p  { color: var(--muted); font-size: 0.875rem; max-width: 340px; line-height: 1.6; }
-    .loading-steps { display: flex; flex-direction: column; gap: 8px; }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    #loading-state h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    #loading-state p {
+      color: var(--muted);
+      font-size: 0.875rem;
+      max-width: 340px;
+      line-height: 1.6;
+    }
+
+    .loading-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
     .loading-step {
-      display: flex; align-items: center; gap: 10px;
-      font-size: 0.8rem; color: var(--muted);
-      opacity: 0; transform: translateY(6px);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      opacity: 0;
+      transform: translateY(6px);
       transition: opacity .4s, transform .4s;
     }
-    .loading-step.visible { opacity: 1; transform: translateY(0); }
-    .loading-step svg { width: 14px; height: 14px; color: var(--indigo); flex-shrink: 0; }
+
+    .loading-step.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .loading-step svg {
+      width: 14px;
+      height: 14px;
+      color: var(--indigo);
+      flex-shrink: 0;
+    }
 
     /* ── Error state ── */
     #error-state {
-      display: none; flex-direction: column; align-items: center;
-      text-align: center; padding: 3rem; gap: 1rem;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 3rem;
+      gap: 1rem;
     }
-    #error-state .err-icon { font-size: 2.5rem; }
-    #error-state h3 { font-size: 1.1rem; color: var(--red); }
-    #error-state p  { color: var(--muted); font-size: 0.875rem; max-width: 360px; line-height: 1.6; }
+
+    #error-state .err-icon {
+      font-size: 2.5rem;
+    }
+
+    #error-state h3 {
+      font-size: 1.1rem;
+      color: var(--red);
+    }
+
+    #error-state p {
+      color: var(--muted);
+      font-size: 0.875rem;
+      max-width: 360px;
+      line-height: 1.6;
+    }
+
     .retry-btn {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: var(--indigo); color: #fff; font-size: 0.875rem; font-weight: 600;
-      padding: 10px 20px; border-radius: 10px; border: none; cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--indigo);
+      color: #fff;
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
       transition: opacity .2s;
     }
-    .retry-btn:hover { opacity: 0.85; }
+
+    .retry-btn:hover {
+      opacity: 0.85;
+    }
 
     /* ── Allocation bar ── */
-    #alloc-section { display: none; margin-bottom: 2rem; }
-    .alloc-card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 1rem; padding: 1.25rem 1.5rem;
+    #alloc-section {
+      display: none;
+      margin-bottom: 2rem;
     }
-    .alloc-title { font-size: 0.8rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 1rem; }
-    .alloc-bar-wrap { display: flex; height: 10px; border-radius: 999px; overflow: hidden; gap: 3px; margin-bottom: 1rem; }
-    .alloc-bar { height: 100%; border-radius: 999px; transition: width .8s cubic-bezier(.4,0,.2,1); }
-    .alloc-legends { display: flex; gap: 1.5rem; flex-wrap: wrap; }
-    .alloc-legend { display: flex; align-items: center; gap: 7px; font-size: 0.8rem; color: var(--muted); }
-    .alloc-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+    .alloc-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      padding: 1.25rem 1.5rem;
+    }
+
+    .alloc-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 1rem;
+    }
+
+    .alloc-bar-wrap {
+      display: flex;
+      height: 10px;
+      border-radius: 999px;
+      overflow: hidden;
+      gap: 3px;
+      margin-bottom: 1rem;
+    }
+
+    .alloc-bar {
+      height: 100%;
+      border-radius: 999px;
+      transition: width .8s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    .alloc-legends {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .alloc-legend {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .alloc-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
 
     /* ── Section cards ── */
-    #insight-sections { display: none; space-y: 1.5rem; }
+    #insight-sections {
+      display: none;
+      space-y: 1.5rem;
+    }
+
     .section-card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.25rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
       animation: slideUp .4s ease-out both;
     }
-    @keyframes slideUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
-    .section-card:nth-child(1) { animation-delay:.05s }
-    .section-card:nth-child(2) { animation-delay:.10s }
-    .section-card:nth-child(3) { animation-delay:.15s }
-    .section-card:nth-child(4) { animation-delay:.20s }
-    .section-card:nth-child(5) { animation-delay:.25s }
-    .section-card:nth-child(6) { animation-delay:.30s }
-    .section-card:nth-child(7) { animation-delay:.35s }
 
-    .section-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 1rem; }
-    .section-icon {
-      width: 38px; height: 38px; border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.1rem; flex-shrink: 0;
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(14px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
     }
-    .section-meta { flex: 1; }
-    .section-num { font-size: 0.7rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 2px; }
-    .section-title { font-size: 1rem; font-weight: 700; color: var(--text); }
+
+    .section-card:nth-child(1) {
+      animation-delay: .05s
+    }
+
+    .section-card:nth-child(2) {
+      animation-delay: .10s
+    }
+
+    .section-card:nth-child(3) {
+      animation-delay: .15s
+    }
+
+    .section-card:nth-child(4) {
+      animation-delay: .20s
+    }
+
+    .section-card:nth-child(5) {
+      animation-delay: .25s
+    }
+
+    .section-card:nth-child(6) {
+      animation-delay: .30s
+    }
+
+    .section-card:nth-child(7) {
+      animation-delay: .35s
+    }
+
+    .section-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 1rem;
+    }
+
+    .section-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .section-meta {
+      flex: 1;
+    }
+
+    .section-num {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      margin-bottom: 2px;
+    }
+
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
 
     .section-body {
-      color: #94a3b8; font-size: 0.875rem; line-height: 1.85;
+      color: #94a3b8;
+      font-size: 0.875rem;
+      line-height: 1.85;
       white-space: pre-wrap;
     }
 
     /* Line-level formatting inside insight text */
-    .section-body .bullet { display: block; padding-left: 1.1rem; position: relative; }
-    .section-body .bullet::before { content: '•'; position: absolute; left: 0; color: var(--indigo); }
-    .section-body .highlight { color: var(--text); font-weight: 600; }
+    .section-body .bullet {
+      display: block;
+      padding-left: 1.1rem;
+      position: relative;
+    }
+
+    .section-body .bullet::before {
+      content: '•';
+      position: absolute;
+      left: 0;
+      color: var(--indigo);
+    }
+
+    .section-body .highlight {
+      color: var(--text);
+      font-weight: 600;
+    }
 
     /* ── Motivational footer ── */
     .motive-banner {
       display: none;
-      background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.10));
-      border: 1px solid rgba(99,102,241,0.25); border-radius: 1rem;
-      padding: 1.5rem 2rem; text-align: center; margin-top: 2rem;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.10));
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      border-radius: 1rem;
+      padding: 1.5rem 2rem;
+      text-align: center;
+      margin-top: 2rem;
     }
-    .motive-banner p { font-size: 1rem; font-weight: 600; color: #c7d2fe; line-height: 1.6; }
+
+    .motive-banner p {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #c7d2fe;
+      line-height: 1.6;
+    }
 
     /* ── Refresh button ── */
-    .refresh-row { display: none; justify-content: center; margin-top: 1.5rem; gap: 1rem; flex-wrap: wrap; }
-    .action-btn {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 10px 22px; border-radius: 10px;
-      font-size: 0.875rem; font-weight: 600; cursor: pointer;
-      border: none; transition: opacity .2s, transform .15s;
+    .refresh-row {
+      display: none;
+      justify-content: center;
+      margin-top: 1.5rem;
+      gap: 1rem;
+      flex-wrap: wrap;
     }
-    .action-btn:hover { opacity: 0.85; transform: translateY(-1px); }
-    .action-btn.primary { background: linear-gradient(135deg,#6366f1,#8b5cf6); color: #fff; }
-    .action-btn.secondary { background: var(--surface); border: 1px solid var(--border); color: var(--muted); }
+
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 22px;
+      border-radius: 10px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: opacity .2s, transform .15s;
+    }
+
+    .action-btn:hover {
+      opacity: 0.85;
+      transform: translateY(-1px);
+    }
+
+    .action-btn.primary {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #fff;
+    }
+
+    .action-btn.secondary {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
 
     @media(max-width:600px) {
-      .hero h1 { font-size: 1.5rem; }
-      .profile-strip { gap: 0.5rem; }
+      .hero h1 {
+        font-size: 1.5rem;
+      }
+
+      .profile-strip {
+        gap: 0.5rem;
+      }
     }
   </style>
 </head>
+
 <body>
-<div class="page">
+  <div class="page">
 
-  <!-- Back -->
-  <button class="back-btn" id="btn-back">
-    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-    </svg>
-    Back to Dashboard
-  </button>
-
-  <!-- Hero -->
-  <div class="hero">
-    <div class="hero-left">
-      <div class="hero-badge">
-        <span></span>
-        Groq LLaMA-3 · Live AI
-      </div>
-      <h1>Your <em>AI Financial Plan</em></h1>
-      <p class="hero-sub" id="hero-sub">Personalised advice based on your real income, expenses & goals.</p>
-    </div>
-  </div>
-
-  <!-- Profile Strip -->
-  <div class="profile-strip" id="profile-strip" style="display:none">
-    <div class="pstat">
-      <span class="pstat-label">Monthly Income</span>
-      <span class="pstat-value green" id="ps-income">—</span>
-    </div>
-    <div class="pstat">
-      <span class="pstat-label">Monthly Expenses</span>
-      <span class="pstat-value amber" id="ps-expenses">—</span>
-    </div>
-    <div class="pstat">
-      <span class="pstat-label">Monthly Savings</span>
-      <span class="pstat-value green" id="ps-savings">—</span>
-    </div>
-    <div class="pstat">
-      <span class="pstat-label">Savings Rate</span>
-      <span class="pstat-value indigo" id="ps-rate">—</span>
-    </div>
-    <div class="pstat">
-      <span class="pstat-label">Goal</span>
-      <span class="pstat-value" id="ps-goal">—</span>
-    </div>
-    <div class="pstat">
-      <span class="pstat-label">Risk Level</span>
-      <span class="pstat-value" id="ps-risk">—</span>
-    </div>
-  </div>
-
-  <!-- Allocation bar -->
-  <div id="alloc-section">
-    <div class="alloc-card">
-      <div class="alloc-title">Recommended Portfolio Allocation</div>
-      <div class="alloc-bar-wrap">
-        <div class="alloc-bar" id="bar-equity" style="width:0%;background:#6366f1;"></div>
-        <div class="alloc-bar" id="bar-debt"   style="width:0%;background:#8b5cf6;"></div>
-        <div class="alloc-bar" id="bar-cash"   style="width:0%;background:#f59e0b;"></div>
-      </div>
-      <div class="alloc-legends">
-        <div class="alloc-legend"><div class="alloc-dot" style="background:#6366f1"></div><span id="leg-equity">Equity 30%</span></div>
-        <div class="alloc-legend"><div class="alloc-dot" style="background:#8b5cf6"></div><span id="leg-debt">Debt 50%</span></div>
-        <div class="alloc-legend"><div class="alloc-dot" style="background:#f59e0b"></div><span id="leg-cash">Cash 20%</span></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Loading state -->
-  <div id="loading-state">
-    <div class="spinner-ring"></div>
-    <h3>Analysing your finances…</h3>
-    <p>Our AI is reading your income, expenses, savings rate and goals to craft a personalised plan.</p>
-    <div class="loading-steps">
-      <div class="loading-step" id="step-1">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4"/></svg>
-        Reading your financial profile
-      </div>
-      <div class="loading-step" id="step-2">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4"/></svg>
-        Computing savings rate &amp; risk tier
-      </div>
-      <div class="loading-step" id="step-3">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4"/></svg>
-        Generating 7-section financial plan via Groq AI
-      </div>
-    </div>
-  </div>
-
-  <!-- Error state -->
-  <div id="error-state">
-    <div class="err-icon">⚠️</div>
-    <h3>Could not load AI insight</h3>
-    <p id="error-msg">Something went wrong while generating your plan. Please try again.</p>
-    <button class="retry-btn" id="btn-retry">
-      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-      Retry
+    <!-- Back -->
+    <button class="back-btn" id="btn-back">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+      </svg>
+      Back to Dashboard
     </button>
+
+    <!-- Hero -->
+    <div class="hero">
+      <div class="hero-left">
+        <div class="hero-badge">
+          <span></span>
+          Groq LLaMA-3 · Live AI
+        </div>
+        <h1>Your <em>AI Financial Plan</em></h1>
+        <p class="hero-sub" id="hero-sub">Personalised advice based on your real income, expenses & goals.</p>
+      </div>
+    </div>
+
+    <!-- Profile Strip -->
+    <div class="profile-strip" id="profile-strip" style="display:none">
+      <div class="pstat">
+        <span class="pstat-label">Monthly Income</span>
+        <span class="pstat-value green" id="ps-income">—</span>
+      </div>
+      <div class="pstat">
+        <span class="pstat-label">Monthly Expenses</span>
+        <span class="pstat-value amber" id="ps-expenses">—</span>
+      </div>
+      <div class="pstat">
+        <span class="pstat-label">Monthly Savings</span>
+        <span class="pstat-value green" id="ps-savings">—</span>
+      </div>
+      <div class="pstat">
+        <span class="pstat-label">Savings Rate</span>
+        <span class="pstat-value indigo" id="ps-rate">—</span>
+      </div>
+      <div class="pstat">
+        <span class="pstat-label">Goal</span>
+        <span class="pstat-value" id="ps-goal">—</span>
+      </div>
+      <div class="pstat">
+        <span class="pstat-label">Risk Level</span>
+        <span class="pstat-value" id="ps-risk">—</span>
+      </div>
+    </div>
+
+    <!-- Allocation bar -->
+    <div id="alloc-section">
+      <div class="alloc-card">
+        <div class="alloc-title">Recommended Portfolio Allocation</div>
+        <div class="alloc-bar-wrap">
+          <div class="alloc-bar" id="bar-equity" style="width:0%;background:#6366f1;"></div>
+          <div class="alloc-bar" id="bar-debt" style="width:0%;background:#8b5cf6;"></div>
+          <div class="alloc-bar" id="bar-cash" style="width:0%;background:#f59e0b;"></div>
+        </div>
+        <div class="alloc-legends">
+          <div class="alloc-legend">
+            <div class="alloc-dot" style="background:#6366f1"></div><span id="leg-equity">Equity 30%</span>
+          </div>
+          <div class="alloc-legend">
+            <div class="alloc-dot" style="background:#8b5cf6"></div><span id="leg-debt">Debt 50%</span>
+          </div>
+          <div class="alloc-legend">
+            <div class="alloc-dot" style="background:#f59e0b"></div><span id="leg-cash">Cash 20%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading state -->
+    <div id="loading-state">
+      <div class="spinner-ring"></div>
+      <h3>Analysing your finances…</h3>
+      <p>Our AI is reading your income, expenses, savings rate and goals to craft a personalised plan.</p>
+      <div class="loading-steps">
+        <div class="loading-step" id="step-1">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" />
+          </svg>
+          Reading your financial profile
+        </div>
+        <div class="loading-step" id="step-2">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" />
+          </svg>
+          Computing savings rate &amp; risk tier
+        </div>
+        <div class="loading-step" id="step-3">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" />
+          </svg>
+          Generating 7-section financial plan via Groq AI
+        </div>
+      </div>
+    </div>
+
+    <!-- Error state -->
+    <div id="error-state">
+      <div class="err-icon">⚠️</div>
+      <h3>Could not load AI insight</h3>
+      <p id="error-msg">Something went wrong while generating your plan. Please try again.</p>
+      <button class="retry-btn" id="btn-retry">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+        Retry
+      </button>
+    </div>
+
+    <!-- Insight sections -->
+    <div id="insight-sections"></div>
+
+    <!-- Motivational banner -->
+    <div class="motive-banner" id="motive-banner">
+      <p id="motive-text">💡 The best time to start investing was yesterday. The second best time is right now.</p>
+    </div>
+
+    <!-- Action row -->
+    <div class="refresh-row" id="refresh-row">
+      <button class="action-btn primary" id="btn-regenerate">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+        Regenerate Plan
+      </button>
+      <button class="action-btn secondary" id="btn-back2">
+        ← Back to Dashboard
+      </button>
+    </div>
+
   </div>
 
-  <!-- Insight sections -->
-  <div id="insight-sections"></div>
+  <script type="module">
+    import { apiFetch } from './js/api.js';
 
-  <!-- Motivational banner -->
-  <div class="motive-banner" id="motive-banner">
-    <p id="motive-text">💡 The best time to start investing was yesterday. The second best time is right now.</p>
-  </div>
+    // ── Config ────────────────────────────────────────────────────────────────
+    const SECTION_META = [
+      { icon: '🩺', color: 'rgba(16,185,129,0.12)', label: 'SECTION 1', title: 'Financial Health Diagnosis' },
+      { icon: '⚖️', color: 'rgba(99,102,241,0.12)', label: 'SECTION 2', title: 'Why This Allocation Suits You' },
+      { icon: '📅', color: 'rgba(139,92,246,0.12)', label: 'SECTION 3', title: 'Monthly Investment Plan' },
+      { icon: '🔄', color: 'rgba(245,158,11,0.12)', label: 'SECTION 4', title: 'Quarterly Actions' },
+      { icon: '🎯', color: 'rgba(16,185,129,0.12)', label: 'SECTION 5', title: 'Annual Milestones' },
+      { icon: '🚀', color: 'rgba(99,102,241,0.12)', label: 'SECTION 6', title: 'Wealth-Building Tactics' },
+      { icon: '🛡️', color: 'rgba(239,68,68,0.10)', label: 'SECTION 7', title: 'Top Risks to Watch' },
+    ];
 
-  <!-- Action row -->
-  <div class="refresh-row" id="refresh-row">
-    <button class="action-btn primary" id="btn-regenerate">
-      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-      Regenerate Plan
-    </button>
-    <button class="action-btn secondary" id="btn-back2">
-      ← Back to Dashboard
-    </button>
-  </div>
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    const fmt = (n) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n || 0);
 
-</div>
+    function show(id) { document.getElementById(id).style.display = 'flex'; }
+    function hide(id) { document.getElementById(id).style.display = 'none'; }
+    function block(id) { document.getElementById(id).style.display = 'block'; }
 
-<script type="module">
-  import { apiFetch } from './js/api.js';
+    function animateLoadingSteps() {
+      [1, 2, 3].forEach((n, i) => {
+        setTimeout(() => {
+          const el = document.getElementById(`step-${n}`);
+          if (el) el.classList.add('visible');
+        }, i * 1200);
+      });
+    }
 
-  // ── Config ────────────────────────────────────────────────────────────────
-  const SECTION_META = [
-    { icon: '🩺', color: 'rgba(16,185,129,0.12)', label: 'SECTION 1', title: 'Financial Health Diagnosis' },
-    { icon: '⚖️', color: 'rgba(99,102,241,0.12)',  label: 'SECTION 2', title: 'Why This Allocation Suits You' },
-    { icon: '📅', color: 'rgba(139,92,246,0.12)',  label: 'SECTION 3', title: 'Monthly Investment Plan' },
-    { icon: '🔄', color: 'rgba(245,158,11,0.12)',  label: 'SECTION 4', title: 'Quarterly Actions' },
-    { icon: '🎯', color: 'rgba(16,185,129,0.12)',  label: 'SECTION 5', title: 'Annual Milestones' },
-    { icon: '🚀', color: 'rgba(99,102,241,0.12)',  label: 'SECTION 6', title: 'Wealth-Building Tactics' },
-    { icon: '🛡️', color: 'rgba(239,68,68,0.10)',   label: 'SECTION 7', title: 'Top Risks to Watch' },
-  ];
+    // ── Parse AI text into sections ───────────────────────────────────────────
+    function parseInsightIntoSections(text) {
+      const sections = [];
+      const sectionRegex = /SECTION\s+\d+\s*[—–-]+?\s*[^\n]+/gi;
+      const parts = text.split(/(?=SECTION\s+\d+)/i);
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
-  const fmt = (n) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n || 0);
+      parts.forEach((part, idx) => {
+        if (!part.trim()) return;
+        // Remove the "SECTION N — Title" header line; keep the body
+        const lines = part.split('\n');
+        const body = lines.slice(1).join('\n').trim();
+        if (body) sections.push(body);
+      });
 
-  function show(id) { document.getElementById(id).style.display = 'flex'; }
-  function hide(id) { document.getElementById(id).style.display = 'none'; }
-  function block(id) { document.getElementById(id).style.display = 'block'; }
+      // Fallback: if no SECTION markers found, show as a single block
+      if (sections.length === 0) sections.push(text.trim());
+      return sections;
+    }
 
-  function animateLoadingSteps() {
-    [1, 2, 3].forEach((n, i) => {
-      setTimeout(() => {
-        const el = document.getElementById(`step-${n}`);
-        if (el) el.classList.add('visible');
-      }, i * 1200);
-    });
-  }
+    // ── Render sections ───────────────────────────────────────────────────────
+    function renderSections(sectionTexts) {
+      const container = document.getElementById('insight-sections');
+      container.innerHTML = '';
 
-  // ── Parse AI text into sections ───────────────────────────────────────────
-  function parseInsightIntoSections(text) {
-    const sections = [];
-    const sectionRegex = /SECTION\s+\d+\s*[—–-]+?\s*[^\n]+/gi;
-    const parts = text.split(/(?=SECTION\s+\d+)/i);
+      sectionTexts.forEach((text, idx) => {
+        const meta = SECTION_META[idx] || { icon: '📌', color: 'rgba(255,255,255,0.05)', label: `SECTION ${idx + 1}`, title: 'Insight' };
+        const card = document.createElement('div');
+        card.className = 'section-card';
 
-    parts.forEach((part, idx) => {
-      if (!part.trim()) return;
-      // Remove the "SECTION N — Title" header line; keep the body
-      const lines = part.split('\n');
-      const body = lines.slice(1).join('\n').trim();
-      if (body) sections.push(body);
-    });
+        // Format body: bold lines starting with - or *
+        const formattedText = text
+          .replace(/\*\*(.+?)\*\*/g, '<strong class="highlight">$1</strong>')
+          .replace(/^[-•]\s+(.+)/gm, '<span class="bullet">$1</span>');
 
-    // Fallback: if no SECTION markers found, show as a single block
-    if (sections.length === 0) sections.push(text.trim());
-    return sections;
-  }
-
-  // ── Render sections ───────────────────────────────────────────────────────
-  function renderSections(sectionTexts) {
-    const container = document.getElementById('insight-sections');
-    container.innerHTML = '';
-
-    sectionTexts.forEach((text, idx) => {
-      const meta = SECTION_META[idx] || { icon: '📌', color: 'rgba(255,255,255,0.05)', label: `SECTION ${idx+1}`, title: 'Insight' };
-      const card = document.createElement('div');
-      card.className = 'section-card';
-
-      // Format body: bold lines starting with - or *
-      const formattedText = text
-        .replace(/\*\*(.+?)\*\*/g, '<strong class="highlight">$1</strong>')
-        .replace(/^[-•]\s+(.+)/gm, '<span class="bullet">$1</span>');
-
-      card.innerHTML = `
+        card.innerHTML = `
         <div class="section-header">
           <div class="section-icon" style="background:${meta.color}">${meta.icon}</div>
           <div class="section-meta">
@@ -395,99 +765,100 @@
         </div>
         <div class="section-body">${formattedText}</div>
       `;
-      container.appendChild(card);
-    });
+        container.appendChild(card);
+      });
 
-    block('insight-sections');
-  }
-
-  // ── Extract motivational line ─────────────────────────────────────────────
-  function extractMotivation(text) {
-    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
-    const last  = lines[lines.length - 1];
-    if (last && last.length < 200) return last;
-    return '💡 The best time to start investing was yesterday. The second best time is right now.';
-  }
-
-  // ── Main fetch ────────────────────────────────────────────────────────────
-  async function loadAdvisor() {
-    const user = JSON.parse(localStorage.getItem('user') || 'null');
-    if (!user) { window.location.href = './index.html'; return; }
-
-    // Update hero subtitle
-    document.getElementById('hero-sub').textContent =
-      `Personalised plan for ${user.Name || user.email} based on your real income, expenses & goals.`;
-
-    show('loading-state');
-    hide('error-state');
-    document.getElementById('insight-sections').style.display = 'none';
-    document.getElementById('alloc-section').style.display   = 'none';
-    document.getElementById('profile-strip').style.display   = 'none';
-    document.getElementById('motive-banner').style.display   = 'none';
-    document.getElementById('refresh-row').style.display     = 'none';
-
-    animateLoadingSteps();
-
-    try {
-      const data = await apiFetch(`/api/ai/investment-insight/${user.email}`);
-
-      // Profile strip
-      const income   = data.user_profile?.income   || 0;
-      const expenses = data.user_profile?.expenses  || 0;
-      const savings  = Math.max(0, income - expenses);
-      const rate     = income > 0 ? ((savings / income) * 100).toFixed(1) : 0;
-      const goal     = data.user_profile?.goal  || '—';
-      const risk     = data.user_profile?.risk  || '—';
-
-      document.getElementById('ps-income').textContent   = fmt(income);
-      document.getElementById('ps-expenses').textContent = fmt(expenses);
-      document.getElementById('ps-savings').textContent  = fmt(savings);
-      document.getElementById('ps-rate').textContent     = `${rate}%`;
-      document.getElementById('ps-goal').textContent     = goal;
-      document.getElementById('ps-risk').textContent     = risk.charAt(0).toUpperCase() + risk.slice(1);
-
-      // Allocation bar
-      const alloc = data.allocation || { equity: 30, debt: 50, cash: 20 };
-      setTimeout(() => {
-        document.getElementById('bar-equity').style.width = alloc.equity + '%';
-        document.getElementById('bar-debt').style.width   = alloc.debt   + '%';
-        document.getElementById('bar-cash').style.width   = alloc.cash   + '%';
-      }, 100);
-      document.getElementById('leg-equity').textContent = `Equity ${alloc.equity}%`;
-      document.getElementById('leg-debt').textContent   = `Debt ${alloc.debt}%`;
-      document.getElementById('leg-cash').textContent   = `Cash ${alloc.cash}%`;
-
-      // Sections
-      const sections = parseInsightIntoSections(data.insight || '');
-      renderSections(sections);
-
-      // Motivation
-      const motive = extractMotivation(data.insight || '');
-      document.getElementById('motive-text').textContent = motive;
-
-      // Show everything, hide loading
-      hide('loading-state');
-      document.getElementById('profile-strip').style.display  = 'flex';
-      document.getElementById('alloc-section').style.display  = 'block';
-      document.getElementById('motive-banner').style.display  = 'block';
-      document.getElementById('refresh-row').style.display    = 'flex';
-
-    } catch (err) {
-      hide('loading-state');
-      document.getElementById('error-msg').textContent = err.message || 'Something went wrong.';
-      show('error-state');
-      document.getElementById('refresh-row').style.display = 'flex';
+      block('insight-sections');
     }
-  }
 
-  // ── Wire buttons ──────────────────────────────────────────────────────────
-  document.getElementById('btn-back').addEventListener('click',  () => window.location.href = './dashboard.html');
-  document.getElementById('btn-back2').addEventListener('click', () => window.location.href = './dashboard.html');
-  document.getElementById('btn-retry').addEventListener('click', loadAdvisor);
-  document.getElementById('btn-regenerate').addEventListener('click', loadAdvisor);
+    // ── Extract motivational line ─────────────────────────────────────────────
+    function extractMotivation(text) {
+      const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+      const last = lines[lines.length - 1];
+      if (last && last.length < 200) return last;
+      return '💡 The best time to start investing was yesterday. The second best time is right now.';
+    }
 
-  // ── Boot ──────────────────────────────────────────────────────────────────
-  loadAdvisor();
-</script>
+    // ── Main fetch ────────────────────────────────────────────────────────────
+    async function loadAdvisor() {
+      const user = JSON.parse(localStorage.getItem('user') || 'null');
+      if (!user) { window.location.href = './index.html'; return; }
+
+      // Update hero subtitle
+      document.getElementById('hero-sub').textContent =
+        `Personalised plan for ${user.Name || user.email} based on your real income, expenses & goals.`;
+
+      show('loading-state');
+      hide('error-state');
+      document.getElementById('insight-sections').style.display = 'none';
+      document.getElementById('alloc-section').style.display = 'none';
+      document.getElementById('profile-strip').style.display = 'none';
+      document.getElementById('motive-banner').style.display = 'none';
+      document.getElementById('refresh-row').style.display = 'none';
+
+      animateLoadingSteps();
+
+      try {
+        const data = await apiFetch(`/api/ai/investment-insight/${user.email}`);
+
+        // Profile strip
+        const income = data.user_profile?.income || 0;
+        const expenses = data.user_profile?.expenses || 0;
+        const savings = Math.max(0, income - expenses);
+        const rate = income > 0 ? ((savings / income) * 100).toFixed(1) : 0;
+        const goal = data.user_profile?.goal || '—';
+        const risk = data.user_profile?.risk || '—';
+
+        document.getElementById('ps-income').textContent = fmt(income);
+        document.getElementById('ps-expenses').textContent = fmt(expenses);
+        document.getElementById('ps-savings').textContent = fmt(savings);
+        document.getElementById('ps-rate').textContent = `${rate}%`;
+        document.getElementById('ps-goal').textContent = goal;
+        document.getElementById('ps-risk').textContent = risk.charAt(0).toUpperCase() + risk.slice(1);
+
+        // Allocation bar
+        const alloc = data.allocation || { equity: 30, debt: 50, cash: 20 };
+        setTimeout(() => {
+          document.getElementById('bar-equity').style.width = alloc.equity + '%';
+          document.getElementById('bar-debt').style.width = alloc.debt + '%';
+          document.getElementById('bar-cash').style.width = alloc.cash + '%';
+        }, 100);
+        document.getElementById('leg-equity').textContent = `Equity ${alloc.equity}%`;
+        document.getElementById('leg-debt').textContent = `Debt ${alloc.debt}%`;
+        document.getElementById('leg-cash').textContent = `Cash ${alloc.cash}%`;
+
+        // Sections
+        const sections = parseInsightIntoSections(data.insight || '');
+        renderSections(sections);
+
+        // Motivation
+        const motive = extractMotivation(data.insight || '');
+        document.getElementById('motive-text').textContent = motive;
+
+        // Show everything, hide loading
+        hide('loading-state');
+        document.getElementById('profile-strip').style.display = 'flex';
+        document.getElementById('alloc-section').style.display = 'block';
+        document.getElementById('motive-banner').style.display = 'block';
+        document.getElementById('refresh-row').style.display = 'flex';
+
+      } catch (err) {
+        hide('loading-state');
+        document.getElementById('error-msg').textContent = err.message || 'Something went wrong.';
+        show('error-state');
+        document.getElementById('refresh-row').style.display = 'flex';
+      }
+    }
+
+    // ── Wire buttons ──────────────────────────────────────────────────────────
+    document.getElementById('btn-back').addEventListener('click', () => window.location.href = './dashboard.html');
+    document.getElementById('btn-back2').addEventListener('click', () => window.location.href = './dashboard.html');
+    document.getElementById('btn-retry').addEventListener('click', loadAdvisor);
+    document.getElementById('btn-regenerate').addEventListener('click', loadAdvisor);
+
+    // ── Boot ──────────────────────────────────────────────────────────────────
+    loadAdvisor();
+  </script>
 </body>
+
 </html>
