@@ -19,6 +19,7 @@
       padding: 0;
     }
 
+    /* ── Dark theme (default) ── */
     :root {
       --bg: #090d1a;
       --surface: rgba(255, 255, 255, 0.04);
@@ -30,7 +31,27 @@
       --emerald: #10b981;
       --amber: #f59e0b;
       --red: #ef4444;
+      --section-body-color: #94a3b8;
+      --back-hover: rgba(255, 255, 255, 0.07);
     }
+
+    /* ── Light theme ── */
+    html.light {
+      --bg: #f8fafc;
+      --surface: rgba(0, 0, 0, 0.03);
+      --border: rgba(0, 0, 0, 0.09);
+      --text: #0f172a;
+      --muted: #64748b;
+      --section-body-color: #475569;
+      --back-hover: rgba(0, 0, 0, 0.06);
+    }
+    html.light body::before {
+      background:
+        radial-gradient(ellipse 80% 50% at 20% 10%, rgba(99, 102, 241, 0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 60%);
+    }
+    html.light .section-body { color: var(--section-body-color); }
+    html.light .motive-banner p { color: #4f46e5; }
 
     body {
       font-family: 'Inter', sans-serif;
@@ -142,7 +163,9 @@
       font-style: normal;
       background: linear-gradient(90deg, #6366f1, #8b5cf6, #a78bfa);
       -webkit-background-clip: text;
+      background-clip: text;
       -webkit-text-fill-color: transparent;
+      color: transparent;
     }
 
     .hero-sub {
@@ -370,7 +393,6 @@
     /* ── Section cards ── */
     #insight-sections {
       display: none;
-      space-y: 1.5rem;
     }
 
     .section-card {
@@ -459,7 +481,7 @@
     }
 
     .section-body {
-      color: #94a3b8;
+      color: var(--section-body-color);
       font-size: 0.875rem;
       line-height: 1.85;
       white-space: pre-wrap;
@@ -540,6 +562,27 @@
       color: var(--muted);
     }
 
+    /* ── Theme toggle button ── */
+    .theme-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 13px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background .2s, color .2s;
+      flex-shrink: 0;
+    }
+    .theme-btn:hover { background: var(--back-hover); color: var(--text); }
+
+    /* Fix: #insight-sections space-y is not valid CSS — use margin on children instead */
+    #insight-sections { display: none; }
+
     @media(max-width:600px) {
       .hero h1 {
         font-size: 1.5rem;
@@ -571,8 +614,13 @@
           Groq LLaMA-3 · Live AI
         </div>
         <h1>Your <em>AI Financial Plan</em></h1>
-        <p class="hero-sub" id="hero-sub">Personalised advice based on your real income, expenses & goals.</p>
+        <p class="hero-sub" id="hero-sub">Personalised advice based on your real income, expenses &amp; goals.</p>
       </div>
+      <!-- Theme Toggle -->
+      <button class="theme-btn" id="btn-theme" title="Toggle light/dark mode">
+        <span id="theme-icon">☀️</span>
+        <span id="theme-label">Light</span>
+      </button>
     </div>
 
     <!-- Profile Strip -->
@@ -855,6 +903,26 @@
     document.getElementById('btn-back2').addEventListener('click', () => window.location.href = './dashboard.html');
     document.getElementById('btn-retry').addEventListener('click', loadAdvisor);
     document.getElementById('btn-regenerate').addEventListener('click', loadAdvisor);
+
+    // ── Theme toggle ──────────────────────────────────────────────────────────
+    function applyTheme(theme) {
+      if (theme === 'light') {
+        document.documentElement.classList.add('light');
+        document.getElementById('theme-icon').textContent = '🌙';
+        document.getElementById('theme-label').textContent = 'Dark';
+      } else {
+        document.documentElement.classList.remove('light');
+        document.getElementById('theme-icon').textContent = '☀️';
+        document.getElementById('theme-label').textContent = 'Light';
+      }
+      localStorage.setItem('theme', theme);
+    }
+    // Apply saved preference on load
+    applyTheme(localStorage.getItem('theme') || 'dark');
+    document.getElementById('btn-theme').addEventListener('click', () => {
+      const isLight = document.documentElement.classList.contains('light');
+      applyTheme(isLight ? 'dark' : 'light');
+    });
 
     // ── Boot ──────────────────────────────────────────────────────────────────
     loadAdvisor();
