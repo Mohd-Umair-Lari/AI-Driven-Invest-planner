@@ -536,13 +536,15 @@ def investment_insight(email):
     if not user:
         return jsonify({"status": "error", "message": "User not found"}), 404
 
-    financials = user.get("financials", {})
-    goal = user.get("Goal", {})
+    financials  = user.get("financials", {})
+    goal        = user.get("Goal", {})
     investments = user.get("investments", {})
 
-    income = float(financials.get("monthly-income") or 0)
-    expenses = float(financials.get("monthly-expenses") or 0)
-    risk = goal.get("risk", "moderate")
+    income      = float(financials.get("monthly-income") or 0)
+    expenses    = float(financials.get("monthly-expenses") or 0)
+    debt        = float(financials.get("debt") or 0)
+    invest_amt  = float(investments.get("invest-amt") or 0)
+    risk        = goal.get("risk", "moderate")
 
     if income == 0:
         return jsonify({
@@ -551,31 +553,36 @@ def investment_insight(email):
         }), 400
 
     user_profile = {
-        "income": income,
-        "expenses": expenses,
-        "risk": risk,
-        "goal": goal.get("goal", "Wealth Building")
+        "income":      income,
+        "expenses":    expenses,
+        "debt":        debt,
+        "invest_amt":  invest_amt,
+        "risk":        risk,
+        "goal":        goal.get("goal", "Wealth Building"),
+        "target_amt":  float(goal.get("target-amt") or 0),
+        "target_time": int(goal.get("target-time") or 0)
     }
     allocation = {
         "equity": 60 if risk == "high" else 50 if risk == "medium" else 30,
-        "debt": 25 if risk == "high" else 35 if risk == "medium" else 50,
-        "cash": 15 if risk == "high" else 15 if risk == "medium" else 20
+        "debt":   25 if risk == "high" else 35 if risk == "medium" else 50,
+        "cash":   15 if risk == "high" else 15 if risk == "medium" else 20
     }
 
     try:
         insight = generate_investment_insight(user_profile, allocation)
         return jsonify({
-            "status": "success",
-            "email": email,
+            "status":       "success",
+            "email":        email,
             "user_profile": user_profile,
-            "allocation": allocation,
-            "insight": insight
+            "allocation":   allocation,
+            "insight":      insight
         })
     except Exception as e:
         return jsonify({
-            "status": "error",
+            "status":  "error",
             "message": f"AI insight generation failed: {str(e)}"
         }), 500
+
 
 @app.route("/api/agent/<email>", methods=["GET"])
 def agent_api(email):
