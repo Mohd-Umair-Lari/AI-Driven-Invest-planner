@@ -560,7 +560,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     document.getElementById('btn-agent')?.addEventListener('click', () => {
-      alert('🤖 AI Advisor feature coming soon!');
+      window.location.href = './advisor.html';
     });
 
     console.log("✅ Dashboard Ready");
