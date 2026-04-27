@@ -9,7 +9,7 @@ from pymongo import MongoClient
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
 import certifi
-from vertex_service import initialize_vertex, generate_financial_insights
+from groq_service import initialize_groq, generate_financial_insights
 from agent.financial_agent import generate_investment_insight
 
 from analytics.financial_analytics import compute_financial_health
@@ -22,7 +22,7 @@ from routes.intelligence_routes import intelligence_bp
 env_path = os.path.join(os.path.dirname(__file__), "nosave", ".env")
 load_dotenv(dotenv_path=env_path)
 try:
-    initialize_vertex()
+    initialize_groq()
 except Exception as e:
     print(f"⚠️ Groq AI initialization skipped: {e}")
 

@@ -1,5 +1,5 @@
-# groq_service.py (replaces vertex_service.py)
-# All Vertex AI / Gemini logic removed. Now powered by Groq (LLaMA-3).
+# groq_service.py
+# Groq (LLaMA-3) powered AI service for financial insights.
 
 import os
 from groq import Groq
@@ -7,33 +7,31 @@ from groq import Groq
 _client = None
 
 
-def initialize_vertex():
-    """
-    Previously initialised Vertex AI. Now validates the Groq client on startup.
-    Raises EnvironmentError if GROQ_API_KEY is missing.
-    """
-    global _client
-    api_key = os.environ.get("GROQ_API_KEY")
-    if not api_key:
-        raise EnvironmentError(
-            "GROQ_API_KEY env var is not set. AI features will be unavailable."
-        )
-    _client = Groq(api_key=api_key)
-
-
 def _get_client() -> Groq:
+    """Lazily initialise and return the Groq client."""
     global _client
     if _client is None:
         api_key = os.environ.get("GROQ_API_KEY")
         if not api_key:
-            raise EnvironmentError("GROQ_API_KEY is not set.")
+            raise EnvironmentError(
+                "GROQ_API_KEY is not set. AI features will be unavailable."
+            )
         _client = Groq(api_key=api_key)
     return _client
 
 
+def initialize_groq():
+    """
+    Validates the Groq client on application startup.
+    Raises EnvironmentError if GROQ_API_KEY is missing.
+    """
+    _get_client()
+    print("✅ Groq AI client initialised successfully.")
+
+
 def generate_financial_insights(user_data: dict) -> str:
     """
-    Generate structured financial insights using Groq (LLaMA-3).
+    Generate structured financial insights using Groq (LLaMA-3.1-8b-instant).
     Returns a JSON array string.
     """
     client = _get_client()
