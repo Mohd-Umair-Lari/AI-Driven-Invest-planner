@@ -197,11 +197,7 @@ All recommendations are intended to support user understanding and decision-maki
 
 Developed as a focused, system-driven financial AI project with an emphasis on clarity, safety, and long-term thinking.
 
-## Bugs
-
-
-Vertex AI was producing a lot of isues regarding the billing as well as the models were getting deprecated, so I stopped working on it, However I'll try to integrate the latest AI features using Groq AI.
-
+## Bugs & Future Scope of the work intentional
 ```
 # Future Plans
 Need to integrate the latest AI features and will change the stack for the sake of interface, will try to integrate selected frameworks.

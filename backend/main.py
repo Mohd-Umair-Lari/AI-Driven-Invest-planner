@@ -1,34 +1,38 @@
 import os
 import re
-import json
 from datetime import datetime
 from bson import ObjectId
-from flask import Flask, request, jsonify, Blueprint
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 from pymongo import MongoClient
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
 import certifi
-from groq_service import initialize_groq, generate_financial_insights
-from agent.financial_agent import generate_investment_insight
-
+from groq_service import initialize_groq
 from analytics.financial_analytics import compute_financial_health
 from ml.goal_predictor import generate_plan, goal_probability
 from ml.goal_intelligence import compute_goal_intelligence
 from agent.financial_agent import run_agent
 from routes.intelligence_routes import intelligence_bp
 
-
-env_path = os.path.join(os.path.dirname(__file__), "nosave", ".env")
-load_dotenv(dotenv_path=env_path)
+# Load environment variables from .env file in backend root directory
+load_dotenv()
+# Initialize Groq AI (optional - gracefully handle if unavailable)
 try:
     initialize_groq()
+    print("✅ Groq AI initialized successfully")
 except Exception as e:
     print(f"⚠️ Groq AI initialization skipped: {e}")
 
+# Environment Variables
 MONGO_URI = os.getenv("MONGO_URI", "").strip()
+if not MONGO_URI:
+    raise ValueError("❌ MONGO_URI environment variable is not set. Please configure it in .env")
+
 DB_NAME = os.getenv("DB_NAME", "mockDB").strip()
 COLLECTION_NAME = os.getenv("COLLECTION_NAME", "userGoals").strip()
+FLASK_ENV = os.getenv("FLASK_ENV", "development").strip()
+PORT = int(os.getenv("PORT", 5000))
 
 app = Flask(__name__)
 # CORS configuration: Allow all Vercel deployments + localhost + production domain
