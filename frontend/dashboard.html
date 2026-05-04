@@ -301,76 +301,68 @@
 
             <div id="content-cashflow" class="content-tab hidden">
                 <div class="panel-card p-8 flex flex-col">
-                    <div class="flex justify-between items-center mb-6">
+                    <div class="flex justify-between items-center mb-8">
                         <h3 class="text-2xl font-bold text-slate-900 dark:text-white transition-colors">Monthly Cash Flow Analysis</h3>
-                        <p class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Visualizing Income Distribution</p>
+                        <p class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Income Distribution</p>
                     </div>
                     
-                    <div class="border border-slate-100 dark:border-slate-700 rounded-xl p-8 transition-colors">
-                        <!-- Chart and Legend Row -->
-                        <div class="flex flex-col lg:flex-row items-center justify-between gap-12 mb-8">
-                            <!-- SVG Diagram -->
-                            <div class="flex-1 min-h-[300px] w-full lg:w-auto">
-                                <!-- SVG Paths -->
-                                <svg class="w-full h-[300px]" preserveAspectRatio="xMidYMid meet" viewBox="0 0 100 100">
-                                    <!-- Left Node (Income) -->
-                                    <rect x="2" y="25" width="4" height="50" fill="#3b82f6" rx="1"/>
-                                    
-                                    <!-- Income to Expenses (Red) -->
-                                    <path d="M 6 50 C 50 50, 50 15, 94 15" stroke="#ef4444" stroke-width="25" fill="none" opacity="0.6"/>
-                                    <!-- Income to Debt (Yellow) -->
-                                    <path d="M 6 50 C 50 50, 50 40, 94 40" stroke="#f59e0b" stroke-width="8" fill="none" opacity="0.6"/>
-                                    <!-- Income to Investments (Green) -->
-                                    <path d="M 6 50 C 50 50, 50 65, 94 65" stroke="#10b981" stroke-width="20" fill="none" opacity="0.6"/>
-                                    <!-- Income to Surplus (Purple) -->
-                                    <path d="M 6 50 C 50 50, 50 85, 94 85" stroke="#818cf8" stroke-width="22" fill="none" opacity="0.6"/>
-                                </svg>
+                    <!-- Main Content Container -->
+                    <div class="space-y-8">
+                        <!-- Chart Section -->
+                        <div class="border border-slate-100 dark:border-slate-700 rounded-xl p-8 bg-white dark:bg-slate-800/50" style="height: 400px;">
+                            <canvas id="cashFlowChart"></canvas>
+                        </div>
+
+                        <!-- Legend Section -->
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div class="border border-slate-100 dark:border-slate-700 rounded-xl p-6 bg-white dark:bg-slate-800/50 hover:border-indigo-200 dark:hover:border-indigo-500/50 transition-all">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <div class="w-4 h-4 rounded-full bg-rose-500"></div>
+                                    <h4 class="font-semibold text-slate-700 dark:text-slate-200">Living Expenses</h4>
+                                </div>
+                                <p class="text-2xl font-bold text-rose-600 dark:text-rose-400">₹45,000</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">45% of income</p>
                             </div>
 
-                            <!-- Labels Column -->
-                            <div class="space-y-4 min-w-[250px]">
-                                <div class="flex items-center gap-4 p-3 bg-slate-50 dark:bg-slate-700/30 rounded-lg">
-                                    <div class="w-4 h-10 bg-rose-500 rounded-sm flex-shrink-0"></div>
-                                    <div class="flex flex-col flex-1">
-                                        <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">Living Expenses</span>
-                                        <span class="text-lg font-bold text-rose-600 dark:text-rose-400">₹45,000</span>
-                                    </div>
+                            <div class="border border-slate-100 dark:border-slate-700 rounded-xl p-6 bg-white dark:bg-slate-800/50 hover:border-indigo-200 dark:hover:border-indigo-500/50 transition-all">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <div class="w-4 h-4 rounded-full bg-amber-500"></div>
+                                    <h4 class="font-semibold text-slate-700 dark:text-slate-200">Debt Repayment</h4>
                                 </div>
-                                <div class="flex items-center gap-4 p-3 bg-slate-50 dark:bg-slate-700/30 rounded-lg">
-                                    <div class="w-4 h-4 bg-amber-500 rounded-sm flex-shrink-0"></div>
-                                    <div class="flex flex-col flex-1">
-                                        <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">Debt Repayment</span>
-                                        <span class="text-lg font-bold text-amber-600 dark:text-amber-400">₹12,000</span>
-                                    </div>
+                                <p class="text-2xl font-bold text-amber-600 dark:text-amber-400">₹12,000</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">8% of income</p>
+                            </div>
+
+                            <div class="border border-slate-100 dark:border-slate-700 rounded-xl p-6 bg-white dark:bg-slate-800/50 hover:border-indigo-200 dark:hover:border-indigo-500/50 transition-all">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <div class="w-4 h-4 rounded-full bg-emerald-500"></div>
+                                    <h4 class="font-semibold text-slate-700 dark:text-slate-200">Investable Surplus</h4>
                                 </div>
-                                <div class="flex items-center gap-4 p-3 bg-slate-50 dark:bg-slate-700/30 rounded-lg">
-                                    <div class="w-4 h-8 bg-emerald-500 rounded-sm flex-shrink-0"></div>
-                                    <div class="flex flex-col flex-1">
-                                        <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">Investable Surplus</span>
-                                        <span class="text-lg font-bold text-emerald-600 dark:text-emerald-400">₹41,667</span>
-                                    </div>
-                                </div>
+                                <p class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">₹41,667</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">47% savings rate</p>
                             </div>
                         </div>
 
-                        <!-- Stats Row -->
-                        <div class="flex flex-col sm:flex-row gap-6 pt-6 border-t border-slate-100 dark:border-slate-700">
-                            <div class="flex-1">
-                                <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold mb-2">Savings Rate</p>
+                        <!-- Stats Section -->
+                        <div class="grid grid-cols-3 gap-4 p-6 bg-slate-50 dark:bg-slate-700/30 rounded-xl border border-slate-100 dark:border-slate-700">
+                            <div class="text-center">
+                                <p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold mb-2">Savings Rate</p>
                                 <p class="text-3xl font-bold text-emerald-600 dark:text-emerald-400">62%</p>
                             </div>
-                            <div class="flex-1">
-                                <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold mb-2">Debt Ratio</p>
+                            <div class="text-center">
+                                <p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold mb-2">Debt Ratio</p>
                                 <p class="text-3xl font-bold text-amber-600 dark:text-amber-400">8%</p>
                             </div>
-                            <div class="flex-1">
-                                <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold mb-2">Expense Ratio</p>
+                            <div class="text-center">
+                                <p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold mb-2">Expense Ratio</p>
                                 <p class="text-3xl font-bold text-rose-600 dark:text-rose-400">45%</p>
                             </div>
                         </div>
 
                         <!-- Note -->
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-6 italic">*Investment flow is calculated as a monthly equivalent of your total portfolio allocation.</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 italic p-4 bg-slate-50 dark:bg-slate-700/20 rounded-lg border border-slate-100 dark:border-slate-700">
+                            * These percentages are calculated based on your monthly income and current allocation across various financial goals.
+                        </p>
                     </div>
                 </div>
             </div>
