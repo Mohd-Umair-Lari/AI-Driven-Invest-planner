@@ -330,6 +330,9 @@ def api_update_user(email):
     data = request.get_json(silent=True) or {}
 
     update = {
+        "Name": data.get("Name", ""),
+        "Age": str(data.get("Age", "")),
+        "employment-status": data.get("employment-status", ""),
         "Goal": data.get("Goal", {}),
         "financials": data.get("financials", {}),
         "investments": data.get("investments", {}),
@@ -344,6 +347,7 @@ def api_update_user(email):
     if result.matched_count == 0:
         return jsonify({"status": "error", "message": "User not found"}), 404
 
+    print(f"✅ User profile updated: {email}")
     return jsonify({"status": "success"})
 
 @app.route("/api/analytics/<email>", methods=["GET"])

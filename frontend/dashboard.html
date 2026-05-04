@@ -117,55 +117,58 @@
             <div id="content-dashboard" class="content-tab">
             <!-- Stat Cards -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
-                <!-- Card 1 -->
-                <div class="stat-card">
+                <!-- Card 1: Income -->
+                <div class="stat-card hover:shadow-md">
                     <div class="flex justify-between items-start mb-4">
-                        <div class="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 transition-colors">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/40 dark:to-blue-800/20 flex items-center justify-center text-blue-600 dark:text-blue-300 transition-colors shadow-sm">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
                         </div>
-                        <span class="text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-md tracking-wider transition-colors">+4.8%</span>
+                        <span class="text-[10px] font-bold text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 px-2.5 py-1 rounded-md tracking-wider transition-colors">+4.8%</span>
                     </div>
-                    <p class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1 transition-colors">Monthly Income</p>
+                    <p class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 transition-colors">Monthly Income</p>
                     <h3 class="text-2xl font-bold text-slate-900 dark:text-white transition-colors" id="metric-income">₹1,50,000</h3>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-3 transition-colors">Gross income for this month</p>
                 </div>
 
-                <!-- Card 2 -->
-                <div class="stat-card">
+                <!-- Card 2: Portfolio -->
+                <div class="stat-card hover:shadow-md">
                     <div class="flex justify-between items-start mb-4">
-                        <div class="w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 transition-colors">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-100 to-emerald-50 dark:from-emerald-900/40 dark:to-emerald-800/20 flex items-center justify-center text-emerald-600 dark:text-emerald-300 transition-colors shadow-sm">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
                         </div>
-                        <span class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-2 py-1 rounded-md tracking-wider transition-colors">MEDIUM</span>
+                        <span class="text-[10px] font-bold text-indigo-600 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-900/30 px-2.5 py-1 rounded-md tracking-wider transition-colors">MEDIUM</span>
                     </div>
-                    <p class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1 transition-colors">Total Portfolio</p>
+                    <p class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 transition-colors">Total Portfolio</p>
                     <h3 class="text-2xl font-bold text-slate-900 dark:text-white transition-colors" id="metric-portfolio">₹5,00,000</h3>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-3 transition-colors">Current investment value</p>
                 </div>
 
-                <!-- Card 3 -->
-                <div class="stat-card">
+                <!-- Card 3: Goal Target -->
+                <div class="stat-card hover:shadow-md">
                     <div class="flex justify-between items-start mb-4">
-                        <div class="w-8 h-8 rounded-full bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400 transition-colors">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-100 to-purple-50 dark:from-purple-900/40 dark:to-purple-800/20 flex items-center justify-center text-purple-600 dark:text-purple-300 transition-colors shadow-sm">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                         </div>
                     </div>
-                    <p class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1 transition-colors">Goal Target</p>
+                    <p class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 transition-colors">Goal Target</p>
                     <h3 class="text-2xl font-bold text-slate-900 dark:text-white transition-colors" id="metric-goal-target">₹21,00,000</h3>
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1 transition-colors">
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-3 flex items-center gap-1 transition-colors">
                         <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         <span id="metric-goal-name">Luxury Car</span>
                     </p>
                 </div>
 
-                <!-- Card 4 -->
-                <div class="stat-card">
+                <!-- Card 4: Debt -->
+                <div class="stat-card hover:shadow-md">
                     <div class="flex justify-between items-start mb-4">
-                        <div class="w-8 h-8 rounded-full bg-red-50 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-400 transition-colors">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-red-100 to-red-50 dark:from-red-900/40 dark:to-red-800/20 flex items-center justify-center text-red-600 dark:text-red-300 transition-colors shadow-sm">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         </div>
-                        <span class="text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-md tracking-wider transition-colors">ACTIVE</span>
+                        <span class="text-[10px] font-bold text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 px-2.5 py-1 rounded-md tracking-wider transition-colors">ACTIVE</span>
                     </div>
-                    <p class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1 transition-colors">Monthly Debt</p>
+                    <p class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 transition-colors">Monthly Debt</p>
                     <h3 class="text-2xl font-bold text-slate-900 dark:text-white transition-colors" id="metric-debt">₹12,000</h3>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-3 transition-colors">Active debt obligations</p>
                 </div>
             </div>
 
@@ -356,23 +359,105 @@
             </div>
 
             <div id="content-profile" class="content-tab hidden">
-                <div class="panel-card p-8 flex flex-col min-h-[400px]">
-                    <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-6 border-b border-slate-100 dark:border-slate-700 pb-4">My Profile Settings</h3>
-                    <div class="space-y-6 max-w-2xl">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Display Name</label>
-                            <input type="text" class="input-field" value="Aditya Sharma" disabled>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Email Address</label>
-                            <input type="email" class="input-field" value="aditya@example.com" disabled>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Risk Tolerance</label>
-                            <select class="select-field"><option>Moderate</option><option>Aggressive</option></select>
-                        </div>
-                        <button class="btn-primary mt-4 max-w-[200px] text-sm">Save Changes</button>
+                <div class="profile-section">
+                    <div class="profile-header">
+                        <h3 class="profile-title">My Profile Settings</h3>
+                        <button id="profile-edit-btn" class="profile-edit-btn">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            Edit Profile
+                        </button>
                     </div>
+
+                    <!-- Success/Error Messages -->
+                    <div id="profile-success" class="success-message">
+                        ✓ Profile updated successfully!
+                    </div>
+                    <div id="profile-error" class="error-message">
+                        ✗ Failed to update profile. Please try again.
+                    </div>
+
+                    <!-- Profile Read-Only View -->
+                    <div id="profile-read-only" class="profile-read-only">
+                        <div class="profile-item">
+                            <label class="profile-item-label">Full Name</label>
+                            <span class="profile-item-value" id="profile-name-display">-</span>
+                        </div>
+                        <div class="profile-item">
+                            <label class="profile-item-label">Email Address</label>
+                            <span class="profile-item-value" id="profile-email-display">-</span>
+                        </div>
+                        <div class="profile-item">
+                            <label class="profile-item-label">Age</label>
+                            <span class="profile-item-value" id="profile-age-display">-</span>
+                        </div>
+                        <div class="profile-item">
+                            <label class="profile-item-label">Employment Status</label>
+                            <span class="profile-item-value" id="profile-employment-display">-</span>
+                        </div>
+                        <div class="profile-item">
+                            <label class="profile-item-label">Monthly Income</label>
+                            <span class="profile-item-value" id="profile-income-display">-</span>
+                        </div>
+                        <div class="profile-item">
+                            <label class="profile-item-label">Monthly Expenses</label>
+                            <span class="profile-item-value" id="profile-expenses-display">-</span>
+                        </div>
+                        <div class="profile-item">
+                            <label class="profile-item-label">Risk Appetite</label>
+                            <span class="profile-item-value" id="profile-risk-display">-</span>
+                        </div>
+                    </div>
+
+                    <!-- Profile Edit Form (Hidden by Default) -->
+                    <form id="profile-edit-form" style="display: none;">
+                        <div class="profile-form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" id="edit-name" class="form-input" placeholder="Your Name" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Email Address</label>
+                                <input type="email" id="edit-email" class="form-input" placeholder="your@email.com" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Age</label>
+                                <input type="number" id="edit-age" class="form-input" placeholder="25" min="18" max="100">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Employment Status</label>
+                                <select id="edit-employment" class="form-select">
+                                    <option value="">Select Status</option>
+                                    <option value="Salaried">Salaried</option>
+                                    <option value="Self-Employed">Self-Employed</option>
+                                    <option value="Freelancer">Freelancer</option>
+                                    <option value="Unemployed">Unemployed</option>
+                                    <option value="Retired">Retired</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Monthly Income (₹)</label>
+                                <input type="number" id="edit-income" class="form-input" placeholder="75000" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Monthly Expenses (₹)</label>
+                                <input type="number" id="edit-expenses" class="form-input" placeholder="45000" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Risk Appetite</label>
+                                <select id="edit-risk" class="form-select">
+                                    <option value="">Select Risk Level</option>
+                                    <option value="Low">Low</option>
+                                    <option value="Moderate">Moderate</option>
+                                    <option value="High">High</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="profile-actions">
+                            <button type="button" id="profile-cancel-btn" class="btn-cancel">Cancel</button>
+                            <button type="submit" class="btn-save">Save Changes</button>
+                        </div>
+                    </form>
                 </div>
             </div>
 
