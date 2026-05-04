@@ -4,6 +4,7 @@ console.log("📊 Dashboard Initializing...");
 
 let charts = {};
 let currentUser = null;
+let metricsData = {}; // Store metrics for chart recreation
 
 // ===== HELPERS =====
 function formatCurrency(value) {
@@ -75,10 +76,14 @@ function populateMetrics(user) {
 
   // Draw chart
   const surplus = Math.max(0, income - expenses - debt);
+  
+  // Store metrics globally for later recreation
+  metricsData = { income, expenses, debt, surplus, portfolio };
+  
   createCashFlowChart(debt, surplus, expenses);
 
   console.log("💰 Metrics populated");
-  return { income, expenses, debt, surplus, portfolio };
+  return metricsData;
 }
 
 // ===== POPULATE GOAL DATA =====
@@ -190,12 +195,12 @@ function setupNavigation() {
             populateProfileData();
           }
           if (targetId === 'cashflow') {
-            // Trigger chart resize when tab becomes visible
+            // Recreate chart when cashflow tab becomes visible
             setTimeout(() => {
-              if (charts.cashFlow) {
-                charts.cashFlow.resize();
+              if (metricsData.debt !== undefined) {
+                createCashFlowChart(metricsData.debt, metricsData.surplus, metricsData.expenses);
               }
-            }, 100);
+            }, 50);
           }
         } else {
           tab.classList.add('hidden');
