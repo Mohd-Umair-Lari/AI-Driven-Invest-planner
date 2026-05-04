@@ -308,11 +308,67 @@
                     
                     <!-- Main Content Container -->
                     <div class="space-y-8">
-                        <!-- Chart Section -->
-                        <div class="border border-slate-100 dark:border-slate-700 rounded-xl p-8 bg-white dark:bg-slate-800/50" style="height: 400px; display: flex; align-items: center; justify-content: center;">
-                            <div style="width: 100%; height: 100%; position: relative;">
-                                <canvas id="cashFlowChartTab" style="display: block;"></canvas>
-                            </div>
+                        <!-- Chart Section - Sankey Diagram -->
+                        <div class="border border-slate-100 dark:border-slate-700 rounded-xl p-8 bg-white dark:bg-slate-800/50">
+                            <svg class="w-full h-96" preserveAspectRatio="xMidYMid meet" viewBox="0 0 1200 400" style="background: transparent;">
+                                <!-- Income Source Bar (Left) -->
+                                <rect x="20" y="120" width="20" height="160" fill="#3b82f6" rx="3"/>
+                                <text x="50" y="210" font-size="14" font-weight="bold" fill="#1e293b" class="dark:fill-white">Monthly Income</text>
+                                <text x="50" y="230" font-size="12" fill="#64748b">₹1,50,000</text>
+                                
+                                <!-- SVG Paths for flows -->
+                                <defs>
+                                    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:0.3" />
+                                        <stop offset="100%" style="stop-color:#ef4444;stop-opacity:0.6" />
+                                    </linearGradient>
+                                    <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:0.3" />
+                                        <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:0.6" />
+                                    </linearGradient>
+                                    <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:0.3" />
+                                        <stop offset="100%" style="stop-color:#10b981;stop-opacity:0.6" />
+                                    </linearGradient>
+                                    <linearGradient id="grad4" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:0.3" />
+                                        <stop offset="100%" style="stop-color:#818cf8;stop-opacity:0.6" />
+                                    </linearGradient>
+                                </defs>
+                                
+                                <!-- Flow to Expenses (Top) -->
+                                <path d="M 40 150 Q 400 100, 850 100" stroke="url(#grad1)" stroke-width="60" fill="none" opacity="0.7"/>
+                                
+                                <!-- Flow to Debt Repayment -->
+                                <path d="M 40 200 Q 400 180, 850 180" stroke="url(#grad2)" stroke-width="20" fill="none" opacity="0.7"/>
+                                
+                                <!-- Flow to Investments -->
+                                <path d="M 40 220 Q 400 260, 850 260" stroke="url(#grad3)" stroke-width="50" fill="none" opacity="0.7"/>
+                                
+                                <!-- Flow to Surplus Savings -->
+                                <path d="M 40 270 Q 400 320, 850 320" stroke="url(#grad4)" stroke-width="55" fill="none" opacity="0.7"/>
+                                
+                                <!-- Right side boxes with labels -->
+                                <!-- Expenses Box -->
+                                <rect x="850" y="70" width="300" height="60" fill="#f3f4f6" class="dark:fill-slate-700" stroke="#e5e7eb" stroke-width="1" rx="8"/>
+                                <text x="870" y="92" font-size="13" font-weight="600" fill="#1e293b" class="dark:fill-slate-200">Living Expenses</text>
+                                <text x="870" y="115" font-size="16" font-weight="bold" fill="#dc2626">₹45,000</text>
+                                
+                                <!-- Debt Repayment Box -->
+                                <rect x="850" y="150" width="300" height="60" fill="#f3f4f6" class="dark:fill-slate-700" stroke="#e5e7eb" stroke-width="1" rx="8"/>
+                                <text x="870" y="172" font-size="13" font-weight="600" fill="#1e293b" class="dark:fill-slate-200">Debt Repayment</text>
+                                <text x="870" y="195" font-size="16" font-weight="bold" fill="#d97706">₹12,000</text>
+                                
+                                <!-- Investments Box -->
+                                <rect x="850" y="230" width="300" height="60" fill="#f3f4f6" class="dark:fill-slate-700" stroke="#e5e7eb" stroke-width="1" rx="8"/>
+                                <text x="870" y="252" font-size="13" font-weight="600" fill="#1e293b" class="dark:fill-slate-200">Investments</text>
+                                <text x="870" y="275" font-size="16" font-weight="bold" fill="#059669">₹41,667</text>
+                                
+                                <!-- Surplus Savings Box -->
+                                <rect x="850" y="310" width="300" height="60" fill="#f3f4f6" class="dark:fill-slate-700" stroke="#e5e7eb" stroke-width="1" rx="8"/>
+                                <text x="870" y="332" font-size="13" font-weight="600" fill="#1e293b" class="dark:fill-slate-200">Surplus Savings</text>
+                                <text x="870" y="355" font-size="16" font-weight="bold" fill="#6366f1">₹51,333</text>
+                            </svg>
                         </div>
 
                         <!-- Legend Section -->

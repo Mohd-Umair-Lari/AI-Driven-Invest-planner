@@ -202,12 +202,8 @@ function setupNavigation() {
             populateProfileData();
           }
           if (targetId === 'cashflow') {
-            // Create chart on the cashflow tab canvas when tab becomes visible
-            setTimeout(() => {
-              if (metricsData.debt !== undefined) {
-                createCashFlowChart(metricsData.debt, metricsData.surplus, metricsData.expenses, 'cashFlowChartTab');
-              }
-            }, 100);
+            // Cash flow tab - Sankey diagram is static SVG, no chart creation needed
+            console.log("📊 Cash flow tab opened");
           }
         } else {
           tab.classList.add('hidden');
