@@ -158,7 +158,7 @@ window.logout = () => {
   if (confirm('Are you sure you want to logout?')) {
     localStorage.removeItem('user');
     localStorage.removeItem('onboardingCompleted');
-    window.location.href = '/login.html';
+    window.location.href = '/';
   }
 };
 
