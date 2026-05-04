@@ -830,7 +830,7 @@
     // ── Main fetch ────────────────────────────────────────────────────────────
     async function loadAdvisor() {
       const user = JSON.parse(localStorage.getItem('user') || 'null');
-      if (!user) { window.location.href = './index.html'; return; }
+      if (!user) { window.location.href = './login.html'; return; }
 
       // Update hero subtitle
       document.getElementById('hero-sub').textContent =

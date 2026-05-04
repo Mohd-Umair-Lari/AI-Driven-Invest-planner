@@ -33,7 +33,7 @@ function safeExtract(obj, path, defaultVal = 0) {
 async function loadUserData() {
   let user = JSON.parse(localStorage.getItem("user"));
   if (!user) {
-    window.location.href = "/index.html";
+    window.location.href = "/login.html";
     return null;
   }
 
@@ -529,7 +529,7 @@ window.logout = () => {
   if (confirm('Are you sure you want to logout?')) {
     localStorage.removeItem('user');
     localStorage.removeItem('onboardingCompleted');
-    window.location.href = '/index.html';
+    window.location.href = '/login.html';
   }
 };
 
