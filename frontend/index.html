@@ -103,24 +103,116 @@
             <div class="mt-20 mx-auto max-w-5xl animate-slide-up animate-float" style="animation-delay: 0.4s;">
                 <div class="relative rounded-2xl p-2 bg-gradient-to-b from-indigo-500/10 dark:from-indigo-500/20 to-transparent border border-indigo-500/10 dark:border-white/10 shadow-xl dark:shadow-2xl">
                     <div class="rounded-xl overflow-hidden bg-white dark:bg-[#0f1423] border border-slate-200 dark:border-white/5 aspect-video relative flex flex-col transition-colors">
+                        <!-- Browser Tab -->
                         <div class="h-8 border-b border-slate-200 dark:border-white/10 flex items-center px-4 gap-2 bg-slate-100 dark:bg-black/20 transition-colors">
                             <div class="w-3 h-3 rounded-full bg-rose-500"></div>
                             <div class="w-3 h-3 rounded-full bg-amber-500"></div>
                             <div class="w-3 h-3 rounded-full bg-emerald-500"></div>
                         </div>
-                        <div class="p-8 flex-1 grid grid-cols-3 gap-6 opacity-80">
-                            <!-- Mock UI Elements -->
-                            <div class="col-span-2 space-y-6">
-                                <div class="h-32 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 flex p-6 flex-col justify-center transition-colors">
-                                    <div class="w-1/3 h-4 bg-slate-200 dark:bg-white/20 rounded mb-4"></div>
-                                    <div class="w-2/3 h-8 bg-indigo-400/30 dark:bg-indigo-500/50 rounded"></div>
+                        
+                        <!-- Dashboard Content -->
+                        <div class="p-8 flex-1 flex flex-col overflow-hidden bg-gradient-to-br from-slate-50 dark:from-slate-900/30 to-slate-100 dark:to-slate-900/50">
+                            <!-- Header Section -->
+                            <div class="flex justify-between items-start mb-6">
+                                <div>
+                                    <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Portfolio Value</p>
+                                    <p class="text-3xl font-bold text-slate-900 dark:text-white mt-1">₹4,52,890</p>
+                                    <p class="text-sm text-emerald-600 dark:text-emerald-400 font-medium mt-1">↑ 12.5% this month</p>
                                 </div>
-                                <div class="h-48 rounded-xl bg-gradient-to-tr from-indigo-100 dark:from-indigo-500/10 to-violet-100 dark:to-violet-500/10 border border-indigo-200 dark:border-indigo-500/20 transition-colors"></div>
+                                <div class="flex gap-2">
+                                    <div class="px-3 py-1.5 rounded-lg bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-xs font-semibold">Dashboard</div>
+                                    <div class="px-3 py-1.5 rounded-lg bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300 text-xs font-semibold">Insights</div>
+                                </div>
                             </div>
-                            <div class="col-span-1 space-y-6">
-                                <div class="h-20 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 transition-colors"></div>
-                                <div class="h-20 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 transition-colors"></div>
-                                <div class="h-40 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 transition-colors"></div>
+
+                            <!-- Two Column Layout -->
+                            <div class="grid grid-cols-2 gap-4 flex-1">
+                                <!-- Left Column -->
+                                <div class="space-y-4">
+                                    <!-- Chart Placeholder -->
+                                    <div class="h-32 rounded-lg bg-gradient-to-tr from-indigo-400/20 dark:from-indigo-500/30 to-violet-400/20 dark:to-violet-500/30 border border-indigo-200 dark:border-indigo-500/30 p-4 flex flex-col justify-between transition-colors">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">Growth Trend</span>
+                                            <span class="text-xs text-emerald-600 dark:text-emerald-400">+18.2%</span>
+                                        </div>
+                                        <div class="flex items-end gap-1.5 flex-1">
+                                            <div class="h-3/4 w-1.5 rounded-sm bg-indigo-400 dark:bg-indigo-500/60"></div>
+                                            <div class="h-1/2 w-1.5 rounded-sm bg-indigo-400 dark:bg-indigo-500/60"></div>
+                                            <div class="h-full w-1.5 rounded-sm bg-indigo-500 dark:bg-indigo-400/60"></div>
+                                            <div class="h-2/3 w-1.5 rounded-sm bg-indigo-400 dark:bg-indigo-500/60"></div>
+                                            <div class="h-5/6 w-1.5 rounded-sm bg-emerald-500/70"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Goals Section -->
+                                    <div class="rounded-lg bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-white/10 p-4 transition-colors">
+                                        <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase mb-3">Financial Goals</p>
+                                        <div class="space-y-2">
+                                            <div>
+                                                <div class="flex justify-between mb-1">
+                                                    <span class="text-xs text-slate-700 dark:text-slate-300">Retirement Fund</span>
+                                                    <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">65%</span>
+                                                </div>
+                                                <div class="w-full bg-slate-200 dark:bg-white/10 h-1.5 rounded-full overflow-hidden">
+                                                    <div class="bg-emerald-500 h-full rounded-full" style="width: 65%"></div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div class="flex justify-between mb-1">
+                                                    <span class="text-xs text-slate-700 dark:text-slate-300">Home Purchase</span>
+                                                    <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">42%</span>
+                                                </div>
+                                                <div class="w-full bg-slate-200 dark:bg-white/10 h-1.5 rounded-full overflow-hidden">
+                                                    <div class="bg-indigo-500 h-full rounded-full" style="width: 42%"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Right Column -->
+                                <div class="space-y-4">
+                                    <!-- Stats Cards -->
+                                    <div class="rounded-lg bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-white/10 p-3 transition-colors">
+                                        <p class="text-xs text-slate-600 dark:text-slate-400">Total Investments</p>
+                                        <p class="text-xl font-bold text-slate-900 dark:text-white mt-1">₹3,45,600</p>
+                                        <p class="text-xs text-emerald-600 dark:text-emerald-400 mt-1">+8.3% this year</p>
+                                    </div>
+
+                                    <div class="rounded-lg bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-white/10 p-3 transition-colors">
+                                        <p class="text-xs text-slate-600 dark:text-slate-400">Monthly Savings</p>
+                                        <p class="text-xl font-bold text-slate-900 dark:text-white mt-1">₹12,450</p>
+                                        <p class="text-xs text-indigo-600 dark:text-indigo-400 mt-1">On track this month</p>
+                                    </div>
+
+                                    <!-- Asset Allocation -->
+                                    <div class="rounded-lg bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-white/10 p-3 transition-colors">
+                                        <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase mb-3">Asset Mix</p>
+                                        <div class="space-y-2">
+                                            <div class="flex items-center justify-between">
+                                                <div class="flex items-center gap-2">
+                                                    <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+                                                    <span class="text-xs text-slate-700 dark:text-slate-300">Equity</span>
+                                                </div>
+                                                <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">55%</span>
+                                            </div>
+                                            <div class="flex items-center justify-between">
+                                                <div class="flex items-center gap-2">
+                                                    <div class="w-2 h-2 rounded-full bg-indigo-500"></div>
+                                                    <span class="text-xs text-slate-700 dark:text-slate-300">Bonds</span>
+                                                </div>
+                                                <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">30%</span>
+                                            </div>
+                                            <div class="flex items-center justify-between">
+                                                <div class="flex items-center gap-2">
+                                                    <div class="w-2 h-2 rounded-full bg-violet-500"></div>
+                                                    <span class="text-xs text-slate-700 dark:text-slate-300">Cash</span>
+                                                </div>
+                                                <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">15%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -256,7 +348,7 @@
                                 <div class="flex justify-between items-start mb-4">
                                     <div>
                                         <p class="text-slate-600 dark:text-slate-400 text-sm transition-colors">Total Savings</p>
-                                        <p class="text-3xl font-bold text-slate-900 dark:text-white mt-2 transition-colors">$45,230</p>
+                                        <p class="text-3xl font-bold text-slate-900 dark:text-white mt-2 transition-colors">₹45,23,000</p>
                                     </div>
                                     <span class="text-emerald-600 dark:text-emerald-400 text-sm font-semibold">↑ 12.5%</span>
                                 </div>
@@ -269,7 +361,7 @@
                                 <div class="flex justify-between items-start mb-4">
                                     <div>
                                         <p class="text-slate-600 dark:text-slate-400 text-sm transition-colors">Monthly Growth</p>
-                                        <p class="text-3xl font-bold text-slate-900 dark:text-white mt-2 transition-colors">$2,450</p>
+                                        <p class="text-3xl font-bold text-slate-900 dark:text-white mt-2 transition-colors">₹2,45,000</p>
                                     </div>
                                     <span class="text-indigo-600 dark:text-indigo-400 text-sm font-semibold">↑ 8.3%</span>
                                 </div>
@@ -282,7 +374,7 @@
                                 <div class="flex justify-between items-start mb-4">
                                     <div>
                                         <p class="text-slate-600 dark:text-slate-400 text-sm transition-colors">Investment Returns</p>
-                                        <p class="text-3xl font-bold text-slate-900 dark:text-white mt-2 transition-colors">$8,920</p>
+                                        <p class="text-3xl font-bold text-slate-900 dark:text-white mt-2 transition-colors">₹8,92,000</p>
                                     </div>
                                     <span class="text-violet-600 dark:text-violet-400 text-sm font-semibold">↑ 15.2%</span>
                                 </div>
@@ -308,22 +400,12 @@
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 items-center justify-items-center">
                 <!-- Zerodha -->
                 <div class="glass-card p-6 rounded-xl hover:shadow-lg transition-all duration-300 flex items-center justify-center">
-                    <img src="https://www.zerodha.com/static/images/landing.svg" alt="Zerodha" class="h-12 object-contain dark:invert"/>
+                    <img src="https://zerodha.com/static/images/logo.svg" alt="Zerodha" class="h-12 object-contain dark:invert"/>
                 </div>
 
                 <!-- LIC -->
                 <div class="glass-card p-6 rounded-xl hover:shadow-lg transition-all duration-300 flex items-center justify-center">
                     <img src="https://licindia.in/documents/d/guest/lic_log_updated" alt="LIC" class="h-12 object-contain"/>
-                </div>
-
-                <!-- HDFC Bank -->
-                <div class="glass-card p-6 rounded-xl hover:shadow-lg transition-all duration-300 flex items-center justify-center">
-                    <img src="https://s7ap1.scene7.com/is/content/hdfcbankPWS/hdfc-bank-logo?fmt=webp" alt="HDFC Bank" class="h-12 object-contain"/>
-                </div>
-
-                <!-- ICICI Bank -->
-                <div class="glass-card p-6 rounded-xl hover:shadow-lg transition-all duration-300 flex items-center justify-center">
-                    <img src="https://www.icici.bank.in/content/dam/icicibank-revamp/images/icici-logo/icici-header-logo.png" alt="ICICI Bank" class="h-12 object-contain"/>
                 </div>
 
                 <!-- GROWW -->
@@ -333,22 +415,7 @@
 
                 <!-- NSE (National Stock Exchange) -->
                 <div class="glass-card p-6 rounded-xl hover:shadow-lg transition-all duration-300 flex items-center justify-center">
-                    <img src="https://www.nseindia.com/content/dam/nse/logo.png" alt="NSE" class="h-12 object-contain"/>
-                </div>
-
-                <!-- BSE -->
-                <div class="glass-card p-6 rounded-xl hover:shadow-lg transition-all duration-300 flex items-center justify-center">
-                    <img src="https://www.bseindia.com/static/images/bse-logo.png" alt="BSE" class="h-12 object-contain"/>
-                </div>
-
-                <!-- SBI -->
-                <div class="glass-card p-6 rounded-xl hover:shadow-lg transition-all duration-300 flex items-center justify-center">
-                    <img src="https://www.sbi.co.in/Cms_Resources/Document/webthumb_E0004521.png" alt="SBI" class="h-12 object-contain"/>
-                </div>
-
-                <!-- PayTM Money -->
-                <div class="glass-card p-6 rounded-xl hover:shadow-lg transition-all duration-300 flex items-center justify-center">
-                    <img src="https://images.paytmmoney.com/images/logo-paytm-money.svg" alt="Paytm Money" class="h-12 object-contain"/>
+                    <img src="https://www.nseindia.com/next-assets/images/NSE_Logo.svg" alt="NSE" class="h-12 object-contain"/>
                 </div>
 
                 <!-- Angel One -->
