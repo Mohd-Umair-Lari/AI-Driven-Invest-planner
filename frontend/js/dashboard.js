@@ -121,13 +121,20 @@ async function populateGoalData(user) {
 }
 
 // ===== CHART =====
-function createCashFlowChart(debt, surplus, expenses) {
-  const ctx = document.getElementById('cashFlowChart');
-  if (!ctx) return;
+function createCashFlowChart(debt, surplus, expenses, targetId = 'cashFlowChart') {
+  const ctx = document.getElementById(targetId);
+  if (!ctx) {
+    console.warn(`Canvas #${targetId} not found`);
+    return;
+  }
 
-  if (charts.cashFlow) charts.cashFlow.destroy();
+  const chartKey = targetId === 'cashFlowChartTab' ? 'cashFlowTab' : 'cashFlow';
+  
+  if (charts[chartKey]) {
+    charts[chartKey].destroy();
+  }
 
-  charts.cashFlow = new Chart(ctx, {
+  charts[chartKey] = new Chart(ctx, {
     type: 'doughnut',
     data: {
       labels: ['Debt Repayment', 'Investable Surplus', 'Living Expenses'],
@@ -155,7 +162,7 @@ function createCashFlowChart(debt, surplus, expenses) {
       }
     }
   });
-  console.log("✅ Cash Flow chart created");
+  console.log("✅ Cash Flow chart created on #" + targetId);
 }
 
 // ===== LOGOUT =====
@@ -195,12 +202,12 @@ function setupNavigation() {
             populateProfileData();
           }
           if (targetId === 'cashflow') {
-            // Recreate chart when cashflow tab becomes visible
+            // Create chart on the cashflow tab canvas when tab becomes visible
             setTimeout(() => {
               if (metricsData.debt !== undefined) {
-                createCashFlowChart(metricsData.debt, metricsData.surplus, metricsData.expenses);
+                createCashFlowChart(metricsData.debt, metricsData.surplus, metricsData.expenses, 'cashFlowChartTab');
               }
-            }, 50);
+            }, 100);
           }
         } else {
           tab.classList.add('hidden');
