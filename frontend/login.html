@@ -10,6 +10,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
+      darkMode: 'class',
       theme: {
         extend: {
           fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
@@ -30,108 +31,52 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-    }
-
-    .glass {
-      background: rgba(255, 255, 255, 0.04);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .input-field {
-      width: 100%;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 0.625rem;
-      padding: 0.75rem 1rem;
-      color: #f1f5f9;
-      font-size: 0.9375rem;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      outline: none;
-    }
-
-    .input-field::placeholder {
-      color: #64748b;
-    }
-
-    .input-field:focus {
-      border-color: #6366f1;
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
-    }
-
-    .btn-primary {
-      width: 100%;
-      padding: 0.8125rem 1.5rem;
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
-      color: white;
-      font-weight: 600;
-      font-size: 1rem;
-      border-radius: 0.625rem;
-      border: none;
-      cursor: pointer;
-      transition: opacity 0.2s, transform 0.15s;
-    }
-
-    .btn-primary:hover {
-      opacity: 0.9;
-      transform: translateY(-1px);
-    }
-
-    .btn-primary:active {
-      transform: translateY(0);
-    }
-
-    .mesh-bg {
-      background: radial-gradient(ellipse at 20% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 60%),
-        radial-gradient(ellipse at 80% 20%, rgba(139, 92, 246, 0.12) 0%, transparent 55%),
-        radial-gradient(ellipse at 60% 80%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
-        #0b0f1a;
-    }
-  </style>
+  <link rel="stylesheet" href="./css/style.css" />
 </head>
 
-<body class="mesh-bg min-h-screen flex items-center justify-center p-4">
+<body class="min-h-screen flex items-center justify-center p-4 transition-colors duration-200 relative">
+
+  <!-- Theme Toggle Top Right -->
+  <div class="fixed top-6 right-6 z-50">
+    <button id="theme-toggle" class="p-2.5 rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 transition-colors shadow-sm focus:outline-none">
+        <svg id="theme-icon" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <!-- Icon injected by theme.js -->
+        </svg>
+    </button>
+  </div>
 
   <!-- Floating Orbs -->
   <div class="fixed inset-0 overflow-hidden pointer-events-none">
-    <div
-      class="absolute -top-40 -left-40 w-96 h-96 bg-indigo-600 rounded-full mix-blend-screen filter blur-3xl opacity-10 animate-pulse">
+    <div class="absolute -top-40 -left-40 w-96 h-96 bg-indigo-600 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-20 dark:opacity-10 animate-pulse">
     </div>
-    <div
-      class="absolute -bottom-40 -right-40 w-96 h-96 bg-violet-600 rounded-full mix-blend-screen filter blur-3xl opacity-10 animate-pulse"
-      style="animation-delay:2s"></div>
+    <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-violet-600 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-20 dark:opacity-10 animate-pulse" style="animation-delay:2s"></div>
   </div>
 
   <div class="w-full max-w-md animate-slide-up relative z-10">
 
     <!-- Logo -->
     <div class="text-center mb-8">
-      <div
-        class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/30 mb-4">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/30 mb-4">
         <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-          <path stroke-linecap="round" stroke-linejoin="round"
-            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       </div>
-      <h1 class="text-2xl font-bold text-white tracking-tight">FinPass AI</h1>
-      <p class="text-slate-400 text-sm mt-1">Your intelligent financial advisor</p>
+      <h1 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight transition-colors">FinPass AI</h1>
+      <p class="text-slate-500 dark:text-slate-400 text-sm mt-1 transition-colors">Your intelligent financial advisor</p>
     </div>
 
     <!-- Card -->
-    <div class="glass rounded-2xl p-8 shadow-2xl">
-      <h2 class="text-xl font-semibold text-white mb-1">Welcome back</h2>
-      <p class="text-slate-400 text-sm mb-6">Sign in to manage your finances</p>
+    <div class="bg-white/70 dark:bg-white/5 backdrop-blur-xl border border-white/80 dark:border-white/10 rounded-2xl p-8 shadow-2xl transition-colors duration-200">
+      <h2 class="text-xl font-semibold text-slate-900 dark:text-white mb-1 transition-colors">Welcome back</h2>
+      <p class="text-slate-500 dark:text-slate-400 text-sm mb-6 transition-colors">Sign in to manage your finances</p>
 
       <div class="space-y-4">
         <div>
-          <label class="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider">Email Address</label>
+          <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider transition-colors">Email Address</label>
           <input type="email" id="login-email" placeholder="you@example.com" class="input-field" />
         </div>
         <div>
-          <label class="block text-xs font-medium text-slate-400 mb-1.5 uppercase tracking-wider">Password</label>
+          <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider transition-colors">Password</label>
           <input type="password" id="login-password" placeholder="••••••••" class="input-field" />
         </div>
       </div>
@@ -141,12 +86,12 @@
       </button>
 
       <div class="mt-6 flex items-center">
-        <div class="flex-grow border-t border-slate-700"></div>
-        <span class="mx-4 text-xs text-slate-500 uppercase">Or</span>
-        <div class="flex-grow border-t border-slate-700"></div>
+        <div class="flex-grow border-t border-slate-200 dark:border-slate-700 transition-colors"></div>
+        <span class="mx-4 text-xs text-slate-400 dark:text-slate-500 uppercase transition-colors">Or</span>
+        <div class="flex-grow border-t border-slate-200 dark:border-slate-700 transition-colors"></div>
       </div>
 
-      <button id="oauth-btn" class="w-full mt-6 py-3 px-4 bg-white text-slate-900 rounded-xl font-semibold text-sm flex items-center justify-center gap-3 hover:bg-slate-100 transition-colors">
+      <button id="oauth-btn" class="w-full mt-6 py-3 px-4 bg-white text-slate-900 border border-slate-200 dark:border-transparent rounded-xl font-semibold text-sm flex items-center justify-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-200 transition-colors shadow-sm">
         <svg class="w-5 h-5" viewBox="0 0 24 24">
           <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
           <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -156,16 +101,16 @@
         Sign in with Google
       </button>
 
-      <p class="text-center text-slate-400 text-sm mt-5">
+      <p class="text-center text-slate-500 dark:text-slate-400 text-sm mt-5 transition-colors">
         Don't have an account?
-        <a href="./register.html" class="text-indigo-400 font-medium hover:text-indigo-300 transition-colors">Create
-          one</a>
+        <a href="./register.html" class="text-indigo-600 dark:text-indigo-400 font-medium hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors">Create one</a>
       </p>
     </div>
 
-    <p class="text-center text-xs text-slate-600 mt-6">© 2025 FinPass AI · For educational use only</p>
+    <p class="text-center text-xs text-slate-500 dark:text-slate-600 mt-6 transition-colors">© 2025 FinPass AI · For educational use only</p>
   </div>
 
+  <script src="./js/theme.js"></script>
   <script type="module" src="./js/login.js"></script>
 </body>
 
