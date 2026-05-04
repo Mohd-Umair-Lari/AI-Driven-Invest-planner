@@ -162,9 +162,93 @@ window.logout = () => {
   }
 };
 
+// ===== NAVIGATION & TABS =====
+function setupNavigation() {
+  const navItems = document.querySelectorAll('#sidebar-nav .sidebar-item');
+  const contentTabs = document.querySelectorAll('.content-tab');
+
+  navItems.forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      const targetId = item.getAttribute('data-target');
+      if (!targetId) return;
+
+      // Update active state on nav
+      navItems.forEach(n => {
+          n.classList.remove('active', 'text-indigo-600', 'dark:text-indigo-400', 'bg-indigo-50', 'dark:bg-indigo-900/20');
+          n.classList.add('text-slate-600', 'dark:text-slate-300');
+      });
+      
+      item.classList.add('active', 'bg-indigo-50', 'dark:bg-indigo-900/20');
+      item.classList.remove('text-slate-600', 'dark:text-slate-300');
+
+      // Show target content tab
+      contentTabs.forEach(tab => {
+        if (tab.id === `content-${targetId}`) {
+          tab.classList.remove('hidden');
+        } else {
+          tab.classList.add('hidden');
+        }
+      });
+    });
+  });
+}
+
+// ===== AI CHATBOT =====
+function setupChatbot() {
+  const chatInput = document.getElementById('ai-chat-input');
+  const chatSend = document.getElementById('ai-chat-send');
+  const chatMessages = document.getElementById('ai-chat-messages');
+
+  if (!chatInput || !chatSend || !chatMessages) return;
+
+  const handleSend = () => {
+    const text = chatInput.value.trim();
+    if (!text) return;
+    
+    // Add user message
+    const userMsg = document.createElement('div');
+    userMsg.className = 'bg-indigo-500/20 border border-indigo-500/30 rounded-xl p-3 ml-8 mb-3 text-right';
+    userMsg.innerHTML = `<p class="text-xs text-white">${text}</p>`;
+    chatMessages.appendChild(userMsg);
+    chatInput.value = '';
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    // Add typing indicator
+    const typingMsg = document.createElement('div');
+    typingMsg.className = 'text-xs text-slate-500 italic mb-3';
+    typingMsg.textContent = 'AI Advisor is thinking...';
+    chatMessages.appendChild(typingMsg);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    // Simulate AI response
+    setTimeout(() => {
+      typingMsg.remove();
+      const aiMsg = document.createElement('div');
+      aiMsg.className = 'bg-white/[0.04] border border-white/5 rounded-xl p-4 mb-3 mr-4';
+      aiMsg.innerHTML = `
+        <div class="flex justify-between items-center mb-2">
+            <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded tracking-wider">RESPONSE</span>
+        </div>
+        <p class="text-xs text-slate-300 leading-relaxed">Based on your portfolio, prioritizing debt repayment while maintaining a 10% SIP increase is the best approach to hit your goal.</p>
+      `;
+      chatMessages.appendChild(aiMsg);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }, 1200);
+  };
+
+  chatSend.addEventListener('click', handleSend);
+  chatInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') handleSend();
+  });
+}
+
 // ===== INITIALIZE =====
 document.addEventListener('DOMContentLoaded', async () => {
   try {
+    setupNavigation();
+    setupChatbot();
+    
     const user = await loadUserData();
     if (!user) return;
 

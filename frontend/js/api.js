@@ -9,7 +9,7 @@ export async function fetchInsights(financialState) {
 
 export async function apiFetch(endpoint, options = {}) {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 15000);
+  const timeoutId = setTimeout(() => controller.abort(), 60000);
 
   try {
     const url = `${BACKEND_URL}${endpoint}`;
