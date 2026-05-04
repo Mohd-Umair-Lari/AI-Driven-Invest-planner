@@ -14,6 +14,7 @@ from ml.goal_predictor import generate_plan, goal_probability
 from ml.goal_intelligence import compute_goal_intelligence
 from agent.financial_agent import run_agent
 from routes.intelligence_routes import intelligence_bp
+from routes.advisor_routes import advisor_bp
 
 # Load environment variables from .env file in backend root directory
 load_dotenv()
@@ -57,6 +58,7 @@ CORS(
     supports_credentials=True
 )
 app.register_blueprint(intelligence_bp, url_prefix="/api")
+app.register_blueprint(advisor_bp, url_prefix="/api")
 
 def connect_mongo():
     client = MongoClient(
