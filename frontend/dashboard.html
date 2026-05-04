@@ -309,8 +309,10 @@
                     <!-- Main Content Container -->
                     <div class="space-y-8">
                         <!-- Chart Section -->
-                        <div class="border border-slate-100 dark:border-slate-700 rounded-xl p-8 bg-white dark:bg-slate-800/50" style="height: 400px;">
-                            <canvas id="cashFlowChart"></canvas>
+                        <div class="border border-slate-100 dark:border-slate-700 rounded-xl p-8 bg-white dark:bg-slate-800/50" style="height: 400px; display: flex; align-items: center; justify-content: center;">
+                            <div style="width: 100%; height: 100%; position: relative;">
+                                <canvas id="cashFlowChart" style="display: block;"></canvas>
+                            </div>
                         </div>
 
                         <!-- Legend Section -->

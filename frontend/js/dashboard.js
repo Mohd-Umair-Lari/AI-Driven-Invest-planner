@@ -189,6 +189,14 @@ function setupNavigation() {
           if (targetId === 'profile') {
             populateProfileData();
           }
+          if (targetId === 'cashflow') {
+            // Trigger chart resize when tab becomes visible
+            setTimeout(() => {
+              if (charts.cashFlow) {
+                charts.cashFlow.resize();
+              }
+            }, 100);
+          }
         } else {
           tab.classList.add('hidden');
         }
