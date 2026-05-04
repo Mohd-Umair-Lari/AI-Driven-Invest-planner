@@ -1,474 +1,387 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en" class="h-full bg-[#f8fafc]">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FinPass AI | Dashboard</title>
-  <meta name="description" content="Your personal AI-powered financial dashboard. Track income, expenses, goals, and get smart investment insights." />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
-          animation: {
-            'fade-in': 'fadeIn 0.4s ease-out',
-            'slide-up': 'slideUp 0.4s ease-out',
-          },
-          keyframes: {
-            fadeIn: { from: { opacity: '0' }, to: { opacity: '1' } },
-            slideUp: { from: { opacity: '0', transform: 'translateY(16px)' }, to: { opacity: '1', transform: 'translateY(0)' } },
-          }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | AI-Financial Advisor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            blue: '#4338ca',
+                            indigo: '#5a67d8',
+                            dark: '#111827',
+                            card: '#ffffff'
+                        }
+                    }
+                }
+            }
         }
-      }
-    }
-  </script>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <style>
-    * { box-sizing: border-box; }
-    body { font-family: 'Inter', sans-serif; background: #090d1a; color: #f1f5f9; margin: 0; }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-item { transition: all 0.2s ease; }
+        .sidebar-item.active { background-color: #4f46e5; color: white; }
+        .sidebar-item.active svg { color: white; }
+        .sidebar-item:not(.active):hover { background-color: #f1f5f9; color: #1e293b; }
+        
+        .stat-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            padding: 1.25rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .stat-card:hover {
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            transform: translateY(-2px);
+        }
 
-    /* Sidebar */
-    .sidebar { width: 240px; min-height: 100vh; background: rgba(255,255,255,0.03); border-right: 1px solid rgba(255,255,255,0.07); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 40; }
-    .main-wrap { margin-left: 240px; min-height: 100vh; }
+        .panel-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
 
-    /* Glass card */
-    .glass { background: rgba(255,255,255,0.04); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.08); border-radius: 1rem; }
+        .ai-panel {
+            background-color: #111827;
+            border-radius: 1rem;
+            color: white;
+        }
 
-    /* Nav items */
-    .nav-item {
-      display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-radius: 10px;
-      color: #94a3b8; font-size: 0.875rem; font-weight: 500; text-decoration: none;
-      transition: background 0.2s, color 0.2s; cursor: pointer;
-    }
-    .nav-item:hover { background: rgba(99,102,241,0.1); color: #c7d2fe; }
-    .nav-item.active { background: rgba(99,102,241,0.18); color: #a5b4fc; }
-    .nav-item svg { width: 17px; height: 17px; flex-shrink: 0; }
-
-    /* Metric cards */
-    .metric-card { border-radius: 1rem; padding: 1.25rem 1.5rem; border: 1px solid rgba(255,255,255,0.07); transition: transform 0.2s; }
-    .metric-card:hover { transform: translateY(-2px); }
-
-    /* Section visibility */
-    .section { display: none; animation: fadeIn 0.35s ease-out; }
-    .section.active-section { display: block; }
-
-    /* Chart container */
-    .chart-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 1rem; padding: 1.5rem; }
-
-    /* Insight cards */
-    .insight-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 0.875rem; padding: 1.25rem; }
-    .insight-card.high .insight-badge { background: rgba(239,68,68,0.15); color: #f87171; }
-    .insight-card.low .insight-badge  { background: rgba(16,185,129,0.15); color: #34d399; }
-    .insight-card.medium .insight-badge { background: rgba(245,158,11,0.15); color: #fbbf24; }
-
-    /* Header button */
-    .hdr-btn {
-      display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px;
-      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 8px; color: #94a3b8; font-size: 0.8125rem; font-weight: 500;
-      cursor: pointer; transition: background 0.2s, color 0.2s; text-decoration: none;
-    }
-    .hdr-btn:hover { background: rgba(255,255,255,0.1); color: #e2e8f0; }
-
-    /* Profile grid */
-    .profile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; }
-    .profile-item { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 0.75rem; padding: 0.875rem; }
-
-    /* Skeleton loader */
-    .skeleton { background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 0.5rem; height: 1.5rem; }
-    @keyframes shimmer { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }
-    @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
-    @keyframes slideUp { from { opacity: 0; transform: translateY(16px) } to { opacity: 1; transform: translateY(0) } }
-
-    /* Gradient backgrounds for metric cards */
-    .bg-income  { background: linear-gradient(135deg, rgba(16,185,129,0.12), rgba(5,150,105,0.06)); }
-    .bg-expense { background: linear-gradient(135deg, rgba(239,68,68,0.12), rgba(185,28,28,0.06)); }
-    .bg-debt    { background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(180,83,9,0.06)); }
-    .bg-savings { background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(79,70,229,0.06)); }
-
-    /* Scrollbar */
-    ::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 999px; }
-
-    @media (max-width: 768px) {
-      .sidebar { display: none; }
-      .main-wrap { margin-left: 0; }
-    }
-  </style>
+        .sankey-placeholder {
+            width: 100%;
+            height: 220px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .sankey-flow {
+            fill: #e2e8f0;
+            transition: fill 0.3s ease;
+        }
+        .sankey-flow:hover { fill: #cbd5e1; }
+    </style>
 </head>
-<body>
-<div class="flex">
+<body class="flex h-screen overflow-hidden text-slate-800">
 
-  <!-- ===== SIDEBAR ===== -->
-  <aside class="sidebar">
-    <!-- Logo -->
-    <div class="p-5 border-b border-white/5">
-      <div class="flex items-center gap-2.5">
-        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-md shadow-indigo-500/30">
-          <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </div>
-        <span class="text-white font-semibold text-base tracking-tight">FinPass AI</span>
-      </div>
-    </div>
-
-    <!-- Nav -->
-    <nav class="flex-1 p-4 space-y-1">
-      <a href="#" class="nav-item active" data-section="overview">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
-        Dashboard
-      </a>
-      <a href="#" class="nav-item" data-section="analytics">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-        Analytics
-      </a>
-      <a href="#" class="nav-item" data-section="goals">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-        Goals
-      </a>
-      <a href="#" class="nav-item" data-section="insights">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
-        Insights
-      </a>
-    </nav>
-
-    <!-- User + Logout -->
-    <div class="p-4 border-t border-white/5">
-      <div class="flex items-center gap-3 mb-3 px-1">
-        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-violet-500 flex items-center justify-center text-xs font-bold text-white shrink-0">U</div>
-        <div class="min-w-0">
-          <p class="text-slate-200 text-sm font-medium truncate" id="sidebar-name">User</p>
-          <p class="text-slate-500 text-xs truncate" id="sidebar-email">—</p>
-        </div>
-      </div>
-      <button onclick="window.logout()"
-        class="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-slate-500 text-sm font-medium hover:bg-red-500/10 hover:text-red-400 transition-colors">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-        </svg>
-        Sign Out
-      </button>
-    </div>
-  </aside>
-
-  <!-- ===== MAIN ===== -->
-  <main class="main-wrap flex-1">
-
-    <!-- Top Header -->
-    <header class="sticky top-0 z-30 flex items-center justify-between px-6 py-4" style="background: rgba(9,13,26,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.06);">
-      <div>
-        <h1 class="text-lg font-semibold text-white">Welcome back, <span id="user-name" class="text-indigo-400">User</span></h1>
-        <p class="text-slate-500 text-xs mt-0.5">Here's your financial overview</p>
-      </div>
-      <div class="flex items-center gap-2">
-        <span class="text-xs text-slate-500 hidden sm:block" id="user-email">—</span>
-        <div class="w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-emerald-500/20"></div>
-        <button id="btn-refresh" class="hdr-btn">
-          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-          Refresh
-        </button>
-        <button id="btn-agent" class="hdr-btn" style="background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.15)); border-color: rgba(99,102,241,0.35); color: #a5b4fc;">
-          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-          AI Advisor
-        </button>
-      </div>
-    </header>
-
-    <div class="p-6 space-y-6">
-
-      <!-- ===== OVERVIEW SECTION ===== -->
-      <section id="overview-section" class="section active-section space-y-6">
-
-        <!-- Metric Cards -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div class="metric-card bg-income">
-            <div class="flex items-center gap-2 mb-3">
-              <div class="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-                <svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-              </div>
-              <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Income</span>
+    <!-- Sidebar -->
+    <aside class="w-[260px] bg-white border-r border-slate-200 flex flex-col justify-between h-full flex-shrink-0 relative z-20">
+        <div>
+            <!-- Logo -->
+            <div class="p-6 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-[#4f46e5] flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="font-bold text-slate-900 leading-tight">AI-Financial</h1>
+                    <p class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Advisor</p>
+                </div>
             </div>
-            <p class="text-2xl font-bold text-white" id="metric-income">₹0</p>
-            <p class="text-xs text-emerald-400/70 mt-1">Monthly</p>
-          </div>
 
-          <div class="metric-card bg-expense">
-            <div class="flex items-center gap-2 mb-3">
-              <div class="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center">
-                <svg class="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
-              </div>
-              <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Expenses</span>
-            </div>
-            <p class="text-2xl font-bold text-white" id="metric-expense">₹0</p>
-            <p class="text-xs text-red-400/70 mt-1">Monthly</p>
-          </div>
-
-          <div class="metric-card bg-debt">
-            <div class="flex items-center gap-2 mb-3">
-              <div class="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
-                <svg class="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
-              </div>
-              <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Debt</span>
-            </div>
-            <p class="text-2xl font-bold text-white" id="metric-debt">₹0</p>
-            <p class="text-xs text-amber-400/70 mt-1">Total outstanding</p>
-          </div>
-
-          <div class="metric-card bg-savings">
-            <div class="flex items-center gap-2 mb-3">
-              <div class="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center">
-                <svg class="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-              </div>
-              <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Savings</span>
-            </div>
-            <p class="text-2xl font-bold text-white" id="metric-savings">₹0</p>
-            <p class="text-xs text-indigo-400/70 mt-1">Monthly surplus</p>
-          </div>
+            <!-- Navigation -->
+            <nav class="px-4 space-y-1 mt-2">
+                <a href="#" class="sidebar-item active flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm">
+                    <svg class="w-5 h-5 opacity-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+                    Dashboard
+                </a>
+                <a href="#" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-600">
+                    <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Cash Flow
+                </a>
+                <a href="#" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-600">
+                    <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    Wealth Reports
+                </a>
+                <a href="#" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-600 mt-4">
+                    <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                    My Profile
+                </a>
+                <a href="#" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-600">
+                    <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    Preferences
+                </a>
+            </nav>
         </div>
 
-        <!-- Charts Row -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div class="chart-box">
-            <h3 class="text-sm font-semibold text-slate-200 mb-4 flex items-center gap-2">
-              <span class="w-1.5 h-4 rounded-full bg-indigo-500 inline-block"></span>
-              Income vs Expenses
-            </h3>
-            <canvas id="incomeExpenseChart" height="200"></canvas>
-          </div>
-          <div class="chart-box">
-            <h3 class="text-sm font-semibold text-slate-200 mb-2 flex items-center gap-2">
-              <span class="w-1.5 h-4 rounded-full bg-violet-500 inline-block"></span>
-              Financial Health Score
-            </h3>
-            <div class="flex items-center justify-between mb-3">
-              <p class="text-xs text-slate-500">Overall health</p>
-              <span class="text-sm font-semibold" id="health-status">—</span>
+        <!-- User Profile Widget -->
+        <div class="p-4 mx-4 mb-4 border border-slate-100 bg-[#f8fafc] rounded-2xl flex items-center justify-between cursor-pointer hover:bg-slate-50 transition-colors" onclick="window.logout()">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm shrink-0" id="sidebar-avatar">A</div>
+                <div class="min-w-0">
+                    <p class="text-sm font-semibold text-slate-900 truncate" id="sidebar-name">Aditya Sharma</p>
+                    <p class="text-[10px] text-slate-500 uppercase tracking-wider truncate" id="sidebar-email">ADITYA@EXAMPLE.COM</p>
+                </div>
             </div>
-            <canvas id="healthScoreChart" height="180"></canvas>
-          </div>
+            <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
         </div>
+    </aside>
 
-        <!-- Goal Section -->
-        <div class="chart-box">
-          <div class="flex items-center justify-between mb-5">
-            <h3 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
-              <span class="w-1.5 h-4 rounded-full bg-emerald-500 inline-block"></span>
-              Financial Goal
-            </h3>
-            <span id="goal-status" class="text-xs font-semibold px-3 py-1 rounded-full" style="background: rgba(16,185,129,0.15); color: #34d399;">On Track</span>
-          </div>
-          <div class="grid grid-cols-3 gap-4">
-            <div class="bg-white/[0.03] rounded-xl p-4 border border-white/5">
-              <p class="text-xs text-slate-500 mb-1">Target Amount</p>
-              <p class="text-lg font-bold text-white" id="goal-target">₹0</p>
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto relative h-full">
+        <div class="max-w-[1400px] mx-auto p-8 lg:p-10">
+            
+            <!-- Header -->
+            <header class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+                <div class="flex items-center gap-3">
+                    <svg class="w-8 h-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-900 tracking-tight">AI-Financial Advisor</h2>
+                        <p class="text-sm text-slate-500 mt-0.5">Personalized Wealth Strategy for <span id="hdr-name">Aditya Sharma</span></p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="text-right hidden sm:block">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Last Updated</p>
+                        <p class="text-xs text-slate-600 font-medium">2/20/2024</p>
+                    </div>
+                    <button class="bg-[#4f46e5] hover:bg-indigo-700 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        Verified Profile
+                    </button>
+                </div>
+            </header>
+
+            <!-- Stat Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+                <!-- Card 1 -->
+                <div class="stat-card">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                        </div>
+                        <span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-md tracking-wider">+4.8%</span>
+                    </div>
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Monthly Income</p>
+                    <h3 class="text-2xl font-bold text-slate-900" id="metric-income">₹1,50,000</h3>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="stat-card">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                        </div>
+                        <span class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md tracking-wider">MEDIUM</span>
+                    </div>
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Portfolio</p>
+                    <h3 class="text-2xl font-bold text-slate-900" id="metric-portfolio">₹5,00,000</h3>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="stat-card">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="w-8 h-8 rounded-full bg-purple-50 flex items-center justify-center text-purple-600">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        </div>
+                    </div>
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Goal Target</p>
+                    <h3 class="text-2xl font-bold text-slate-900" id="metric-goal-target">₹21,00,000</h3>
+                    <p class="text-[11px] text-slate-500 mt-1 flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span id="metric-goal-name">Luxury Car</span>
+                    </p>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="stat-card">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center text-red-600">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-md tracking-wider">ACTIVE</span>
+                    </div>
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Monthly Debt</p>
+                    <h3 class="text-2xl font-bold text-slate-900" id="metric-debt">₹12,000</h3>
+                </div>
             </div>
-            <div class="bg-white/[0.03] rounded-xl p-4 border border-white/5">
-              <p class="text-xs text-slate-500 mb-1">Expected Corpus</p>
-              <p class="text-lg font-bold text-white" id="goal-corpus">₹0</p>
+
+            <!-- Middle Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6 h-auto lg:h-[400px]">
+                
+                <!-- Cash Flow Donut -->
+                <div class="panel-card p-6 flex flex-col relative col-span-1 lg:col-span-1">
+                    <h3 class="font-bold text-slate-900 flex items-center gap-2 mb-4">
+                        <svg class="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        Monthly Cash Flow
+                    </h3>
+                    <div class="flex-1 flex flex-col items-center justify-center min-h-[220px]">
+                        <div class="w-[180px] h-[180px] relative">
+                            <canvas id="cashFlowChart"></canvas>
+                        </div>
+                    </div>
+                    <!-- Custom Legend & Ratios -->
+                    <div class="mt-4 w-full">
+                        <div class="flex flex-col items-center gap-1.5 text-xs text-slate-600 font-medium mb-4">
+                            <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-[#f59e0b]"></div> Debt Repayment</div>
+                            <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-[#10b981]"></div> Investable Surplus</div>
+                            <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-[#ef4444]"></div> Living Expenses</div>
+                        </div>
+                        <div class="flex justify-between border-t border-slate-100 pt-3">
+                            <div class="text-center">
+                                <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Savings Rate</p>
+                                <p class="text-lg font-bold text-[#10b981]">62%</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Debt Ratio</p>
+                                <p class="text-lg font-bold text-[#f59e0b]">8%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Goal Progress -->
+                <div class="panel-card p-6 flex flex-col col-span-1 lg:col-span-1">
+                    <h3 class="font-bold text-slate-900 mb-8 mt-1">Goal Progress: <span id="goal-progress-name">Luxury Car</span></h3>
+                    
+                    <div class="flex-1 flex flex-col justify-center mb-8">
+                        <div class="flex justify-between items-end mb-2">
+                            <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md" id="goal-progress-pct">24% COMPLETE</span>
+                            <span class="text-sm font-bold text-slate-400" id="goal-progress-total">₹21,00,000</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-3.5 shadow-inner">
+                            <div class="bg-[#4f46e5] h-3.5 rounded-full shadow-sm transition-all duration-1000" style="width: 24%" id="goal-progress-bar"></div>
+                        </div>
+                        
+                        <div class="mt-12 bg-slate-50 border border-slate-100 rounded-xl p-5">
+                            <p class="text-sm text-slate-600 leading-relaxed text-center">
+                                At your current investment rate, you are <span class="font-bold text-indigo-600">on track</span> to reach this goal in <span class="font-bold text-slate-900" id="goal-progress-time">24 months</span>.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Advisor Panel -->
+                <div class="ai-panel p-6 flex flex-col col-span-1 lg:col-span-1 shadow-xl shadow-indigo-900/10 h-[400px]">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-300">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-white text-lg leading-tight">AI Advisor</h3>
+                            <p class="text-[11px] text-slate-400 font-medium">Smart Suggestions & Insights</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex-1 overflow-y-auto pr-2 space-y-4" style="scrollbar-width: thin; scrollbar-color: #334155 transparent;">
+                        
+                        <!-- Insight 1 -->
+                        <div class="bg-white/[0.04] border border-white/5 rounded-xl p-4">
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="text-[10px] font-bold text-rose-400 bg-rose-500/10 px-2 py-1 rounded tracking-wider">SAVINGS</span>
+                                <span class="text-[10px] font-bold text-rose-400 tracking-wide">High Impact</span>
+                            </div>
+                            <h4 class="text-sm font-semibold text-white mb-2">Emergency Fund Priority</h4>
+                            <p class="text-xs text-slate-400 leading-relaxed">Your current expenses are ₹45,000. We suggest maintaining an emergency fund of at least ₹2.7L (6 months) before aggressive investing.</p>
+                        </div>
+
+                        <!-- Insight 2 -->
+                        <div class="bg-white/[0.04] border border-white/5 rounded-xl p-4">
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="text-[10px] font-bold text-blue-400 bg-blue-500/10 px-2 py-1 rounded tracking-wider">TAX</span>
+                                <span class="text-[10px] font-bold text-slate-400 tracking-wide">Medium Impact</span>
+                            </div>
+                            <h4 class="text-sm font-semibold text-white mb-2">Tax Optimization (80C)</h4>
+                            <p class="text-xs text-slate-400 leading-relaxed">Consider investing in ELSS or PPF to exhaust your ₹1.5L limit under Section 80C for better post-tax returns.</p>
+                        </div>
+
+                    </div>
+                </div>
+
             </div>
-            <div class="bg-white/[0.03] rounded-xl p-4 border border-white/5">
-              <p class="text-xs text-slate-500 mb-1">Success Probability</p>
-              <p class="text-lg font-bold text-white" id="goal-prob">0%</p>
+
+            <!-- Bottom Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
+                <!-- Flow Analysis -->
+                <div class="panel-card p-6 col-span-1 lg:col-span-2 flex flex-col">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-bold text-slate-900">Flow Analysis (Sankey)</h3>
+                        <p class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Visualizing Income Distribution</p>
+                    </div>
+                    
+                    <div class="flex-1 border border-slate-100 rounded-xl p-6 relative flex flex-col">
+                        <h4 class="font-bold text-slate-800 mb-6">Monthly Cash Flow Analysis</h4>
+                        
+                        <!-- Pseudo Sankey Diagram via SVG -->
+                        <div class="sankey-placeholder flex-1 min-h-[220px]">
+                            <!-- Left Node (Income) -->
+                            <div class="w-4 h-full bg-blue-500 rounded-sm z-10 absolute left-0 top-0 bottom-0"></div>
+                            
+                            <!-- SVG Paths -->
+                            <svg class="absolute inset-0 w-full h-full pointer-events-none" preserveAspectRatio="none" viewBox="0 0 100 100">
+                                <!-- Income to Expenses (Red) -->
+                                <path d="M 2 50 C 50 50, 50 15, 98 15" stroke="#e2e8f0" stroke-width="25" fill="none" opacity="0.6"/>
+                                <!-- Income to Debt (Yellow) -->
+                                <path d="M 2 50 C 50 50, 50 40, 98 40" stroke="#e2e8f0" stroke-width="8" fill="none" opacity="0.6"/>
+                                <!-- Income to Investments (Green) -->
+                                <path d="M 2 50 C 50 50, 50 65, 98 65" stroke="#e2e8f0" stroke-width="20" fill="none" opacity="0.6"/>
+                                <!-- Income to Surplus (Purple) -->
+                                <path d="M 2 50 C 50 50, 50 85, 98 85" stroke="#e2e8f0" stroke-width="22" fill="none" opacity="0.6"/>
+                            </svg>
+
+                            <!-- Right Nodes -->
+                            <div class="absolute right-0 top-0 bottom-0 w-32 flex flex-col justify-between py-2 z-10">
+                                <div class="flex items-center gap-2 translate-y-[-10px]"><div class="w-3 h-10 bg-rose-500 rounded-sm"></div><span class="text-[9px] font-medium text-slate-600">Expenses (₹45,000)</span></div>
+                                <div class="flex items-center gap-2 translate-y-[-15px]"><div class="w-3 h-4 bg-amber-500 rounded-sm"></div><span class="text-[9px] font-medium text-slate-600">Debt Repayment (₹12,000)</span></div>
+                                <div class="flex items-center gap-2 translate-y-[0px]"><div class="w-3 h-8 bg-emerald-500 rounded-sm"></div><span class="text-[9px] font-medium text-slate-600">Investments (₹41,667)</span></div>
+                                <div class="flex items-center gap-2 translate-y-[10px]"><div class="w-3 h-10 bg-indigo-400 rounded-sm"></div><span class="text-[9px] font-medium text-slate-600">Surplus Savings (₹51,333)</span></div>
+                            </div>
+                        </div>
+                        
+                        <p class="text-[10px] text-slate-400 mt-6 italic">*Investment flow is calculated as a monthly equivalent of your total portfolio allocation.</p>
+                    </div>
+                </div>
+
+                <!-- Recommended Actions -->
+                <div class="panel-card p-6 col-span-1 lg:col-span-1">
+                    <h3 class="font-bold text-slate-900 flex items-center gap-2 mb-6">
+                        <svg class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                        Recommended Actions
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <div class="border border-slate-100 rounded-xl p-4 hover:border-indigo-200 hover:shadow-sm cursor-pointer transition-all bg-white">
+                            <h4 class="text-sm font-bold text-slate-800">Increase SIP by 10%</h4>
+                            <p class="text-xs text-slate-400 mt-0.5">Beat inflation annually</p>
+                        </div>
+                        <div class="border border-slate-100 rounded-xl p-4 hover:border-indigo-200 hover:shadow-sm cursor-pointer transition-all bg-white">
+                            <h4 class="text-sm font-bold text-slate-800">Review Term Insurance</h4>
+                            <p class="text-xs text-slate-400 mt-0.5">Current cover: ₹0</p>
+                        </div>
+                        <div class="border border-slate-100 rounded-xl p-4 hover:border-indigo-200 hover:shadow-sm cursor-pointer transition-all bg-white">
+                            <h4 class="text-sm font-bold text-slate-800">Tax Filing (FY 24-25)</h4>
+                            <p class="text-xs text-slate-400 mt-0.5">Due in 4 months</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
+
+            <!-- Footer -->
+            <footer class="text-center pb-10 border-t border-slate-200 pt-8 mt-4">
+                <div class="flex items-center justify-center gap-2 mb-3">
+                    <svg class="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
+                    <span class="text-xs font-bold text-slate-500 tracking-widest uppercase">AI-Financial Advisor</span>
+                </div>
+                <p class="text-[10px] text-slate-400 max-w-2xl mx-auto leading-relaxed">
+                    Disclaimer: This report is generated by an advanced AI model for informational purposes only. It does not constitute formal financial advice. Please consult with a SEBI-registered investment advisor before making significant financial decisions. Market investments are subject to risks.
+                </p>
+            </footer>
+
         </div>
+    </main>
 
-        <!-- Profile Section -->
-        <div class="chart-box">
-          <h3 class="text-sm font-semibold text-slate-200 mb-4 flex items-center gap-2">
-            <span class="w-1.5 h-4 rounded-full bg-amber-500 inline-block"></span>
-            Your Profile
-          </h3>
-          <div class="profile-grid">
-            <div class="profile-item">
-              <p class="text-xs text-slate-500 mb-1">Name</p>
-              <p class="text-sm font-medium text-slate-200" id="profile-name">—</p>
-            </div>
-            <div class="profile-item">
-              <p class="text-xs text-slate-500 mb-1">Age</p>
-              <p class="text-sm font-medium text-slate-200" id="profile-age">—</p>
-            </div>
-            <div class="profile-item">
-              <p class="text-xs text-slate-500 mb-1">Employment</p>
-              <p class="text-sm font-medium text-slate-200" id="profile-status">—</p>
-            </div>
-            <div class="profile-item">
-              <p class="text-xs text-slate-500 mb-1">Risk Appetite</p>
-              <p class="text-sm font-medium text-slate-200" id="investment-risk">—</p>
-            </div>
-            <div class="profile-item">
-              <p class="text-xs text-slate-500 mb-1">Monthly Investment</p>
-              <p class="text-sm font-medium text-slate-200" id="investment-amt">₹0</p>
-            </div>
-            <div class="profile-item">
-              <p class="text-xs text-slate-500 mb-1">Timeline</p>
-              <p class="text-sm font-medium text-slate-200" id="investment-timeline">—</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ===== ANALYTICS SECTION ===== -->
-      <section id="analytics-section" class="section space-y-6">
-        <div class="flex items-center justify-between">
-          <h2 class="text-lg font-semibold text-white">Financial Analytics</h2>
-          <span class="text-xs text-slate-500 bg-white/5 px-3 py-1 rounded-full border border-white/8">Live data</span>
-        </div>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div class="chart-box">
-            <h3 class="text-sm font-semibold text-slate-200 mb-4 flex items-center gap-2">
-              <span class="w-1.5 h-4 rounded-full bg-indigo-500 inline-block"></span>
-              Expense Breakdown
-            </h3>
-            <canvas id="expenseBreakdownChart" height="220"></canvas>
-          </div>
-          <div class="chart-box">
-            <h3 class="text-sm font-semibold text-slate-200 mb-4 flex items-center gap-2">
-              <span class="w-1.5 h-4 rounded-full bg-emerald-500 inline-block"></span>
-              Savings Ratio Trend
-            </h3>
-            <canvas id="savingsRatioChart" height="220"></canvas>
-          </div>
-        </div>
-      </section>
-
-      <!-- ===== GOALS SECTION ===== -->
-      <section id="goals-section" class="section space-y-6">
-        <div class="flex items-center justify-between">
-          <h2 class="text-lg font-semibold text-white">Goals</h2>
-          <span class="text-xs text-slate-500 bg-white/5 px-3 py-1 rounded-full border border-white/8">Live data</span>
-        </div>
-
-        <!-- Goal Summary Cards -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" id="goal-cards">
-          <div class="metric-card" style="background:linear-gradient(135deg,rgba(99,102,241,0.12),rgba(79,70,229,0.06))">
-            <p class="text-xs text-slate-400 uppercase tracking-wider mb-2">Goal</p>
-            <p class="text-base font-bold text-white" id="g-name">—</p>
-          </div>
-          <div class="metric-card" style="background:linear-gradient(135deg,rgba(16,185,129,0.12),rgba(5,150,105,0.06))">
-            <p class="text-xs text-slate-400 uppercase tracking-wider mb-2">Target Amount</p>
-            <p class="text-base font-bold text-white" id="g-target">₹0</p>
-          </div>
-          <div class="metric-card" style="background:linear-gradient(135deg,rgba(245,158,11,0.12),rgba(180,83,9,0.06))">
-            <p class="text-xs text-slate-400 uppercase tracking-wider mb-2">Timeline</p>
-            <p class="text-base font-bold text-white" id="g-timeline">— months</p>
-          </div>
-          <div class="metric-card" style="background:linear-gradient(135deg,rgba(139,92,246,0.12),rgba(109,40,217,0.06))">
-            <p class="text-xs text-slate-400 uppercase tracking-wider mb-2">Risk Appetite</p>
-            <p class="text-base font-bold text-white capitalize" id="g-risk">—</p>
-          </div>
-        </div>
-
-        <!-- Progress + Probability -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <!-- Progress Ring -->
-          <div class="chart-box flex flex-col items-center justify-center py-8">
-            <h3 class="text-sm font-semibold text-slate-200 mb-6 self-start flex items-center gap-2">
-              <span class="w-1.5 h-4 rounded-full bg-indigo-500 inline-block"></span>
-              Goal Progress
-            </h3>
-            <div class="relative flex items-center justify-center" style="width:180px;height:180px">
-              <canvas id="goalProgressChart" width="180" height="180"></canvas>
-              <div class="absolute flex flex-col items-center">
-                <span class="text-3xl font-bold text-white" id="g-prob-ring">0%</span>
-                <span class="text-xs text-slate-500 mt-1">Success Probability</span>
-              </div>
-            </div>
-            <div class="grid grid-cols-2 gap-6 mt-6 w-full">
-              <div class="text-center">
-                <p class="text-xs text-slate-500 mb-1">Expected Corpus</p>
-                <p class="text-base font-semibold text-white" id="g-corpus">₹0</p>
-              </div>
-              <div class="text-center">
-                <p class="text-xs text-slate-500 mb-1">Monthly SIP</p>
-                <p class="text-base font-semibold text-white" id="g-sip">₹0</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Allocation -->
-          <div class="chart-box">
-            <h3 class="text-sm font-semibold text-slate-200 mb-4 flex items-center gap-2">
-              <span class="w-1.5 h-4 rounded-full bg-violet-500 inline-block"></span>
-              Recommended Allocation
-            </h3>
-            <canvas id="goalAllocationChart" height="200"></canvas>
-          </div>
-        </div>
-
-        <!-- AI Investment Insight -->
-        <div class="chart-box" id="goal-insight-box">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
-              <span class="w-1.5 h-4 rounded-full bg-emerald-500 inline-block"></span>
-              AI Investment Insight
-            </h3>
-            <span class="text-xs text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20">Groq LLaMA-3</span>
-          </div>
-          <!-- Loading state -->
-          <div id="insight-loading" class="flex items-center gap-3 py-4">
-            <div class="w-4 h-4 rounded-full border-2 border-indigo-500 border-t-transparent animate-spin"></div>
-            <span class="text-slate-400 text-sm">Generating your personalised insight…</span>
-          </div>
-          <!-- Insight content -->
-          <div id="insight-content" class="hidden space-y-3">
-            <div id="insight-text" class="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap"></div>
-          </div>
-          <!-- Error state -->
-          <div id="insight-error" class="hidden text-slate-500 text-sm py-2">
-            ⚠️ Could not load AI insight. Please ensure your Groq API key is configured.
-          </div>
-        </div>
-      </section>
-
-      <!-- ===== INSIGHTS SECTION ===== -->
-      <section id="insights-section" class="section">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-lg font-semibold text-white">AI Insights</h2>
-          <span class="text-xs text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20">Powered by FinPass AI</span>
-        </div>
-        <div id="insights-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-      </section>
-
-    </div><!-- /p-6 -->
-  </main>
-</div>
-
-<script type="module" src="./js/dashboard.js"></script>
-
-<script>
-  // ── Sidebar navigation with section toggling ──────────────────────────────
-  document.querySelectorAll('.nav-item[data-section]').forEach(item => {
-    item.addEventListener('click', e => {
-      e.preventDefault();
-      const target = item.dataset.section;
-
-      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-      item.classList.add('active');
-
-      document.querySelectorAll('.section').forEach(s => s.classList.remove('active-section'));
-      const sec = document.getElementById(`${target}-section`);
-      if (sec) sec.classList.add('active-section');
-    });
-  });
-
-  // ── Sidebar user info mirror ───────────────────────────────────────────────
-  document.addEventListener('DOMContentLoaded', () => {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    const sn = document.getElementById('sidebar-name');
-    const se = document.getElementById('sidebar-email');
-    if (sn) sn.textContent = user.Name || 'User';
-    if (se) se.textContent = user.email || '—';
-  });
-
-  // ── Insight card renderer override (prettier cards) ───────────────────────
-  // dashboard.js calls renderInsights(); we override the DOM output here by
-  // patching the global after DOMContentLoaded so our CSS classes are applied.
-  // The JS logic remains untouched.
-</script>
+    <script type="module" src="./js/dashboard.js"></script>
 </body>
 </html>
