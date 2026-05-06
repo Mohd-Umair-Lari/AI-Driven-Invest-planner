@@ -1,7 +1,13 @@
 {
   "cleanUrls": false,
   "rewrites": [
-    { "source": "/", "destination": "/static/index.html" }
+    { "source": "/", "destination": "/static/index.html" },
+    { "source": "/index.html", "destination": "/static/index.html" },
+    { "source": "/login.html", "destination": "/static/login.html" },
+    { "source": "/register.html", "destination": "/static/register.html" },
+    { "source": "/dashboard.html", "destination": "/static/dashboard.html" },
+    { "source": "/wizard.html", "destination": "/static/wizard.html" },
+    { "source": "/advisor.html", "destination": "/static/advisor.html" }
   ],
   "headers": [
     {
