@@ -351,15 +351,15 @@ function setupChatbot() {
     
     // Add user message
     const userMsg = document.createElement('div');
-    userMsg.className = 'bg-indigo-500/20 border border-indigo-500/30 rounded-xl p-3 ml-8 mb-3 text-right';
-    userMsg.innerHTML = `<p class="text-xs text-white">${text}</p>`;
+    userMsg.className = 'chat-user-msg';
+    userMsg.innerHTML = `<p class="chat-user-text">${text}</p>`;
     chatMessages.appendChild(userMsg);
     chatInput.value = '';
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
     // Add typing indicator
     const typingMsg = document.createElement('div');
-    typingMsg.className = 'text-xs text-slate-500 italic mb-3';
+    typingMsg.className = 'chat-typing';
     typingMsg.textContent = 'AI Advisor is thinking...';
     chatMessages.appendChild(typingMsg);
     chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -368,12 +368,12 @@ function setupChatbot() {
     setTimeout(() => {
       typingMsg.remove();
       const aiMsg = document.createElement('div');
-      aiMsg.className = 'bg-white/[0.04] border border-white/5 rounded-xl p-4 mb-3 mr-4';
+      aiMsg.className = 'ai-chat-card';
       aiMsg.innerHTML = `
         <div class="flex justify-between items-center mb-2">
-            <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded tracking-wider">RESPONSE</span>
+            <span class="chat-response-tag">RESPONSE</span>
         </div>
-        <p class="text-xs text-slate-300 leading-relaxed">Based on your portfolio, prioritizing debt repayment while maintaining a 10% SIP increase is the best approach to hit your goal.</p>
+        <p class="chat-ai-text">Based on your portfolio, prioritizing debt repayment while maintaining a 10% SIP increase is the best approach to hit your goal.</p>
       `;
       chatMessages.appendChild(aiMsg);
       chatMessages.scrollTop = chatMessages.scrollHeight;

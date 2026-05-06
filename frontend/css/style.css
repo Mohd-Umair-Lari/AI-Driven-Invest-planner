@@ -456,6 +456,82 @@ body.wizard-mesh {
   border-color: #818cf8;
 }
 
+/* ── Dynamic chat message bubbles ── */
+
+/* User message bubble */
+.chat-user-msg {
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  margin-left: 2rem;
+  margin-bottom: 0.75rem;
+  text-align: right;
+  transition: background 0.3s, border-color 0.3s;
+}
+
+.dark .chat-user-msg {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: rgba(99, 102, 241, 0.35);
+}
+
+.chat-user-text {
+  font-size: 0.75rem;
+  color: #3730a3;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.dark .chat-user-text {
+  color: #c7d2fe;
+}
+
+/* AI response tag */
+.chat-response-tag {
+  display: inline-block;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 2px 8px;
+  border-radius: 4px;
+  color: #059669;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.dark .chat-response-tag {
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.25);
+}
+
+/* AI response text (inside .ai-chat-card dynamically added) */
+.chat-ai-text {
+  font-size: 0.75rem;
+  color: #334155;
+  line-height: 1.7;
+  margin-top: 0.25rem;
+}
+
+.dark .chat-ai-text {
+  color: #94a3b8;
+}
+
+/* Typing indicator */
+.chat-typing {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-style: italic;
+  margin-bottom: 0.75rem;
+  padding-left: 0.25rem;
+  transition: color 0.3s;
+}
+
+.dark .chat-typing {
+  color: #64748b;
+}
+
+
 .sankey-placeholder {
   width: 100%;
   height: 220px;
