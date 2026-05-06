@@ -34,7 +34,7 @@ btn.addEventListener("click", async () => {
     localStorage.setItem("user", JSON.stringify(res.user));
 
     // go to wizard
-    window.location.href = "/wizard.html";
+    window.location.href = "/static/wizard.html";
 
   } catch (err) {
     alert(err.message || "Registration failed");

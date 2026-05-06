@@ -1,8 +1,5 @@
 {
   "cleanUrls": false,
-  "rewrites": [
-    { "source": "/", "destination": "/static/index.html" }
-  ],
   "headers": [
     {
       "source": "/js/(.*)\\.js",

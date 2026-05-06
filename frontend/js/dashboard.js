@@ -34,7 +34,7 @@ function safeExtract(obj, path, defaultVal = 0) {
 async function loadUserData() {
   let user = JSON.parse(localStorage.getItem("user"));
   if (!user) {
-    window.location.href = "/login.html";
+    window.location.href = "/static/login.html";
     return null;
   }
 
