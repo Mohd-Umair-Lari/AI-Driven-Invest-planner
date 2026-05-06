@@ -89,6 +89,21 @@ canvas {
     linear-gradient(to bottom, #0f1423, #0b0f1a);
 }
 
+/* ── Login / Register page body theming ── */
+body.auth-page {
+  background: radial-gradient(ellipse at 20% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(139, 92, 246, 0.07) 0%, transparent 55%),
+    radial-gradient(ellipse at 60% 80%, rgba(16, 185, 129, 0.06) 0%, transparent 50%),
+    linear-gradient(to bottom, #ffffff, #f8fafc);
+  transition: background 0.3s ease;
+}
+html.dark body.auth-page {
+  background: radial-gradient(ellipse at 20% 50%, rgba(99, 102, 241, 0.12) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(139, 92, 246, 0.10) 0%, transparent 55%),
+    radial-gradient(ellipse at 60% 80%, rgba(16, 185, 129, 0.06) 0%, transparent 50%),
+    linear-gradient(to bottom, #0f1423, #0b0f1a);
+}
+
 /* From wizard.html (combining mesh-bg styles smoothly) */
 body.wizard-mesh {
   background: radial-gradient(ellipse at 30% 40%, rgba(99, 102, 241, 0.05) 0%, transparent 60%),
@@ -258,9 +273,68 @@ body.wizard-mesh {
   border-radius: 1rem;
   color: #1e293b;
   border: 1px solid #e2e8f0;
-  transition: background-color 0.2s;
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
 }
-.dark .ai-panel { background: #0f172a; color: white; border-color: #334155; }
+.dark .ai-panel { background: #0f172a; color: #f1f5f9; border-color: #334155; }
+
+/* AI panel inner elements — light mode overrides */
+.ai-panel .ai-panel-title { color: #0f172a; }
+.dark .ai-panel .ai-panel-title { color: #ffffff; }
+
+.ai-panel .ai-panel-sub { color: #64748b; }
+.dark .ai-panel .ai-panel-sub { color: #94a3b8; }
+
+/* Chat message cards inside AI panel */
+.ai-chat-card {
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  transition: background 0.3s, border-color 0.3s;
+}
+.dark .ai-chat-card {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.ai-chat-card h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 0.5rem;
+  transition: color 0.3s;
+}
+.dark .ai-chat-card h4 { color: #f1f5f9; }
+
+.ai-chat-card p {
+  font-size: 0.75rem;
+  color: #475569;
+  line-height: 1.6;
+  transition: color 0.3s;
+}
+.dark .ai-chat-card p { color: #94a3b8; }
+
+/* Chat input inside AI panel */
+.ai-chat-input-field {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+  padding: 0.625rem 2.5rem 0.625rem 0.75rem;
+  font-size: 0.875rem;
+  color: #0f172a;
+  transition: background 0.3s, border-color 0.3s, color 0.3s;
+  outline: none;
+}
+.ai-chat-input-field::placeholder { color: #94a3b8; }
+.ai-chat-input-field:focus { border-color: #6366f1; }
+.dark .ai-chat-input-field {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f1f5f9;
+}
+.dark .ai-chat-input-field::placeholder { color: #64748b; }
+.dark .ai-chat-input-field:focus { border-color: #818cf8; }
 
 .sankey-placeholder {
   width: 100%;
