@@ -1,20 +1,25 @@
 FROM python:3.11-slim
 
-# Allow statements and log messages to immediately appear in the Knative logs
-ENV PYTHONUNBUFFERED True
+# Hugging Face Spaces requires running as a non-root user
+RUN useradd -m -u 1000 user
 
-# Set working directory
+ENV PYTHONUNBUFFERED=True \
+    PORT=7860 \
+    PYTHONPATH=/app
+
 WORKDIR /app
 
-# Install dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy local code to the container image
-COPY . .
+# Copy local code to the container and set permissions
+COPY --chown=user:user . .
 
-# Set default port
-ENV PORT 8080
+# Switch to the "user" user
+USER user
 
-# Run the web service on container startup using gunicorn
+# Hugging Face Spaces listens on port 7860 by default
+EXPOSE 7860
+
+# Run the web service using gunicorn
 CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 main:app
