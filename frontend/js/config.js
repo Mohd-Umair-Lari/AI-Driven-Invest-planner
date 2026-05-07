@@ -3,8 +3,8 @@ const isDev = window.location.hostname === "localhost" || window.location.hostna
 
 // Backend URLs
 const DEV_URL = "http://localhost:5000";
-// 🔴 CHANGE THIS to your Railway backend URL: https://your-railway-project.railway.app
-const PRODUCTION_URL = "https://ai-driven-invest-planner.onrender.com"; // ← Update this after creating Railway project
+// 🟢 Connected to your Hugging Face Backend URL
+const PRODUCTION_URL = "https://umairlari-ai-financial-advisor-backend.hf.space";
 
 export const BACKEND_URL = isDev ? DEV_URL : PRODUCTION_URL;
 
