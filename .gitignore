@@ -1,2 +1,3 @@
 TESTING_GUIDE.md
 .env
+.dockerignore
