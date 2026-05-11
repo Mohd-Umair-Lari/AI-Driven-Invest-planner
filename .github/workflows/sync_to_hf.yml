@@ -17,4 +17,4 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           # Replace 'username/space-name' with your actual HF info
-          git push -f https://UmairLari:$HF_TOKEN@huggingface.co/spaces/UmairLari/ai-financial-advisor-backend main
+          git push -f https://$HF_TOKEN@huggingface.co/spaces/UmairLari/ai-financial-advisor-backend main
