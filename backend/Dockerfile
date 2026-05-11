@@ -18,7 +18,7 @@ USER user
 
 EXPOSE 7860
 
-CMD exec uvicorn server:asgi_app \
+CMD exec uvicorn main:asgi_app \
     --host 0.0.0.0 \
     --port $PORT \
     --workers 1 \
