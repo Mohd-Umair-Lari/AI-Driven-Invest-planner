@@ -37,7 +37,7 @@ from ml.goal_intelligence import compute_goal_intelligence
 from agent.financial_agent import run_agent
 from routes.intelligence_routes import intelligence_bp
 from routes.advisor_routes import advisor_bp
-from services.groq_service import initialize_groq
+from ai.groq_service import initialize_groq
 
 # ══════════════════════════════════════════════════════════════
 #  Bootstrap
