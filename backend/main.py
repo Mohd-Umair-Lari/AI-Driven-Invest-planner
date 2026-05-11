@@ -1,13 +1,3 @@
-"""
-main.py — Single entry point: Flask + FastAPI unified
-======================================================
-FastAPI is the outer ASGI app (serves /api/* with Pydantic validation + /docs).
-Flask is mounted inside FastAPI at /flask for legacy compatibility.
-
-Run locally:  uvicorn main:asgi_app --reload --port 5000
-Deploy (HF):  uvicorn main:asgi_app --host 0.0.0.0 --port 7860
-"""
-
 import json
 import os
 import re
