@@ -1,626 +1,404 @@
+"""
+main.py — Single entry point: Flask + FastAPI unified
+======================================================
+FastAPI is the outer ASGI app (serves /api/* with Pydantic validation + /docs).
+Flask is mounted inside FastAPI at /flask for legacy compatibility.
+
+Run locally:  uvicorn main:asgi_app --reload --port 5000
+Deploy (HF):  uvicorn main:asgi_app --host 0.0.0.0 --port 7860
+"""
+
+import json
 import os
 import re
 from datetime import datetime
+from typing import Any, Dict, Optional
+
+import certifi
 from bson import ObjectId
+from dotenv import load_dotenv
+
+# ── Flask imports ──────────────────────────────────────────────
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from werkzeug.security import check_password_hash, generate_password_hash
+
+# ── FastAPI imports ────────────────────────────────────────────
+from fastapi import FastAPI, HTTPException, Path as FPath
+from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.wsgi import WSGIMiddleware
 from pymongo import MongoClient
-from dotenv import load_dotenv
-from werkzeug.security import generate_password_hash, check_password_hash
-import certifi
-from groq_service import initialize_groq
+
+# ── Internal modules ───────────────────────────────────────────
+from api.schemas import (
+    AdvisorChatRequest,
+    IntelligenceRequest,
+    LoginRequest,
+    OnboardingCancelRequest,
+    OnboardingCompleteRequest,
+    OnboardingSaveRequest,
+    OnboardingStartRequest,
+    SignupRequest,
+    UserUpdateRequest,
+)
 from analytics.financial_analytics import compute_financial_health
 from ml.goal_predictor import generate_plan, goal_probability
 from ml.goal_intelligence import compute_goal_intelligence
 from agent.financial_agent import run_agent
 from routes.intelligence_routes import intelligence_bp
 from routes.advisor_routes import advisor_bp
+from services.groq_service import initialize_groq
 
-# Load environment variables from .env file in backend root directory
+# ══════════════════════════════════════════════════════════════
+#  Bootstrap
+# ══════════════════════════════════════════════════════════════
+
 load_dotenv()
-# Initialize Groq AI (optional - gracefully handle if unavailable)
+
 try:
     initialize_groq()
-    print("✅ Groq AI initialized successfully")
+    print("✅ Groq AI initialized")
 except Exception as e:
-    print(f"⚠️ Groq AI initialization skipped: {e}")
+    print(f"⚠️  Groq AI skipped: {e}")
 
-# Environment Variables
 MONGO_URI = os.getenv("MONGO_URI", "").strip()
 if not MONGO_URI:
-    raise ValueError("❌ MONGO_URI environment variable is not set. Please configure it in .env")
+    raise ValueError("❌ MONGO_URI is not set.")
 
-DB_NAME = os.getenv("DB_NAME", "mockDB").strip()
+DB_NAME         = os.getenv("DB_NAME", "mockDB").strip()
 COLLECTION_NAME = os.getenv("COLLECTION_NAME", "userGoals").strip()
-FLASK_ENV = os.getenv("FLASK_ENV", "development").strip()
-PORT = int(os.getenv("PORT", 5000))
+PORT            = int(os.getenv("PORT", 7860))
 
-app = Flask(__name__)
-# CORS configuration: Allow all Vercel deployments + localhost + production domain
-CORS(
-    app,
-    resources={
-        r"/api/*": {
-            "origins": [
-                # Development/local
-                "http://localhost:3000",
-                "http://localhost:5173",
-                "http://localhost:8080",
-                "http://127.0.0.1:3000",
-                "http://127.0.0.1:5173",
-                "http://127.0.0.1:8080",
-                # Production - Allow all Vercel subdomains with regex
-                re.compile(r"https://.*\.vercel\.app"),
-                "https://ai-driven-invest-planner.vercel.app",
-            ]
-        }
-    },
-    supports_credentials=True
+_mongo = MongoClient(
+    MONGO_URI,
+    tls=True,
+    tlsCAFile=certifi.where(),
+    serverSelectionTimeoutMS=10_000,
+    connectTimeoutMS=10_000,
+    socketTimeoutMS=10_000,
 )
-app.register_blueprint(intelligence_bp, url_prefix="/api")
-app.register_blueprint(advisor_bp, url_prefix="/api")
-
-def connect_mongo():
-    client = MongoClient(
-        MONGO_URI,
-        tls=True,
-        tlsCAFile=certifi.where(),
-        serverSelectionTimeoutMS=10000,
-        connectTimeoutMS=10000,
-        socketTimeoutMS=10000
-    )
-    client.admin.command("ping")
-    return client
-
-
-client = connect_mongo()
-db = client[DB_NAME]
+_mongo.admin.command("ping")
+db         = _mongo[DB_NAME]
 collection = db[COLLECTION_NAME]
 
-def ensure_onboarding(user):
+# ── Shared CORS origins ────────────────────────────────────────
+_ORIGINS = [
+    "http://localhost:3000", "http://localhost:5173", "http://localhost:8080",
+    "http://127.0.0.1:3000", "http://127.0.0.1:5173", "http://127.0.0.1:8080",
+    "https://ai-driven-invest-planner.vercel.app",
+]
+
+# ══════════════════════════════════════════════════════════════
+#  Helpers
+# ══════════════════════════════════════════════════════════════
+
+def _serialize(doc: dict) -> dict:
+    doc = dict(doc)
+    doc["_id"] = str(doc.get("_id", ""))
+    doc.pop("password", None)
+    return doc
+
+def _ensure_onboarding(email: str, user: dict) -> dict:
     if "onboarding" not in user:
-        onboarding = {
-            "status": "not_started",
-            "current_step": 0,
-            "last_updated": datetime.utcnow().isoformat()
-        }
-        collection.update_one(
-            {"email": user["email"]},
-            {"$set": {"onboarding": onboarding}}
-        )
-        user["onboarding"] = onboarding
+        ob = {"status": "not_started", "current_step": 0,
+              "last_updated": datetime.utcnow().isoformat()}
+        collection.update_one({"email": email}, {"$set": {"onboarding": ob}})
+        user["onboarding"] = ob
+    return user
 
+# ══════════════════════════════════════════════════════════════
+#  Flask App  (legacy WSGI — still handles Blueprint routes)
+# ══════════════════════════════════════════════════════════════
 
-@app.route("/", methods=["GET"])
-def health():
-    return {
-        "status": "ok",
-        "service": "FinPass Backend",
-        "version": "v1"
-    }, 200
+flask_app = Flask(__name__)
+CORS(flask_app, resources={r"/api/*": {"origins": _ORIGINS}}, supports_credentials=True)
+flask_app.register_blueprint(intelligence_bp, url_prefix="/api")
+flask_app.register_blueprint(advisor_bp,      url_prefix="/api")
 
+# keep Flask health alive
+@flask_app.route("/")
+def _flask_health():
+    return {"status": "ok", "engine": "flask"}
 
-@app.route("/api/test-connection", methods=["GET"])
-def test_connection():
-    """Test endpoint to verify backend is accessible"""
+# ══════════════════════════════════════════════════════════════
+#  FastAPI App  (primary ASGI — Pydantic validation + /docs)
+# ══════════════════════════════════════════════════════════════
+
+api = FastAPI(
+    title="FinPass AI – Financial Advisor API",
+    description="Pydantic-validated REST API. Swagger UI at **/docs**.",
+    version="2.0.0",
+)
+
+api.add_middleware(
+    CORSMiddleware,
+    allow_origins=_ORIGINS,
+    allow_origin_regex=r"https://.*\.vercel\.app",
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# ── Health ─────────────────────────────────────────────────────
+
+@api.get("/", tags=["Health"])
+async def health():
+    return {"status": "ok", "service": "FinPass Backend", "version": "v2 (FastAPI+Flask)"}
+
+@api.get("/api/test-connection", tags=["Health"])
+async def test_connection():
     try:
-        # Try to ping the database
-        client.admin.command("ping")
-        return jsonify({
-            "status": "success",
-            "message": "Backend is running",
-            "database": "Connected",
-            "timestamp": datetime.utcnow().isoformat()
-        }), 200
+        _mongo.admin.command("ping")
+        return {"status": "success", "database": "Connected",
+                "timestamp": datetime.utcnow().isoformat()}
     except Exception as e:
-        return jsonify({
-            "status": "error",
-            "message": "Backend is running but database connection failed",
-            "error": str(e)
-        }), 500
+        raise HTTPException(500, str(e))
 
+# ── Auth ───────────────────────────────────────────────────────
 
-@app.route("/api/login", methods=["POST"])
-def api_login():
-    data = request.get_json(silent=True) or {}
-    email = (data.get("email") or "").strip()
-    password = (data.get("password") or "").strip()
+@api.post("/api/login", tags=["Auth"])
+async def api_login(body: LoginRequest):
+    user = collection.find_one({"email": body.email})
+    if not user:
+        raise HTTPException(401, "Invalid credentials")
+    stored = user.get("password", "")
+    hashed = stored.startswith(("scrypt:", "pbkdf2:", "argon2:", "sha256$", "sha512$"))
+    valid  = check_password_hash(stored, body.password) if hashed else stored == body.password
+    if not valid:
+        raise HTTPException(401, "Invalid credentials")
+    user = _ensure_onboarding(body.email, user)
+    return {"status": "success", "user": _serialize(user)}
 
-    user = collection.find_one({"email": email})
-
-    if user:
-        stored_password = user.get("password", "")
-        # werkzeug hashes always start with the method prefix (scrypt:, pbkdf2:, argon2:)
-        # check_password_hash returns False (not an exception) for plain-text input,
-        # so try/except is NOT the right approach — use prefix detection instead.
-        IS_HASHED = stored_password.startswith(("scrypt:", "pbkdf2:", "argon2:", "sha256$", "sha512$"))
-        if IS_HASHED:
-            password_valid = check_password_hash(stored_password, password)
-        else:
-            # Legacy: plain-text password stored directly in DB
-            password_valid = (stored_password == password)
-
-        if password_valid:
-            user.pop("password", None)
-            user["_id"] = str(user["_id"])
-            ensure_onboarding(user)
-            return jsonify({"status": "success", "user": user})
-
-    return jsonify({"status": "error", "message": "Invalid credentials"}), 401
-
-
-
-@app.route("/api/signup", methods=["POST"])
-def api_signup():
-    data = request.get_json(silent=True) or {}
-
-    name = (data.get("Name") or "").strip()
-    email = (data.get("email") or "").strip()
-    password = (data.get("password") or "").strip()
-
-    if not name or not email or not password:
-        return jsonify({"status": "error", "message": "Name, Email, and Password are required"}), 400
-
-    if collection.find_one({"email": email}):
-        return jsonify({"status": "error", "message": "Email already registered"}), 409
-
-    hashed_pwd = generate_password_hash(password)
-    print(f"📝 Signup: {email} - Password hashed successfully")
-
+@api.post("/api/signup", tags=["Auth"], status_code=201)
+async def api_signup(body: SignupRequest):
+    if collection.find_one({"email": body.email}):
+        raise HTTPException(409, "Email already registered")
     doc = {
         "_id": ObjectId(),
-        "Name": name,
-        "email": email,
-        "password": hashed_pwd,
-        "Age": str(data.get("Age") or ""),
-        "employment-status": data.get("employment-status", "Salaried"),
-        "Goal": data.get("Goal", {}),
-        "financials": data.get("financials", {}),
-        "investments": data.get("investments", {}),
-        "progress": data.get("progress", {}),
-        "onboarding": {
-            "status": "in_progress",
-            "current_step": 0,
-            "last_updated": datetime.utcnow().isoformat()
-        }
+        "Name": body.Name, "email": body.email,
+        "password": generate_password_hash(body.password),
+        "Age": body.Age or "",
+        "employment-status": body.employment_status or "Salaried",
+        "Goal": body.Goal or {}, "financials": body.financials or {},
+        "investments": body.investments or {}, "progress": body.progress or {},
+        "onboarding": {"status": "in_progress", "current_step": 0,
+                       "last_updated": datetime.utcnow().isoformat()},
     }
-
     collection.insert_one(doc)
-    doc.pop("password")
-    doc["_id"] = str(doc["_id"])
+    return {"status": "success", "user": _serialize(doc)}
 
-    return jsonify({"status": "success", "user": doc}), 201
+# ── Onboarding ────────────────────────────────────────────────
 
+@api.post("/api/onboarding/start", tags=["Onboarding"])
+async def onboarding_start(body: OnboardingStartRequest):
+    user = collection.find_one({"email": body.email})
+    if not user: raise HTTPException(404, "User not found")
+    user = _ensure_onboarding(body.email, user)
+    if user["onboarding"]["status"] in ("not_started", "cancelled"):
+        ob = {"status": "in_progress", "current_step": 0,
+              "last_updated": datetime.utcnow().isoformat()}
+        collection.update_one({"email": body.email}, {"$set": {"onboarding": ob}})
+        user["onboarding"] = ob
+    return {"status": "success", "onboarding": user["onboarding"]}
 
-@app.route("/api/onboarding/start", methods=["POST"])
-def start_onboarding():
-    data = request.get_json(silent=True) or {}
-    email = data.get("email")
+@api.post("/api/onboarding/save", tags=["Onboarding"])
+async def onboarding_save(body: OnboardingSaveRequest):
+    user = collection.find_one({"email": body.email})
+    if not user: raise HTTPException(404, "User not found")
+    merged = {**user.get("onboarding", {}).get("data", {}), **body.payload}
+    collection.update_one({"email": body.email}, {"$set": {
+        "onboarding.status": "in_progress",
+        "onboarding.current_step": body.step,
+        "onboarding.data": merged,
+        "onboarding.last_updated": datetime.utcnow().isoformat(),
+    }})
+    return {"status": "saved"}
 
+@api.post("/api/onboarding/cancel", tags=["Onboarding"])
+async def onboarding_cancel(body: OnboardingCancelRequest):
+    upd: Dict[str, Any] = {"onboarding.status": "cancelled",
+                            "onboarding.last_updated": datetime.utcnow().isoformat()}
+    if body.current_step is not None:
+        upd["onboarding.current_step"] = body.current_step
+    collection.update_one({"email": body.email}, {"$set": upd})
+    return {"status": "cancelled"}
+
+@api.post("/api/onboarding/complete", tags=["Onboarding"])
+async def onboarding_complete(body: OnboardingCompleteRequest):
+    user = collection.find_one({"email": body.email})
+    if not user: raise HTTPException(404, "User not found")
+    collection.update_one({"email": body.email}, {"$set": {
+        "onboarding": {"status": "completed", "current_step": None,
+                       "last_updated": datetime.utcnow().isoformat()}}})
+    return {"status": "completed"}
+
+@api.get("/api/onboarding/status/{email}", tags=["Onboarding"])
+async def onboarding_status(email: str = FPath(...)):
     user = collection.find_one({"email": email})
-    if not user:
-        return jsonify({"status": "error", "message": "User not found"}), 404
+    if not user: raise HTTPException(404, "User not found")
+    ob = user.get("onboarding", {})
+    return {"status": "success", "onboarding": {
+        "state": ob.get("status"), "current_step": ob.get("current_step"),
+        "data": ob.get("data", {})}}
 
-    ensure_onboarding(user)
+# ── User ───────────────────────────────────────────────────────
 
-    if user["onboarding"]["status"] in ["not_started", "cancelled"]:
-        onboarding = {
-            "status": "in_progress",
-            "current_step": 0,
-            "last_updated": datetime.utcnow().isoformat()
-        }
-        collection.update_one(
-            {"email": email},
-            {"$set": {"onboarding": onboarding}}
-        )
-        user["onboarding"] = onboarding
-
-    return jsonify({"status": "success", "onboarding": user["onboarding"]})
-
-
-@app.route("/api/onboarding/save", methods=["POST"])
-def save_onboarding():
-    data = request.get_json(silent=True) or {}
-
-    email = data.get("email")
-    step = data.get("step", 0)
-    payload = data.get("payload", {})
-
-    if not email:
-        return jsonify({"status": "error", "message": "Email required"}), 400
-
-    user = collection.find_one({"email": email})
-    if not user:
-        return jsonify({"status": "error", "message": "User not found"}), 404
-
-    existing = user.get("onboarding", {}).get("data", {})
-
-    merged_data = {
-        **existing,
-        **payload
-    }
-
-    collection.update_one(
-        {"email": email},
-        {
-            "$set": {
-                "onboarding.status": "in_progress",
-                "onboarding.current_step": step,
-                "onboarding.data": merged_data,
-                "onboarding.last_updated": datetime.utcnow().isoformat()
-            }
-        }
-    )
-
-    return jsonify({"status": "saved"})
-
-@app.route("/api/onboarding/cancel", methods=["POST"])
-def cancel_onboarding():
-    data = request.get_json(silent=True) or {}
-    email = data.get("email")
-    current_step = data.get("current_step")
-
-    if not email:
-        return jsonify({"status": "error", "message": "Email required"}), 400
-
-    update = {
-        "onboarding.status": "cancelled",
-        "onboarding.last_updated": datetime.utcnow().isoformat()
-    }
-
-    if current_step is not None:
-        update["onboarding.current_step"] = current_step
-
-    collection.update_one(
-        {"email": email},
-        {"$set": update}
-    )
-
-    return jsonify({"status": "cancelled"})
-
-@app.route("/api/onboarding/status/<email>", methods=["GET"])
-def onboarding_status(email):
-    user = collection.find_one({"email": email})
-    if not user:
-        return jsonify({"status": "error", "message": "User not found"}), 404
-
-    onboarding = user.get("onboarding", {})
-
-    return jsonify({
-        "status": "success",
-        "onboarding": {
-            "state": onboarding.get("status"),
-            "current_step": onboarding.get("current_step"),
-            "data": onboarding.get("data", {})
-        }
-    })
-
-
-@app.route("/api/onboarding/complete", methods=["POST"])
-def complete_onboarding():
-    data = request.get_json(silent=True) or {}
-    email = data.get("email")
-
-    user = collection.find_one({"email": email})
-    if not user:
-        return jsonify({"status": "error", "message": "User not found"}), 404
-
-    onboarding = {
-        "status": "completed",
-        "current_step": None,
-        "last_updated": datetime.utcnow().isoformat()
-    }
-
-    collection.update_one(
-        {"email": email},
-        {"$set": {"onboarding": onboarding}}
-    )
-
-    return jsonify({"status": "completed"})
-
-
-@app.route("/api/user/<email>", methods=["GET"])
-def api_get_user(email):
+@api.get("/api/user/{email}", tags=["User"])
+async def get_user(email: str = FPath(...)):
     user = collection.find_one({"email": email}, {"_id": 0, "password": 0})
-    if not user:
-        return jsonify({"status": "error", "message": "User not found"}), 404
-    return jsonify({"status": "success", "user": user})
+    if not user: raise HTTPException(404, "User not found")
+    return {"status": "success", "user": user}
 
+@api.put("/api/user/{email}", tags=["User"])
+async def update_user(body: UserUpdateRequest, email: str = FPath(...)):
+    result = collection.update_one({"email": email}, {"$set": {
+        "Name": body.Name, "Age": str(body.Age or ""),
+        "employment-status": body.employment_status or "",
+        "Goal": body.Goal or {}, "financials": body.financials or {},
+        "investments": body.investments or {}, "progress": body.progress or {},
+    }})
+    if result.matched_count == 0: raise HTTPException(404, "User not found")
+    return {"status": "success"}
 
-@app.route("/api/user/<email>", methods=["PUT"])
-def api_update_user(email):
-    data = request.get_json(silent=True) or {}
+# ── Analytics ─────────────────────────────────────────────────
 
-    update = {
-        "Name": data.get("Name", ""),
-        "Age": str(data.get("Age", "")),
-        "employment-status": data.get("employment-status", ""),
-        "Goal": data.get("Goal", {}),
-        "financials": data.get("financials", {}),
-        "investments": data.get("investments", {}),
-        "progress": data.get("progress", {})
-    }
-
-    result = collection.update_one(
-        {"email": email},
-        {"$set": update}
-    )
-
-    if result.matched_count == 0:
-        return jsonify({"status": "error", "message": "User not found"}), 404
-
-    print(f"✅ User profile updated: {email}")
-    return jsonify({"status": "success"})
-
-@app.route("/api/analytics/<email>", methods=["GET"])
-def analytics(email):
+@api.get("/api/analytics/{email}", tags=["Analytics"])
+async def analytics(email: str = FPath(...)):
     user = collection.find_one({"email": email}, {"_id": 0, "password": 0})
-    if not user:
-        return jsonify({"status": "error", "message": "User not found"}), 404
-    return jsonify({"analytics": compute_financial_health(user)})
+    if not user: raise HTTPException(404, "User not found")
+    return {"analytics": compute_financial_health(user)}
 
-
-@app.route("/api/predict/<email>", methods=["GET"])
-def predict(email):
+@api.get("/api/predict/{email}", tags=["Analytics"])
+async def predict(email: str = FPath(...)):
     user = collection.find_one({"email": email}, {"_id": 0, "password": 0})
-    if not user:
-        return jsonify({"status": "error", "message": "User not found"}), 404
-    return jsonify(goal_probability(user))
+    if not user: raise HTTPException(404, "User not found")
+    return goal_probability(user)
 
-
-@app.route("/api/recommend/<email>", methods=["GET"])
-def recommend(email):
+@api.get("/api/recommend/{email}", tags=["Analytics"])
+async def recommend(email: str = FPath(...)):
     user = collection.find_one({"email": email}, {"_id": 0, "password": 0})
-    if not user:
-        return jsonify({"status": "error", "message": "User not found"}), 404
-    return jsonify({"recommended_plan": generate_plan(user)})
+    if not user: raise HTTPException(404, "User not found")
+    return {"recommended_plan": generate_plan(user)}
 
-
-@app.route("/api/goal-intelligence/<email>", methods=["GET"])
-def goal_intelligence(email):
+@api.get("/api/goal-intelligence/{email}", tags=["Analytics"])
+async def goal_intelligence(email: str = FPath(...)):
     user = collection.find_one({"email": email}, {"_id": 0, "password": 0})
-    if not user:
-        return jsonify({"status": "error", "message": "User not found"}), 404
-    return jsonify({"goal_intelligence": compute_goal_intelligence(user)})
+    if not user: raise HTTPException(404, "User not found")
+    return {"goal_intelligence": compute_goal_intelligence(user)}
 
-@app.route("/test-groq")
-def test_groq():
-    """Health-check endpoint to verify Groq AI is reachable."""
+@api.get("/api/agent/{email}", tags=["Agent"])
+async def agent_api(email: str = FPath(...)):
+    user = collection.find_one({"email": email}, {"_id": 0, "password": 0})
+    if not user: raise HTTPException(404, "User not found")
     try:
-        from ai.groq_client import generate_response
-        result = generate_response('Return exactly this JSON: {"message": "hello"}')
-        return result, 200
+        intel = compute_goal_intelligence(user)
+        resp  = run_agent(intel) or {"action": "HOLD", "message": "No data", "reason": "Incomplete profile"}
+        return {"goal_intelligence": intel, "agent": resp}
     except Exception as e:
-        return str(e), 500
+        return {"agent": {"action": "ERROR", "message": "Failed", "reason": str(e)}}
 
-@app.route("/api/analyze-finances/<email>", methods=["GET"])
-def analyze_finances(email):
-    try:
-        print("📊 Analyzing finances for:", email)
+# ── AI Advisor Chat ────────────────────────────────────────────
 
-        user = collection.find_one({"email": email}, {"_id": 0, "password": 0})
-        if not user:
-            return jsonify({"status": "error", "message": "User not found"}), 404
-
-        financials = user.get("financials", {})
-        goal = user.get("Goal", {})
-        investments = user.get("investments", {})
-
-        income = float(financials.get("monthly-income") or 0)
-        expenses = float(financials.get("monthly-expenses") or 0)
-        debt = float(financials.get("debt") or 0)
-        risk = goal.get("risk", "moderate")
-        invest_amt = float(investments.get("invest-amt") or 0)
-
-        if income == 0:
-            return jsonify({
-                "status": "error",
-                "message": "Please complete your financial profile first"
-            }), 400
-
-        # Build user profile dict for Groq prompt
-        user_profile = {
-            "income": income,
-            "expenses": expenses,
-            "risk": risk,
-            "goal": goal.get("goal", "Wealth Building")
-        }
-        allocation = {
-            "equity": 60 if risk == "high" else 50 if risk == "medium" else 30,
-            "debt": 25 if risk == "high" else 35 if risk == "medium" else 50,
-            "cash": 15 if risk == "high" else 15 if risk == "medium" else 20
-        }
-
-        # Try Groq AI
-        try:
-            from ai.groq_client import generate_response
-            from ai.formatter import clean_response
-
-            prompt = f"""Analyze this financial profile and return ONLY valid JSON (no markdown, no explanation):
-Income: {income}
-Expenses: {expenses}
-Debt: {debt}
-Monthly Investment: {invest_amt}
-Risk Appetite: {risk}
-Financial Goal: {goal.get('goal', 'Wealth Building')}
-Target Amount: {goal.get('target-amt', 0)}
-Target Timeline: {goal.get('target-time', 0)} months
-
-Return ONLY this JSON format:
-{{"financial_health_score": <0-100>, "analysis": "<2-3 sentence insight>", "recommendations": ["<r1>", "<r2>", "<r3>"], "investment_strategy": {{"equity": <0-100>, "debt": <0-100>, "cash": <0-100>}}}}"""
-
-            raw = generate_response(prompt)
-            cleaned = clean_response(re.sub(r"```json|```", "", raw))
-            parsed = json.loads(cleaned)
-            print("✅ Groq AI analysis successful")
-            return jsonify(parsed)
-
-        except Exception as ai_err:
-            print(f"⚠️ Groq AI failed ({type(ai_err).__name__}: {ai_err}), using fallback")
-
-            # Rule-based fallback
-            savings_rate = (income - expenses) / income if income > 0 else 0
-            debt_ratio = debt / income if income > 0 else 0
-
-            health_score = 50
-            if savings_rate > 0.3:
-                health_score += 25
-            if debt_ratio < 1:
-                health_score += 15
-            if expenses < income * 0.7:
-                health_score += 10
-
-            recommendations = []
-            if debt_ratio > 2:
-                recommendations.append("Focus on reducing high-interest debt first")
-            if savings_rate < 0.1:
-                recommendations.append("Aim to save at least 20% of your monthly income")
-            if risk == "high":
-                recommendations.append("Diversify across equity, debt and international funds")
-            if not recommendations:
-                recommendations = ["Continue your current financial plan", "Monitor monthly expenses regularly"]
-
-            fallback = {
-                "financial_health_score": min(100, health_score),
-                "analysis": f"Your financial health is {'strong' if health_score > 70 else 'moderate' if health_score > 50 else 'needs improvement'}. Savings rate: {savings_rate * 100:.1f}%.",
-                "recommendations": recommendations[:3],
-                "investment_strategy": allocation
-            }
-            return jsonify(fallback)
-
-    except Exception as e:
-        print(f"❌ Error in analyze_finances: {str(e)}")
-        return jsonify({
-            "financial_health_score": 60,
-            "analysis": "Unable to generate detailed analysis. Please ensure your profile is complete.",
-            "recommendations": ["Review your financial data", "Ensure all fields are complete"],
-            "investment_strategy": {"equity": 50, "debt": 35, "cash": 15}
-        }), 200
-
-@app.route("/api/init-test-data/<email>", methods=["POST"])
-def init_test_data(email):
-    """Initialize test user with sample financial data"""
-    user = collection.find_one({"email": email})
-    if not user:
-        return jsonify({"status": "error", "message": "User not found"}), 404
-    
-    sample_data = {
-        "financials": {
-            "monthly-income": 75000,
-            "monthly-expenses": 45000,
-            "debt": 150000,
-            "em-fund-opted": True
-        },
-        "Goal": {
-            "goal": "Early Retirement",
-            "target-amt": 5000000,
-            "target-time": 120,
-            "duration_months": 120,
-            "risk": "moderate"
-        },
-        "investments": {
-            "risk-opt": "moderate",
-            "prefered-mode": "Monthly SIP",
-            "invest-amt": 15000
-        },
-        "Age": "32",
-        "Name": user.get("Name", "User"),
-        "employment-status": "Salaried"
-    }
-    
-    collection.update_one(
-        {"email": email},
-        {"$set": sample_data}
+@api.post("/api/advisor/chat", tags=["AI Advisor"])
+async def advisor_chat(body: AdvisorChatRequest):
+    from ai.groq_client import generate_response
+    ctx = body.context
+    prompt = (
+        f"You are FinPass AI, a knowledgeable financial advisor.\n\n"
+        f"User Profile: Income ₹{ctx.monthly_income:,.0f}, "
+        f"Expenses ₹{ctx.monthly_expenses:,.0f}, Savings ₹{ctx.total_savings:,.0f}, "
+        f"Debt ₹{ctx.debt:,.0f}, Risk: {ctx.risk_appetite}\n\n"
+        f"Question: {body.question}\n\nProvide clear, actionable financial advice."
     )
-    
-    updated_user = collection.find_one({"email": email}, {"_id": 0, "password": 0})
-    return jsonify({"status": "success", "user": updated_user})
+    try:
+        return {"success": True, "response": generate_response(prompt), "user_email": body.email}
+    except Exception as e:
+        raise HTTPException(500, f"AI generation failed: {e}")
 
-@app.route("/api/ai/investment-insight/<email>", methods=["GET"])
-def investment_insight(email):
-    """
-    Generate an AI-powered investment insight for a user.
-    Fetches user data from DB using email and calls Groq LLaMA-3.
-    """
+# ── Intelligence ───────────────────────────────────────────────
+
+@api.post("/api/intelligence/insights", tags=["Intelligence"])
+async def intelligence_insights(body: IntelligenceRequest):
+    from core.financial_state import FinancialState
+    from services.intelligence_service import IntelligenceService
+    try:
+        state = FinancialState(**body.model_dump())
+        return {"insights": IntelligenceService().run(state)}
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
+# ── Analyze Finances ───────────────────────────────────────────
+
+@api.get("/api/analyze-finances/{email}", tags=["Analytics"])
+async def analyze_finances(email: str = FPath(...)):
     user = collection.find_one({"email": email}, {"_id": 0, "password": 0})
-    if not user:
-        return jsonify({"status": "error", "message": "User not found"}), 404
-
-    financials  = user.get("financials", {})
-    goal        = user.get("Goal", {})
-    investments = user.get("investments", {})
-
-    income      = float(financials.get("monthly-income") or 0)
-    expenses    = float(financials.get("monthly-expenses") or 0)
-    debt        = float(financials.get("debt") or 0)
-    invest_amt  = float(investments.get("invest-amt") or 0)
-    risk        = goal.get("risk", "moderate")
-
+    if not user: raise HTTPException(404, "User not found")
+    fin   = user.get("financials", {})
+    goal  = user.get("Goal", {})
+    inv   = user.get("investments", {})
+    income     = float(fin.get("monthly-income") or 0)
+    expenses   = float(fin.get("monthly-expenses") or 0)
+    debt       = float(fin.get("debt") or 0)
+    invest_amt = float(inv.get("invest-amt") or 0)
+    risk       = goal.get("risk", "moderate")
     if income == 0:
-        return jsonify({
-            "status": "error",
-            "message": "User financial profile is incomplete. Please complete onboarding first."
-        }), 400
-
-    user_profile = {
-        "income":      income,
-        "expenses":    expenses,
-        "debt":        debt,
-        "invest_amt":  invest_amt,
-        "risk":        risk,
-        "goal":        goal.get("goal", "Wealth Building"),
-        "target_amt":  float(goal.get("target-amt") or 0),
-        "target_time": int(goal.get("target-time") or 0)
-    }
+        raise HTTPException(400, "Please complete your financial profile first")
     allocation = {
         "equity": 60 if risk == "high" else 50 if risk == "medium" else 30,
         "debt":   25 if risk == "high" else 35 if risk == "medium" else 50,
-        "cash":   15 if risk == "high" else 15 if risk == "medium" else 20
+        "cash":   15,
     }
-
     try:
-        insight = generate_investment_insight(user_profile, allocation)
-        return jsonify({
-            "status":       "success",
-            "email":        email,
-            "user_profile": user_profile,
-            "allocation":   allocation,
-            "insight":      insight
-        })
-    except Exception as e:
-        return jsonify({
-            "status":  "error",
-            "message": f"AI insight generation failed: {str(e)}"
-        }), 500
+        from ai.groq_client import generate_response
+        from ai.formatter import clean_response
+        prompt = (
+            f"Analyze and return ONLY valid JSON:\n"
+            f"Income:{income} Expenses:{expenses} Debt:{debt} Invest:{invest_amt} Risk:{risk}\n"
+            f"Goal:{goal.get('goal','Wealth Building')} Target:{goal.get('target-amt',0)} "
+            f"in {goal.get('target-time',0)} months\n"
+            f'Return: {{"financial_health_score":<0-100>,"analysis":"...","recommendations":["..."],"investment_strategy":{{"equity":<n>,"debt":<n>,"cash":<n>}}}}'
+        )
+        raw = generate_response(prompt)
+        return json.loads(clean_response(re.sub(r"```json|```", "", raw)))
+    except Exception:
+        sr = (income - expenses) / income if income else 0
+        dr = debt / income if income else 0
+        score = 50 + (25 if sr > 0.3 else 0) + (15 if dr < 1 else 0) + (10 if expenses < income * 0.7 else 0)
+        recs = []
+        if dr > 2: recs.append("Focus on reducing high-interest debt first")
+        if sr < 0.1: recs.append("Aim to save at least 20% of monthly income")
+        if not recs: recs = ["Continue your current plan", "Monitor expenses regularly"]
+        return {"financial_health_score": min(100, score),
+                "analysis": f"Savings rate: {sr*100:.1f}%.",
+                "recommendations": recs[:3], "investment_strategy": allocation}
 
+# ── Init Test Data (dev helper) ────────────────────────────────
 
-@app.route("/api/agent/<email>", methods=["GET"])
-def agent_api(email):
-    user = collection.find_one({"email": email}, {"_id": 0, "password": 0})
-    if not user:
-        return jsonify({"status": "error", "message": "User not found"}), 404
+@api.post("/api/init-test-data/{email}", tags=["Dev"])
+async def init_test_data(email: str = FPath(...)):
+    user = collection.find_one({"email": email})
+    if not user: raise HTTPException(404, "User not found")
+    sample = {
+        "financials": {"monthly-income": 75000, "monthly-expenses": 45000,
+                       "debt": 150000, "em-fund-opted": True},
+        "Goal": {"goal": "Early Retirement", "target-amt": 5000000,
+                 "target-time": 120, "risk": "moderate"},
+        "investments": {"risk-opt": "moderate", "prefered-mode": "Monthly SIP", "invest-amt": 15000},
+        "Age": "32", "employment-status": "Salaried",
+    }
+    collection.update_one({"email": email}, {"$set": sample})
+    updated = collection.find_one({"email": email}, {"_id": 0, "password": 0})
+    return {"status": "success", "user": updated}
 
-    try:
-        goal_intel = compute_goal_intelligence(user)
-        agent_response = run_agent(goal_intel)
+# ══════════════════════════════════════════════════════════════
+#  Mount Flask inside FastAPI  &  export ASGI entry point
+# ══════════════════════════════════════════════════════════════
 
-        if not agent_response:
-            agent_response = {
-                "action": "HOLD",
-                "message": "Decision data unavailable",
-                "reason": "Incomplete user data"
-            }
+# /flask/* → original Flask app (Blueprint routes, etc.)
+api.mount("/flask", WSGIMiddleware(flask_app))
 
-        return jsonify({
-            "goal_intelligence": goal_intel,
-            "agent": agent_response
-        })
+# Primary ASGI callable — used by uvicorn
+asgi_app = api
 
-    except Exception as e:
-        return jsonify({
-            "agent": {
-                "action": "ERROR",
-                "message": "Decision computation failed",
-                "reason": str(e)
-            }
-        }), 200
+# Legacy alias kept so old tooling that references `main:app` still works
+app = asgi_app

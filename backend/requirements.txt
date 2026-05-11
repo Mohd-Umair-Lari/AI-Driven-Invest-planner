@@ -1,9 +1,28 @@
+# Core web frameworks
 Flask==3.0.3
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+
+# WSGI/ASGI bridge (mounts Flask inside FastAPI)
+starlette==0.37.2
+
+# Production server (still used as a fallback / Gunicorn with uvicorn workers)
 gunicorn==21.2.0
+
+# Flask extensions
 flask-cors==4.0.1
+werkzeug==3.0.0
+
+# FastAPI data validation
+pydantic==2.7.1
+
+# Database
 pymongo==4.6.3
 certifi==2024.7.4
+
+# Environment
 python-dotenv==1.0.1
-werkzeug==3.0.0
+
+# AI / HTTP
 groq
 requests

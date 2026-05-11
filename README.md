@@ -298,7 +298,3 @@ All investment data shown is for illustrative purposes.
 Please consult a SEBI-registered investment advisor before making significant financial decisions.
 
 ---
-
-## Author
-
-Developed by **Mohd Umair Lari** as a full-stack, AI-integrated financial planning system focused on clarity, long-term discipline, and explainable investment strategies for Indian retail investors.
