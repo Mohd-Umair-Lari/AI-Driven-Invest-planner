@@ -1,24 +1,20 @@
 """
-rag/rag_chain.py
------------------
-Orchestrates the complete RAG pipeline:
-  1. Retrieve  — fetch user data from MongoDB
-  2. Augment   — build a grounded context string
-  3. Generate  — inject context into prompt and call Groq
+rag/rag_chain.py  (v2)
+-----------------------
+Full RAG pipeline — now accepts conversation history and classified intent
+so the LLM has multi-turn context and the right focus.
 
-Usage:
-    from rag.rag_chain import run_rag_chain
-    result = run_rag_chain(collection, email="user@email.com", question="How much did I spend on food?")
+MongoDB is the sole store for user data. ChromaDB (optional) adds
+semantic search on top — falls back gracefully if not configured.
 """
-
 import re
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional
 
 from ai.groq_client import generate_response
 from rag.retriever import retrieve_user_context, retrieve_transactions_by_category
 from rag.context_builder import build_financial_context, build_category_context
 
-# ── Category keywords the system detects automatically ─────────
+# ── Category keywords ───────────────────────────────────────────
 _CATEGORY_KEYWORDS = [
     "food", "groceries", "grocery", "dining", "restaurant",
     "rent", "housing", "home",
@@ -28,16 +24,11 @@ _CATEGORY_KEYWORDS = [
     "medical", "health", "hospital", "medicine",
     "education", "school", "tuition",
     "utilities", "electricity", "water", "internet", "phone",
-    "insurance",
-    "emi", "loan",
+    "insurance", "emi", "loan",
 ]
 
 
-def _detect_category(question: str) -> str | None:
-    """
-    Heuristically detect if the user is asking about a specific spending
-    category so we can provide a hyper-focused context.
-    """
+def _detect_category(question: str) -> Optional[str]:
     q = question.lower()
     for kw in _CATEGORY_KEYWORDS:
         if kw in q:
@@ -45,70 +36,78 @@ def _detect_category(question: str) -> str | None:
     return None
 
 
-def _build_system_prompt(context: str) -> str:
-    return f"""You are FinPass AI, a precise and honest personal finance advisor.
+def _build_system_prompt(context: str, history: List[Dict[str, str]]) -> str:
+    """
+    Builds the grounded system prompt.
+    Injects conversation history so the model can do multi-turn reasoning.
+    """
+    history_block = ""
+    if history:
+        lines = []
+        for m in history[-6:]:   # last 6 messages max
+            role  = "User" if m["role"] == "user" else "FinPass AI"
+            lines.append(f"{role}: {m['content']}")
+        history_block = "\n--- CONVERSATION HISTORY ---\n" + "\n".join(lines) + "\n---\n\n"
 
-IMPORTANT INSTRUCTIONS:
-- Answer ONLY using the financial data provided below.
-- Do NOT make up numbers. If the data doesn't contain the answer, say so clearly.
-- Use ₹ for Indian Rupees.
-- Be specific, cite exact numbers from the data.
-- Keep responses concise (2-4 sentences max unless analysis is requested).
-- If spending is high, suggest one concrete improvement.
-
---- RETRIEVED FINANCIAL DATA ---
-{context}
---- END OF DATA ---
-"""
+    return (
+        f"You are FinPass AI, a precise and honest personal finance advisor.\n\n"
+        f"RULES:\n"
+        f"- Answer ONLY using the financial data provided below.\n"
+        f"- Do NOT invent numbers. If the data is missing, say so.\n"
+        f"- Use ₹ for Indian Rupees.\n"
+        f"- Cite exact numbers. Be concise (2-4 sentences unless analysis requested).\n"
+        f"- If spending is high, suggest one concrete improvement.\n\n"
+        f"{history_block}"
+        f"--- RETRIEVED FINANCIAL DATA ---\n{context}\n--- END DATA ---"
+    )
 
 
 def run_rag_chain(
     collection,
     email: str,
     question: str,
-    extra_context: Dict[str, Any] | None = None,
+    extra_context: Optional[Dict[str, Any]] = None,
+    conversation_history: Optional[List[Dict[str, str]]] = None,
+    intent=None,
 ) -> Dict[str, Any]:
     """
-    Full RAG pipeline. Returns a dict with the AI response and metadata.
-
-    Args:
-        collection : MongoDB collection object
-        email      : user's email to retrieve their data
-        question   : user's natural language question
-        extra_context : optional override/supplement to MongoDB data
-                        (e.g., values sent directly from the frontend)
+    Full RAG pipeline.
+    Returns standardized dict consumed by AIOrchestrator.
     """
 
-    # ── Step 1: RETRIEVE ─────────────────────────────────────────
+    # ── 1. Retrieve from MongoDB ─────────────────────────────────
     ctx = retrieve_user_context(collection, email)
 
-    # Merge any extra context passed from the frontend
+    # Merge frontend-supplied overrides
     if extra_context:
         ctx.update({k: v for k, v in extra_context.items() if v})
 
     if not ctx:
         return {
-            "success": False,
-            "response": "I couldn't find your financial data. Please complete your profile first.",
+            "success":      False,
+            "response":     "I couldn't find your financial data. Please complete your profile.",
             "context_used": "none",
-            "rag": True,
+            "rag":          True,
         }
 
-    # ── Step 2: AUGMENT ──────────────────────────────────────────
-    detected_category = _detect_category(question)
+    # ── 2. Build context string ──────────────────────────────────
+    # Check if intent gives us a specific category focus
+    detected_category = None
+    if intent and hasattr(intent, "entities"):
+        detected_category = intent.entities.get("category")
+    if not detected_category:
+        detected_category = _detect_category(question)
 
     if detected_category:
-        # Focused context for spending-category questions
         category_txns = retrieve_transactions_by_category(ctx, detected_category)
         context_str   = build_category_context(detected_category, category_txns, ctx)
         context_type  = f"category:{detected_category}"
     else:
-        # Full financial profile context
         context_str  = build_financial_context(ctx)
         context_type = "full_profile"
 
-    # ── Step 3: GENERATE ─────────────────────────────────────────
-    system_prompt = _build_system_prompt(context_str)
+    # ── 3. Generate ──────────────────────────────────────────────
+    system_prompt = _build_system_prompt(context_str, conversation_history or [])
     full_prompt   = f"{system_prompt}\n\nUser Question: {question}"
 
     try:

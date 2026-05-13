@@ -1,8 +1,9 @@
+import uuid
 import json
 import os
 import re
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import certifi
 from bson import ObjectId
@@ -14,7 +15,7 @@ from flask_cors import CORS
 from werkzeug.security import check_password_hash, generate_password_hash
 
 # ── FastAPI imports ────────────────────────────────────────────
-from fastapi import FastAPI, HTTPException, Path as FPath
+from fastapi import FastAPI, HTTPException, Path as FPath, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.wsgi import WSGIMiddleware
 from pymongo import MongoClient
@@ -39,6 +40,16 @@ from routes.intelligence_routes import intelligence_bp
 from routes.advisor_routes import advisor_bp
 from ai.groq_service import initialize_groq
 from rag.rag_chain import run_rag_chain
+from orchestrator.ai_orchestrator import AIOrchestrator
+from memory.conversation_memory import ConversationMemory
+from services.auth_service import (
+    hash_password, verify_password,
+    create_access_token, create_refresh_token,
+    decode_access_token, hash_refresh_token, verify_refresh_token,
+)
+from config.logging_config import setup_logging
+
+log = setup_logging()
 
 # ══════════════════════════════════════════════════════════════
 #  Bootstrap
@@ -69,8 +80,28 @@ _mongo = MongoClient(
     socketTimeoutMS=10_000,
 )
 _mongo.admin.command("ping")
-db         = _mongo[DB_NAME]
-collection = db[COLLECTION_NAME]
+db                = _mongo[DB_NAME]
+collection        = db[COLLECTION_NAME]
+conversations_col = db["conversations"]   # multi-turn chat memory
+documents_col     = db["documents"]       # RAG document metadata
+
+# ── Services wired to MongoDB ─────────────────────────────────
+memory      = ConversationMemory(conversations_col)
+
+def _get_orchestrator() -> AIOrchestrator:
+    """FastAPI dependency — creates orchestrator per request (stateless)."""
+    return AIOrchestrator(collection, conversations_col)
+
+# ── JWT dependency ─────────────────────────────────────────────
+async def _require_auth(authorization: str = Header(default="")) -> str:
+    """FastAPI dependency: validates Bearer token, returns email."""
+    if not authorization.startswith("Bearer "):
+        raise HTTPException(401, "Missing or invalid Authorization header")
+    token = authorization.removeprefix("Bearer ").strip()
+    email = decode_access_token(token)
+    if not email:
+        raise HTTPException(401, "Token expired or invalid")
+    return email
 
 # ── Shared CORS origins ────────────────────────────────────────
 _ORIGINS = [
@@ -152,13 +183,25 @@ async def api_login(body: LoginRequest):
     user = collection.find_one({"email": body.email})
     if not user:
         raise HTTPException(401, "Invalid credentials")
-    stored = user.get("password", "")
-    hashed = stored.startswith(("scrypt:", "pbkdf2:", "argon2:", "sha256$", "sha512$"))
-    valid  = check_password_hash(stored, body.password) if hashed else stored == body.password
-    if not valid:
+    if not verify_password(body.password, user.get("password", "")):
         raise HTTPException(401, "Invalid credentials")
     user = _ensure_onboarding(body.email, user)
-    return {"status": "success", "user": _serialize(user)}
+
+    # Issue JWT tokens
+    access  = create_access_token(body.email)
+    refresh = create_refresh_token()
+    collection.update_one(
+        {"email": body.email},
+        {"$set": {"refresh_token_hash": hash_refresh_token(refresh),
+                  "last_login": datetime.utcnow().isoformat()}}
+    )
+    return {
+        "status":        "success",
+        "user":          _serialize(user),
+        "access_token":  access,
+        "refresh_token": refresh,
+        "token_type":    "bearer",
+    }
 
 @api.post("/api/signup", tags=["Auth"], status_code=201)
 async def api_signup(body: SignupRequest):
@@ -167,16 +210,46 @@ async def api_signup(body: SignupRequest):
     doc = {
         "_id": ObjectId(),
         "Name": body.Name, "email": body.email,
-        "password": generate_password_hash(body.password),
+        "password": hash_password(body.password),
         "Age": body.Age or "",
         "employment-status": body.employment_status or "Salaried",
         "Goal": body.Goal or {}, "financials": body.financials or {},
         "investments": body.investments or {}, "progress": body.progress or {},
         "onboarding": {"status": "in_progress", "current_step": 0,
                        "last_updated": datetime.utcnow().isoformat()},
+        "created_at": datetime.utcnow().isoformat(),
     }
     collection.insert_one(doc)
-    return {"status": "success", "user": _serialize(doc)}
+    access  = create_access_token(body.email)
+    refresh = create_refresh_token()
+    collection.update_one({"email": body.email},
+        {"$set": {"refresh_token_hash": hash_refresh_token(refresh)}})
+    return {
+        "status":        "success",
+        "user":          _serialize(doc),
+        "access_token":  access,
+        "refresh_token": refresh,
+        "token_type":    "bearer",
+    }
+
+
+@api.post("/api/auth/refresh", tags=["Auth"])
+async def refresh_token(body: dict):
+    """Exchange a valid refresh token for a new access token."""
+    email   = body.get("email", "")
+    refresh = body.get("refresh_token", "")
+    if not email or not refresh:
+        raise HTTPException(400, "email and refresh_token required")
+    user = collection.find_one({"email": email})
+    if not user or not user.get("refresh_token_hash"):
+        raise HTTPException(401, "Invalid refresh token")
+    if not verify_refresh_token(refresh, user["refresh_token_hash"]):
+        raise HTTPException(401, "Invalid refresh token")
+    new_access  = create_access_token(email)
+    new_refresh = create_refresh_token()
+    collection.update_one({"email": email},
+        {"$set": {"refresh_token_hash": hash_refresh_token(new_refresh)}})
+    return {"access_token": new_access, "refresh_token": new_refresh, "token_type": "bearer"}
 
 # ── Onboarding ────────────────────────────────────────────────
 
@@ -326,18 +399,73 @@ async def advisor_chat(body: AdvisorChatRequest):
     }
 
 
+@api.post("/api/advisor/chat", tags=["AI Advisor"])
+async def advisor_chat(body: AdvisorChatRequest):
+    """
+    Orchestrator-powered chat. Full pipeline:
+    Intent classify → RAG retrieve → Agent select → Groq → Memory store.
+    Pass `session_id` in request body for multi-turn conversations.
+    """
+    ctx         = body.context
+    session_id  = getattr(body, "session_id", None) or str(uuid.uuid4())
+    extra = {
+        "income":   ctx.monthly_income if ctx else 0,
+        "expenses": ctx.monthly_expenses if ctx else 0,
+        "debt":     ctx.debt if ctx else 0,
+        "risk":     ctx.risk_appetite if ctx else "moderate",
+    }
+    orchestrator = _get_orchestrator()
+    result = orchestrator.run(
+        email=body.email,
+        query=body.question,
+        session_id=session_id,
+        extra_context=extra,
+    )
+    if not result.get("success", True):
+        raise HTTPException(500, result.get("response", "AI error"))
+    return {**result, "user_email": body.email}
+
+
 @api.post("/api/rag/chat", tags=["AI Advisor"])
 async def rag_chat(body: AdvisorChatRequest):
-    """Alias for /api/advisor/chat — explicit RAG endpoint."""
+    """Alias — explicit RAG endpoint."""
     return await advisor_chat(body)
+
+
+# ── Chat History ───────────────────────────────────────────────
+
+@api.get("/api/chat/sessions/{email}", tags=["Chat History"])
+async def get_sessions(email: str = FPath(...)):
+    """List all conversation sessions for a user."""
+    return {"sessions": memory.list_sessions(email)}
+
+
+@api.get("/api/chat/history/{email}/{session_id}", tags=["Chat History"])
+async def get_history(email: str = FPath(...), session_id: str = FPath(...)):
+    """Get full message history for a specific session."""
+    session = memory.get_session(email, session_id)
+    if not session:
+        raise HTTPException(404, "Session not found")
+    return session
+
+
+@api.delete("/api/chat/history/{email}/{session_id}", tags=["Chat History"])
+async def clear_session(email: str = FPath(...), session_id: str = FPath(...)):
+    """Clear a specific chat session."""
+    memory.clear_session(email, session_id)
+    return {"status": "cleared"}
+
+
+@api.delete("/api/chat/history/{email}", tags=["Chat History"])
+async def clear_all_sessions(email: str = FPath(...)):
+    """Clear all chat sessions for a user."""
+    memory.clear_all(email)
+    return {"status": "all sessions cleared"}
 
 
 @api.post("/api/transactions/{email}", tags=["Transactions"], status_code=201)
 async def add_transactions(email: str = FPath(...), transactions: list = None):
-    """
-    Store transaction records for a user.
-    Each transaction: {date, category, description, amount, type: 'debit'|'credit'}
-    """
+    """Store transaction records. Each: {date, category, description, amount, type}"""
     if not transactions:
         raise HTTPException(400, "No transactions provided")
     result = collection.update_one(
@@ -356,6 +484,7 @@ async def get_transactions(email: str = FPath(...)):
     if not user:
         raise HTTPException(404, "User not found")
     return {"transactions": user.get("transactions", [])}
+
 
 # ── Intelligence ───────────────────────────────────────────────
 

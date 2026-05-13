@@ -1,28 +1,41 @@
-# Core web frameworks
+# ── Core web frameworks ────────────────────────────────────────
 Flask==3.0.3
 fastapi==0.111.0
 uvicorn[standard]==0.29.0
-
-# WSGI/ASGI bridge (mounts Flask inside FastAPI)
 starlette==0.37.2
 
-# Production server (still used as a fallback / Gunicorn with uvicorn workers)
+# ── Request validation ─────────────────────────────────────────
+pydantic==2.7.1
+pydantic-settings==2.2.1
+
+# ── Auth ───────────────────────────────────────────────────────
+PyJWT==2.8.0
+passlib[bcrypt]==1.7.4
+
+# ── Production server ──────────────────────────────────────────
 gunicorn==21.2.0
 
-# Flask extensions
+# ── Flask extensions ───────────────────────────────────────────
 flask-cors==4.0.1
 werkzeug==3.0.0
 
-# FastAPI data validation
-pydantic==2.7.1
-
-# Database
+# ── Database ───────────────────────────────────────────────────
 pymongo==4.6.3
 certifi==2024.7.4
 
-# Environment
-python-dotenv==1.0.1
-
-# AI / HTTP
+# ── AI / LLM ──────────────────────────────────────────────────
 groq
+
+# ── Vector store (optional — app runs fine without it) ────────
+chromadb==0.5.0
+
+# ── Document processing ────────────────────────────────────────
+pypdf==4.2.0
+python-multipart==0.0.9
+
+# ── Logging ────────────────────────────────────────────────────
+loguru==0.7.2
+
+# ── Utilities ─────────────────────────────────────────────────
+python-dotenv==1.0.1
 requests
