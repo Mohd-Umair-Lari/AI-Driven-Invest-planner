@@ -5,8 +5,10 @@ uvicorn[standard]==0.29.0
 starlette==0.37.2
 
 # ── Request validation ─────────────────────────────────────────
-pydantic==2.7.1
-pydantic-settings==2.2.1
+# Unpinned: lets pip pick a version with pre-built wheels for the
+# runtime Python version (avoids maturin/Rust build on Python 3.13)
+pydantic>=2.7.1
+pydantic-settings>=2.2.1
 
 # ── Auth ───────────────────────────────────────────────────────
 PyJWT==2.8.0
