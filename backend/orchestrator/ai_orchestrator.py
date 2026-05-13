@@ -12,7 +12,12 @@ Central AI brain. Coordinates the full pipeline:
 Designed to be provider-agnostic: swap Groq → Ollama via settings.
 """
 from typing import Any, Dict, Optional
-from loguru import logger
+
+try:
+    from loguru import logger
+except ImportError:
+    import logging as _l; logger = _l.getLogger("orchestrator")
+
 
 from orchestrator.intent_classifier import classify_intent, Intent
 from orchestrator.response_formatter import format_response

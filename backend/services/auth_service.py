@@ -2,84 +2,123 @@
 services/auth_service.py
 -------------------------
 JWT authentication service.
-- Short-lived access tokens (30 min)
-- Long-lived refresh tokens (7 days) stored hashed in MongoDB
-- Swap-ready: change algorithm in settings without touching routes
+- passlib[bcrypt] used when available (new accounts get bcrypt)
+- werkzeug fallback for existing accounts (scrypt/pbkdf2 hashes)
+- hashlib fallback if passlib not installed
 """
+import hashlib
+import hmac
+import os
 import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
-import jwt
-from passlib.context import CryptContext
 
-from config.settings import get_settings
+# ── passlib (optional) ─────────────────────────────────────────
+try:
+    from passlib.context import CryptContext
+    _pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    _HAS_PASSLIB = True
+except ImportError:
+    _pwd_ctx = None
+    _HAS_PASSLIB = False
 
-_settings = get_settings()
-_pwd_ctx  = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# ── PyJWT (optional) ───────────────────────────────────────────
+try:
+    import jwt as _pyjwt
+    _HAS_JWT = True
+except ImportError:
+    _pyjwt = None
+    _HAS_JWT = False
+
+# ── Werkzeug (already required by Flask) ──────────────────────
+from werkzeug.security import check_password_hash as _wz_check
+from werkzeug.security import generate_password_hash as _wz_hash
+
+
+JWT_SECRET    = os.getenv("JWT_SECRET", "change-me-in-production")
+JWT_ALGORITHM = "HS256"
+ACCESS_EXPIRE_MIN = 30
 
 
 # ── Password helpers ───────────────────────────────────────────
 
 def hash_password(plain: str) -> str:
-    return _pwd_ctx.hash(plain)
+    """New accounts: use bcrypt when passlib available, else werkzeug scrypt."""
+    if _HAS_PASSLIB:
+        return _pwd_ctx.hash(plain)
+    return _wz_hash(plain)
 
 
 def verify_password(plain: str, hashed: str) -> bool:
     """
-    Multi-format password verifier — handles every hash type in the DB:
-    - Werkzeug scrypt  (werkzeug 3.x default): scrypt:...
-    - Werkzeug pbkdf2  (werkzeug 2.x):          pbkdf2:sha256:...
-    - Passlib bcrypt   (new registrations):      $2b$ / $2a$
-    - Passlib argon2   (future):                 $argon2...
-    - Legacy plain text                          (fallback, dev only)
+    Handles every hash format stored in MongoDB:
+    - werkzeug scrypt  (werkzeug 3.x): scrypt:...
+    - werkzeug pbkdf2  (werkzeug 2.x): pbkdf2:sha256:...
+    - passlib bcrypt:                  $2b$... / $2a$...
+    - passlib argon2:                  $argon2...
+    - plain text (legacy dev accounts)
     """
+    # Werkzeug-formatted hashes — route back to werkzeug
     if hashed.startswith(("pbkdf2:", "scrypt:")):
-        # Werkzeug-formatted hash — must use werkzeug to verify
-        from werkzeug.security import check_password_hash as _wz_check
         return _wz_check(hashed, plain)
-    if hashed.startswith(("$2b$", "$2a$", "$argon2")):
-        # Passlib-formatted hash (new accounts post-migration)
-        return _pwd_ctx.verify(plain, hashed)
-    # Legacy plain-text fallback (dev/test only)
-    return plain == hashed
 
+    # Passlib-formatted hashes
+    if hashed.startswith(("$2b$", "$2a$", "$argon2")):
+        if _HAS_PASSLIB:
+            return _pwd_ctx.verify(plain, hashed)
+        # passlib not installed but hash is bcrypt — try werkzeug (will fail gracefully)
+        return False
+
+    # Legacy plain-text (dev/test only)
+    return plain == hashed
 
 
 # ── Token generation ───────────────────────────────────────────
 
 def create_access_token(email: str) -> str:
-    expire = datetime.now(timezone.utc) + timedelta(
-        minutes=_settings.ACCESS_TOKEN_EXPIRE_MINUTES
-    )
+    expire  = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_EXPIRE_MIN)
     payload = {"sub": email, "exp": expire, "type": "access"}
-    return jwt.encode(payload, _settings.JWT_SECRET, algorithm=_settings.JWT_ALGORITHM)
+    if _HAS_JWT:
+        return _pyjwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+    # Fallback: simple HMAC token (not standards-compliant but functional)
+    import base64, json
+    header  = base64.urlsafe_b64encode(json.dumps({"alg": "HS256"}).encode()).decode()
+    body    = base64.urlsafe_b64encode(json.dumps({"sub": email, "exp": expire.isoformat()}).encode()).decode()
+    sig     = hmac.new(JWT_SECRET.encode(), f"{header}.{body}".encode(), hashlib.sha256).hexdigest()
+    return f"{header}.{body}.{sig}"
 
 
 def create_refresh_token() -> str:
-    """Opaque random token — stored hashed in MongoDB."""
     return secrets.token_urlsafe(48)
 
 
 def decode_access_token(token: str) -> Optional[str]:
-    """Returns the email (sub) if valid, else None."""
+    if not _HAS_JWT:
+        # Basic decode of our fallback token
+        try:
+            parts = token.split(".")
+            import base64, json
+            body = json.loads(base64.urlsafe_b64decode(parts[1] + "=="))
+            return body.get("sub")
+        except Exception:
+            return None
     try:
-        payload = jwt.decode(
-            token, _settings.JWT_SECRET, algorithms=[_settings.JWT_ALGORITHM]
-        )
+        payload = _pyjwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
         if payload.get("type") != "access":
             return None
         return payload.get("sub")
-    except jwt.ExpiredSignatureError:
-        return None
-    except jwt.PyJWTError:
+    except Exception:
         return None
 
 
 def hash_refresh_token(token: str) -> str:
-    """Store a one-way hash so raw token never lives in DB."""
-    return _pwd_ctx.hash(token)
+    if _HAS_PASSLIB:
+        return _pwd_ctx.hash(token)
+    return hashlib.sha256(token.encode()).hexdigest()
 
 
 def verify_refresh_token(plain: str, hashed: str) -> bool:
-    return _pwd_ctx.verify(plain, hashed)
+    if _HAS_PASSLIB and hashed.startswith(("$2b$", "$2a$")):
+        return _pwd_ctx.verify(plain, hashed)
+    return hashlib.sha256(plain.encode()).hexdigest() == hashed
