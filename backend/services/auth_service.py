@@ -26,10 +26,24 @@ def hash_password(plain: str) -> str:
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    # Support legacy plain-text passwords during migration
-    if hashed.startswith(("$2b$", "$2a$", "$argon2", "scrypt:")):
+    """
+    Multi-format password verifier — handles every hash type in the DB:
+    - Werkzeug scrypt  (werkzeug 3.x default): scrypt:...
+    - Werkzeug pbkdf2  (werkzeug 2.x):          pbkdf2:sha256:...
+    - Passlib bcrypt   (new registrations):      $2b$ / $2a$
+    - Passlib argon2   (future):                 $argon2...
+    - Legacy plain text                          (fallback, dev only)
+    """
+    if hashed.startswith(("pbkdf2:", "scrypt:")):
+        # Werkzeug-formatted hash — must use werkzeug to verify
+        from werkzeug.security import check_password_hash as _wz_check
+        return _wz_check(hashed, plain)
+    if hashed.startswith(("$2b$", "$2a$", "$argon2")):
+        # Passlib-formatted hash (new accounts post-migration)
         return _pwd_ctx.verify(plain, hashed)
-    return plain == hashed  # legacy plain-text fallback
+    # Legacy plain-text fallback (dev/test only)
+    return plain == hashed
+
 
 
 # ── Token generation ───────────────────────────────────────────
