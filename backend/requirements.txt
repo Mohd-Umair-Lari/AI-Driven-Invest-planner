@@ -26,13 +26,6 @@ certifi==2024.7.4
 # ── AI / LLM ──────────────────────────────────────────────────
 groq
 
-# ── Vector store (optional — app runs fine without it) ────────
-chromadb==0.5.0
-
-# ── Document processing ────────────────────────────────────────
-pypdf==4.2.0
-python-multipart==0.0.9
-
 # ── Logging ────────────────────────────────────────────────────
 loguru==0.7.2
 
