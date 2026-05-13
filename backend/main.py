@@ -38,6 +38,7 @@ from agent.financial_agent import run_agent
 from routes.intelligence_routes import intelligence_bp
 from routes.advisor_routes import advisor_bp
 from ai.groq_service import initialize_groq
+from rag.rag_chain import run_rag_chain
 
 # ══════════════════════════════════════════════════════════════
 #  Bootstrap
@@ -287,23 +288,74 @@ async def agent_api(email: str = FPath(...)):
     except Exception as e:
         return {"agent": {"action": "ERROR", "message": "Failed", "reason": str(e)}}
 
-# ── AI Advisor Chat ────────────────────────────────────────────
+# ── AI Advisor Chat (RAG-powered) ─────────────────────────────
 
 @api.post("/api/advisor/chat", tags=["AI Advisor"])
 async def advisor_chat(body: AdvisorChatRequest):
-    from ai.groq_client import generate_response
+    """
+    RAG-powered chat endpoint.
+    Retrieves the user's full financial profile from MongoDB,
+    builds a grounded context, then calls Groq with that context.
+    The AI answers ONLY from the retrieved data — no hallucination.
+    """
+    # Pass any frontend-supplied numbers as supplementary context
     ctx = body.context
-    prompt = (
-        f"You are FinPass AI, a knowledgeable financial advisor.\n\n"
-        f"User Profile: Income ₹{ctx.monthly_income:,.0f}, "
-        f"Expenses ₹{ctx.monthly_expenses:,.0f}, Savings ₹{ctx.total_savings:,.0f}, "
-        f"Debt ₹{ctx.debt:,.0f}, Risk: {ctx.risk_appetite}\n\n"
-        f"Question: {body.question}\n\nProvide clear, actionable financial advice."
+    extra = {
+        "income":   ctx.monthly_income if ctx else 0,
+        "expenses": ctx.monthly_expenses if ctx else 0,
+        "debt":     ctx.debt if ctx else 0,
+        "risk":     ctx.risk_appetite if ctx else "moderate",
+    }
+
+    result = run_rag_chain(
+        collection=collection,
+        email=body.email,
+        question=body.question,
+        extra_context=extra,
     )
-    try:
-        return {"success": True, "response": generate_response(prompt), "user_email": body.email}
-    except Exception as e:
-        raise HTTPException(500, f"AI generation failed: {e}")
+
+    if not result["success"]:
+        raise HTTPException(500, result["response"])
+
+    return {
+        "success":      True,
+        "response":     result["response"],
+        "user_email":   body.email,
+        "rag":          True,
+        "context_used": result.get("context_used"),
+    }
+
+
+@api.post("/api/rag/chat", tags=["AI Advisor"])
+async def rag_chat(body: AdvisorChatRequest):
+    """Alias for /api/advisor/chat — explicit RAG endpoint."""
+    return await advisor_chat(body)
+
+
+@api.post("/api/transactions/{email}", tags=["Transactions"], status_code=201)
+async def add_transactions(email: str = FPath(...), transactions: list = None):
+    """
+    Store transaction records for a user.
+    Each transaction: {date, category, description, amount, type: 'debit'|'credit'}
+    """
+    if not transactions:
+        raise HTTPException(400, "No transactions provided")
+    result = collection.update_one(
+        {"email": email},
+        {"$push": {"transactions": {"$each": transactions}}}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(404, "User not found")
+    return {"status": "success", "added": len(transactions)}
+
+
+@api.get("/api/transactions/{email}", tags=["Transactions"])
+async def get_transactions(email: str = FPath(...)):
+    """Fetch all stored transactions for a user."""
+    user = collection.find_one({"email": email}, {"_id": 0, "transactions": 1})
+    if not user:
+        raise HTTPException(404, "User not found")
+    return {"transactions": user.get("transactions", [])}
 
 # ── Intelligence ───────────────────────────────────────────────
 
@@ -380,15 +432,8 @@ async def init_test_data(email: str = FPath(...)):
     updated = collection.find_one({"email": email}, {"_id": 0, "password": 0})
     return {"status": "success", "user": updated}
 
-# ══════════════════════════════════════════════════════════════
-#  Mount Flask inside FastAPI  &  export ASGI entry point
-# ══════════════════════════════════════════════════════════════
-
-# /flask/* → original Flask app (Blueprint routes, etc.)
 api.mount("/flask", WSGIMiddleware(flask_app))
 
-# Primary ASGI callable — used by uvicorn
 asgi_app = api
 
-# Legacy alias kept so old tooling that references `main:app` still works
 app = asgi_app
