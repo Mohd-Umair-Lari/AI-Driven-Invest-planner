@@ -14,14 +14,12 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 
-# ── passlib (optional) ─────────────────────────────────────────
+# ── bcrypt (optional) ──────────────────────────────────────────
 try:
-    from passlib.context import CryptContext
-    _pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
-    _HAS_PASSLIB = True
+    import bcrypt as _bcrypt_lib
+    _HAS_BCRYPT = True
 except ImportError:
-    _pwd_ctx = None
-    _HAS_PASSLIB = False
+    _HAS_BCRYPT = False
 
 # ── PyJWT (optional) ───────────────────────────────────────────
 try:
@@ -44,9 +42,10 @@ ACCESS_EXPIRE_MIN = 30
 # ── Password helpers ───────────────────────────────────────────
 
 def hash_password(plain: str) -> str:
-    """New accounts: use bcrypt when passlib available, else werkzeug scrypt."""
-    if _HAS_PASSLIB:
-        return _pwd_ctx.hash(plain)
+    """New accounts: use bcrypt when available, else werkzeug scrypt."""
+    if _HAS_BCRYPT:
+        salt = _bcrypt_lib.gensalt()
+        return _bcrypt_lib.hashpw(plain.encode('utf-8'), salt).decode('utf-8')
     return _wz_hash(plain)
 
 
@@ -55,19 +54,20 @@ def verify_password(plain: str, hashed: str) -> bool:
     Handles every hash format stored in MongoDB:
     - werkzeug scrypt  (werkzeug 3.x): scrypt:...
     - werkzeug pbkdf2  (werkzeug 2.x): pbkdf2:sha256:...
-    - passlib bcrypt:                  $2b$... / $2a$...
-    - passlib argon2:                  $argon2...
+    - passlib/bcrypt:                  $2b$... / $2a$...
     - plain text (legacy dev accounts)
     """
-    # Werkzeug-formatted hashes — route back to werkzeug
+    # Werkzeug-formatted hashes
     if hashed.startswith(("pbkdf2:", "scrypt:")):
         return _wz_check(hashed, plain)
 
-    # Passlib-formatted hashes
-    if hashed.startswith(("$2b$", "$2a$", "$argon2")):
-        if _HAS_PASSLIB:
-            return _pwd_ctx.verify(plain, hashed)
-        # passlib not installed but hash is bcrypt — try werkzeug (will fail gracefully)
+    # bcrypt-formatted hashes
+    if hashed.startswith(("$2b$", "$2a$")):
+        if _HAS_BCRYPT:
+            try:
+                return _bcrypt_lib.checkpw(plain.encode('utf-8'), hashed.encode('utf-8'))
+            except ValueError:
+                return False
         return False
 
     # Legacy plain-text (dev/test only)
@@ -113,12 +113,19 @@ def decode_access_token(token: str) -> Optional[str]:
 
 
 def hash_refresh_token(token: str) -> str:
-    if _HAS_PASSLIB:
-        return _pwd_ctx.hash(token)
+    if _HAS_BCRYPT:
+        # Truncate to 72 bytes max for bcrypt
+        token_bytes = token.encode('utf-8')[:72]
+        salt = _bcrypt_lib.gensalt()
+        return _bcrypt_lib.hashpw(token_bytes, salt).decode('utf-8')
     return hashlib.sha256(token.encode()).hexdigest()
 
 
 def verify_refresh_token(plain: str, hashed: str) -> bool:
-    if _HAS_PASSLIB and hashed.startswith(("$2b$", "$2a$")):
-        return _pwd_ctx.verify(plain, hashed)
+    if _HAS_BCRYPT and hashed.startswith(("$2b$", "$2a$")):
+        plain_bytes = plain.encode('utf-8')[:72]
+        try:
+            return _bcrypt_lib.checkpw(plain_bytes, hashed.encode('utf-8'))
+        except ValueError:
+            return False
     return hashlib.sha256(plain.encode()).hexdigest() == hashed
