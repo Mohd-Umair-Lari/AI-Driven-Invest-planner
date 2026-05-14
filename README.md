@@ -1,3 +1,12 @@
+---
+title: FinPass AI
+emoji: 📈
+colorFrom: indigo
+colorTo: purple
+sdk: docker
+pinned: false
+---
+
 # FinPass AI — AI-Driven Financial Advisor
 
 > **Live App:** [https://ai-driven-invest-planner.vercel.app](https://ai-driven-invest-planner.vercel.app)  
