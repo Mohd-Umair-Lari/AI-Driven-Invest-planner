@@ -171,66 +171,177 @@ async def health():
 async def test_connection():
     try:
         _mongo.admin.command("ping")
-        return {"status": "success", "database": "Connected",
-                "timestamp": datetime.utcnow().isoformat()}
+        # Test database access
+        test_user = collection.find_one({"email": "test@example.com"})
+        return {
+            "status": "success", 
+            "database": "Connected",
+            "mongodb": "Accessible",
+            "sample_query": "successful",
+            "timestamp": datetime.utcnow().isoformat()
+        }
     except Exception as e:
-        raise HTTPException(500, str(e))
+        log.error(f"Database connection error: {str(e)}")
+        raise HTTPException(500, f"Database error: {str(e)}")
+
+@api.post("/api/test-login", tags=["Health"])
+async def test_login(body: LoginRequest):
+    """Test endpoint to diagnose login issues."""
+    try:
+        log.info(f"🧪 Testing login for: {body.email}")
+        
+        # Step 1: Database connection
+        _mongo.admin.command("ping")
+        log.info("✅ MongoDB connected")
+        
+        # Step 2: Find user
+        user = collection.find_one({"email": body.email})
+        log.info(f"📍 User lookup result: {'Found' if user else 'Not found'}")
+        
+        if not user:
+            return {
+                "status": "failed",
+                "reason": "User not found",
+                "email": body.email,
+                "step": "user_lookup"
+            }
+        
+        # Step 3: Check password hash
+        stored_hash = user.get("password", "")
+        log.info(f"🔐 Password hash type: {type(stored_hash).__name__}")
+        log.info(f"🔐 Password hash starts with: {str(stored_hash)[:20]}")
+        
+        # Step 4: Verify password
+        password_valid = verify_password(body.password, stored_hash)
+        log.info(f"✓ Password verification: {'SUCCESS' if password_valid else 'FAILED'}")
+        
+        return {
+            "status": "success",
+            "email": body.email,
+            "user_found": True,
+            "password_valid": password_valid,
+            "hash_type": type(stored_hash).__name__,
+            "step": "complete"
+        }
+        
+    except Exception as e:
+        log.error(f"Test login error: {str(e)}", exc_info=True)
+        return {
+            "status": "error",
+            "message": str(e),
+            "type": type(e).__name__
+        }
 
 # ── Auth ───────────────────────────────────────────────────────
 
 @api.post("/api/login", tags=["Auth"])
 async def api_login(body: LoginRequest):
-    user = collection.find_one({"email": body.email})
-    if not user:
-        raise HTTPException(401, "Invalid credentials")
-    if not verify_password(body.password, user.get("password", "")):
-        raise HTTPException(401, "Invalid credentials")
-    user = _ensure_onboarding(body.email, user)
+    try:
+        # Log the login attempt
+        log.info(f"🔐 Login attempt for: {body.email}")
+        
+        # Check if user exists in database
+        user = collection.find_one({"email": body.email})
+        if not user:
+            log.warning(f"❌ User not found: {body.email}")
+            raise HTTPException(401, "Invalid credentials")
+        
+        # Verify password
+        if not verify_password(body.password, user.get("password", "")):
+            log.warning(f"❌ Invalid password for user: {body.email}")
+            raise HTTPException(401, "Invalid credentials")
+        
+        log.info(f"✅ Password verified for: {body.email}")
+        
+        # Ensure onboarding status exists
+        user = _ensure_onboarding(body.email, user)
 
-    # Issue JWT tokens
-    access  = create_access_token(body.email)
-    refresh = create_refresh_token()
-    collection.update_one(
-        {"email": body.email},
-        {"$set": {"refresh_token_hash": hash_refresh_token(refresh),
-                  "last_login": datetime.utcnow().isoformat()}}
-    )
-    return {
-        "status":        "success",
-        "user":          _serialize(user),
-        "access_token":  access,
-        "refresh_token": refresh,
-        "token_type":    "bearer",
-    }
+        # Issue JWT tokens
+        access  = create_access_token(body.email)
+        refresh = create_refresh_token()
+        
+        # Update last login and refresh token hash
+        collection.update_one(
+            {"email": body.email},
+            {"$set": {"refresh_token_hash": hash_refresh_token(refresh),
+                      "last_login": datetime.utcnow().isoformat()}}
+        )
+        
+        log.info(f"✅ Login successful for: {body.email}")
+        return {
+            "status":        "success",
+            "user":          _serialize(user),
+            "access_token":  access,
+            "refresh_token": refresh,
+            "token_type":    "bearer",
+        }
+    
+    except HTTPException:
+        # Re-raise HTTP exceptions (401, 409, etc.)
+        raise
+    except Exception as e:
+        log.error(f"🔥 Login error for {body.email}: {str(e)}", exc_info=True)
+        raise HTTPException(500, f"Login failed: {str(e)}")
 
 @api.post("/api/signup", tags=["Auth"], status_code=201)
 async def api_signup(body: SignupRequest):
-    if collection.find_one({"email": body.email}):
-        raise HTTPException(409, "Email already registered")
-    doc = {
-        "_id": ObjectId(),
-        "Name": body.Name, "email": body.email,
-        "password": hash_password(body.password),
-        "Age": body.Age or "",
-        "employment-status": body.employment_status or "Salaried",
-        "Goal": body.Goal or {}, "financials": body.financials or {},
-        "investments": body.investments or {}, "progress": body.progress or {},
-        "onboarding": {"status": "in_progress", "current_step": 0,
-                       "last_updated": datetime.utcnow().isoformat()},
-        "created_at": datetime.utcnow().isoformat(),
-    }
-    collection.insert_one(doc)
-    access  = create_access_token(body.email)
-    refresh = create_refresh_token()
-    collection.update_one({"email": body.email},
-        {"$set": {"refresh_token_hash": hash_refresh_token(refresh)}})
-    return {
-        "status":        "success",
-        "user":          _serialize(doc),
-        "access_token":  access,
-        "refresh_token": refresh,
-        "token_type":    "bearer",
-    }
+    try:
+        log.info(f"📝 Signup attempt for: {body.email}")
+        
+        # Check if email already exists
+        if collection.find_one({"email": body.email}):
+            log.warning(f"⚠️  Email already registered: {body.email}")
+            raise HTTPException(409, "Email already registered")
+        
+        # Create new user document
+        doc = {
+            "_id": ObjectId(),
+            "Name": body.Name,
+            "email": body.email,
+            "password": hash_password(body.password),
+            "Age": body.Age or "",
+            "employment-status": body.employment_status or "Salaried",
+            "Goal": body.Goal or {},
+            "financials": body.financials or {},
+            "investments": body.investments or {},
+            "progress": body.progress or {},
+            "onboarding": {
+                "status": "in_progress",
+                "current_step": 0,
+                "last_updated": datetime.utcnow().isoformat()
+            },
+            "created_at": datetime.utcnow().isoformat(),
+        }
+        
+        # Insert user into database
+        result = collection.insert_one(doc)
+        log.info(f"✅ User created: {body.email} (ID: {result.inserted_id})")
+        
+        # Issue JWT tokens
+        access  = create_access_token(body.email)
+        refresh = create_refresh_token()
+        
+        # Store refresh token hash
+        collection.update_one(
+            {"email": body.email},
+            {"$set": {"refresh_token_hash": hash_refresh_token(refresh)}}
+        )
+        
+        log.info(f"✅ Signup successful for: {body.email}")
+        
+        return {
+            "status":        "success",
+            "user":          _serialize(doc),
+            "access_token":  access,
+            "refresh_token": refresh,
+            "token_type":    "bearer",
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        log.error(f"🔥 Signup error for {body.email}: {str(e)}", exc_info=True)
+        raise HTTPException(500, f"Signup failed: {str(e)}")
 
 
 @api.post("/api/auth/refresh", tags=["Auth"])
