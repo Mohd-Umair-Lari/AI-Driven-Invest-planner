@@ -47,7 +47,9 @@ def generate_response(prompt: str, system_prompt: str = None) -> str:
     response = client.chat.completions.create(
         messages=messages,
         model=MODEL,
-        temperature=0.7,   # Higher than 0.5 → more natural and varied responses
+        temperature=0.7,
         max_tokens=1024,
+        frequency_penalty=0.4,  # Reduces repetitive phrases
+        presence_penalty=0.3,   # Encourages topic variety
     )
     return response.choices[0].message.content
