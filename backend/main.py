@@ -85,6 +85,37 @@ collection        = db[COLLECTION_NAME]
 conversations_col = db["conversations"]   # multi-turn chat memory
 documents_col     = db["documents"]       # RAG document metadata
 
+# ── RAG Vector Store (MongoDB Atlas) ─────────────────────────
+from rag.mongo_vector_store import MongoVectorStore
+from rag.indexer import seed_knowledge_base, index_user_profile
+_vector_store = MongoVectorStore(db)
+
+# Seed knowledge base in background (non-blocking)
+import threading
+def _seed_kb_async():
+    try:
+        n = seed_knowledge_base(_vector_store)
+        if n > 0:
+            print(f"✅ Knowledge base seeded: {n} chunks")
+        else:
+            print("ℹ️  Knowledge base already seeded or embedding unavailable")
+    except Exception as e:
+        print(f"⚠️  Knowledge base seeding skipped: {e}")
+
+threading.Thread(target=_seed_kb_async, daemon=True).start()
+
+def _trigger_user_indexing(email: str):
+    """Spawns a background thread to embed and index the user's profile."""
+    def _do_index():
+        try:
+            user = collection.find_one({"email": email})
+            if user:
+                index_user_profile(_vector_store, user)
+        except Exception as e:
+            print(f"⚠️  User indexing failed for {email}: {e}")
+    threading.Thread(target=_do_index, daemon=True).start()
+
+
 # ── Services wired to MongoDB ─────────────────────────────────
 memory      = ConversationMemory(conversations_col)
 
@@ -327,6 +358,9 @@ async def api_signup(body: SignupRequest):
             {"$set": {"refresh_token_hash": hash_refresh_token(refresh)}}
         )
         
+        # Trigger background indexing
+        _trigger_user_indexing(body.email)
+        
         log.info(f"✅ Signup successful for: {body.email}")
         
         return {
@@ -433,6 +467,10 @@ async def update_user(body: UserUpdateRequest, email: str = FPath(...)):
         "investments": body.investments or {}, "progress": body.progress or {},
     }})
     if result.matched_count == 0: raise HTTPException(404, "User not found")
+    
+    # Re-index the user profile now that it has changed
+    _trigger_user_indexing(email)
+    
     return {"status": "success"}
 
 # ── Analytics ─────────────────────────────────────────────────

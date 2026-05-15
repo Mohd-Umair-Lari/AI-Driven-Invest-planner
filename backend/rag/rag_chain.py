@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional
 from ai.groq_client import generate_response
 from rag.retriever import retrieve_user_context, retrieve_transactions_by_category
 from rag.context_builder import build_financial_context, build_category_context
+from rag.embedder import embed_text, is_available as _embedding_available
 
 # ── Category keywords ───────────────────────────────────────────
 _CATEGORY_KEYWORDS = [
@@ -112,7 +113,7 @@ def run_rag_chain(
         except Exception as e:
             return {"success": True, "response": f"Hello{', ' + name if name else ''}! How can I help with your finances today?", "context_used": "greeting", "rag": False}
 
-    # ── 2. Retrieve from MongoDB ─────────────────────────────────
+    # ── 2. Retrieve structured data from MongoDB ─────────────────
     ctx = retrieve_user_context(collection, email)
 
     # Merge frontend-supplied overrides
@@ -127,7 +128,26 @@ def run_rag_chain(
             "rag":          True,
         }
 
-    # ── 3. Build context string ──────────────────────────────────
+    # ── 3. Vector search (semantic retrieval) ────────────────────
+    semantic_chunks: List[str] = []
+    vector_store = _get_vector_store(collection)
+
+    if _embedding_available() and vector_store is not None:
+        query_embedding = embed_text(question)
+        if query_embedding:
+            # a) Retrieve relevant knowledge base chunks
+            kb_chunks = vector_store.search_knowledge(query_embedding, limit=3)
+            # b) Retrieve relevant user-specific chunks
+            user_chunks = vector_store.search_user_chunks(email, query_embedding, limit=2)
+            semantic_chunks = kb_chunks + user_chunks
+        else:
+            # Embedding call failed — fallback to keyword search
+            semantic_chunks = vector_store.keyword_search_knowledge(question, limit=2)
+    elif vector_store is not None:
+        # No embedding available — keyword fallback
+        semantic_chunks = vector_store.keyword_search_knowledge(question, limit=2)
+
+    # ── 4. Build context string ──────────────────────────────────
     detected_category = None
     if intent and hasattr(intent, "entities"):
         detected_category = intent.entities.get("category")
@@ -137,22 +157,30 @@ def run_rag_chain(
     if detected_category:
         category_txns = retrieve_transactions_by_category(ctx, detected_category)
         context_str   = build_category_context(detected_category, category_txns, ctx)
-        context_type  = f"category:{detected_category}"
+        context_type  = f"category:{detected_category}+vector"
     else:
         context_str  = build_financial_context(ctx)
-        context_type = "full_profile"
+        context_type = "full_profile+vector"
 
-    # ── 4. Generate ──────────────────────────────────────────────
+    # Append semantic knowledge chunks if found
+    if semantic_chunks:
+        context_str += "\n\n=== RELEVANT FINANCIAL KNOWLEDGE ===\n"
+        for i, chunk in enumerate(semantic_chunks, 1):
+            context_str += f"\n[{i}] {chunk.strip()}\n"
+        context_str += "=== END KNOWLEDGE ==="
+
+    # ── 5. Generate ──────────────────────────────────────────────
     system_prompt = _build_system_prompt(context_str, conversation_history or [])
     full_prompt   = f"{system_prompt}\n\nUser Question: {question}"
 
     try:
         ai_response = generate_response(full_prompt)
         return {
-            "success":      True,
-            "response":     ai_response,
-            "context_used": context_type,
-            "rag":          True,
+            "success":        True,
+            "response":       ai_response,
+            "context_used":   context_type,
+            "rag":            True,
+            "semantic_chunks": len(semantic_chunks),
         }
     except Exception as e:
         return {
@@ -161,4 +189,26 @@ def run_rag_chain(
             "context_used": context_type,
             "rag":          True,
         }
+
+
+# ── Lazy vector store singleton ──────────────────────────────────
+_vs_instance = None
+
+def _get_vector_store(collection):
+    """Returns a MongoVectorStore singleton bound to the same DB as collection."""
+    global _vs_instance
+    if _vs_instance is None:
+        try:
+            from rag.mongo_vector_store import MongoVectorStore
+            db = collection.database
+            _vs_instance = MongoVectorStore(db)
+        except Exception as e:
+            try:
+                from loguru import logger
+            except ImportError:
+                import logging as _l; logger = _l.getLogger("rag_chain")
+            logger.warning(f"Could not init MongoVectorStore: {e}")
+            return None
+    return _vs_instance
+
 
