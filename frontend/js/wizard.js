@@ -96,8 +96,24 @@ window.nextStep = async () => {
   show();
 };
 
-window.prevStep = () => {
+window.prevStep = async () => {
   if (step > 0) {
+    const payload = buildRegistrationPayload(); 
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user && user.email) {
+      try {
+        await apiFetch("/api/onboarding/save", {
+          method: "POST",
+          body: JSON.stringify({
+            email: user.email,
+            step: step - 1,
+            payload
+          })
+        });
+      } catch (err) {
+        console.warn("Failed to save data on previous step", err);
+      }
+    }
     step -= 1;
     show();
   }
