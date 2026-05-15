@@ -339,50 +339,123 @@ function setupProfileEditor() {
 
 // ===== AI CHATBOT =====
 function setupChatbot() {
-  const chatInput = document.getElementById('ai-chat-input');
-  const chatSend = document.getElementById('ai-chat-send');
+  const chatInput    = document.getElementById('ai-chat-input');
+  const chatSend     = document.getElementById('ai-chat-send');
   const chatMessages = document.getElementById('ai-chat-messages');
 
   if (!chatInput || !chatSend || !chatMessages) return;
 
-  const handleSend = () => {
+  // Session ID persists for the whole dashboard session (multi-turn memory)
+  const sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+
+  function appendUserMsg(text) {
+    const div = document.createElement('div');
+    div.className = 'chat-user-msg';
+    div.innerHTML = `<p class="chat-user-text">${escapeHtml(text)}</p>`;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function appendAiMsg(text) {
+    const div = document.createElement('div');
+    div.className = 'ai-chat-card';
+    // Convert newlines and basic markdown-style bullets to HTML
+    const formatted = text
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/^[-•]\s+(.+)$/gm, '<li>$1</li>')
+      .replace(/(<li>.*<\/li>)/gs, '<ul class="chat-list">$1</ul>')
+      .replace(/\n/g, '<br>');
+    div.innerHTML = `
+      <div class="flex justify-between items-center mb-2">
+        <span class="chat-response-tag">FinPass AI</span>
+      </div>
+      <p class="chat-ai-text">${formatted}</p>
+    `;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function appendError(msg) {
+    const div = document.createElement('div');
+    div.className = 'ai-chat-card';
+    div.innerHTML = `<p class="chat-ai-text" style="color:#ef4444;">⚠️ ${escapeHtml(msg)}</p>`;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function showTyping() {
+    const div = document.createElement('div');
+    div.className = 'chat-typing';
+    div.id = 'chat-typing-indicator';
+    div.innerHTML = `
+      <span></span><span></span><span></span>
+    `;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    return div;
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  const handleSend = async () => {
     const text = chatInput.value.trim();
     if (!text) return;
-    
-    // Add user message
-    const userMsg = document.createElement('div');
-    userMsg.className = 'chat-user-msg';
-    userMsg.innerHTML = `<p class="chat-user-text">${text}</p>`;
-    chatMessages.appendChild(userMsg);
+
+    const user = currentUser || JSON.parse(localStorage.getItem('user') || '{}');
+    if (!user?.email) {
+      appendError('Please log in to use the AI advisor.');
+      return;
+    }
+
     chatInput.value = '';
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    chatInput.disabled = true;
+    chatSend.disabled  = true;
 
-    // Add typing indicator
-    const typingMsg = document.createElement('div');
-    typingMsg.className = 'chat-typing';
-    typingMsg.textContent = 'AI Advisor is thinking...';
-    chatMessages.appendChild(typingMsg);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    appendUserMsg(text);
+    const typingEl = showTyping();
 
-    // Simulate AI response
-    setTimeout(() => {
-      typingMsg.remove();
-      const aiMsg = document.createElement('div');
-      aiMsg.className = 'ai-chat-card';
-      aiMsg.innerHTML = `
-        <div class="flex justify-between items-center mb-2">
-            <span class="chat-response-tag">RESPONSE</span>
-        </div>
-        <p class="chat-ai-text">Based on your portfolio, prioritizing debt repayment while maintaining a 10% SIP increase is the best approach to hit your goal.</p>
-      `;
-      chatMessages.appendChild(aiMsg);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    }, 1200);
+    try {
+      const res = await apiFetch('/api/advisor/chat', {
+        method: 'POST',
+        body: JSON.stringify({
+          email:      user.email,
+          question:   text,
+          session_id: sessionId,
+          context: {
+            monthly_income:   user.financials?.['monthly-income']   || 0,
+            monthly_expenses: user.financials?.['monthly-expenses'] || 0,
+            debt:             user.financials?.debt                 || 0,
+            risk_appetite:    user.investments?.['risk-opt']        || 'moderate',
+          }
+        })
+      });
+
+      typingEl.remove();
+      appendAiMsg(res.response || 'Sorry, I did not get a response. Please try again.');
+
+    } catch (err) {
+      typingEl.remove();
+      if (err.message?.includes('401')) {
+        appendError('Session expired. Please log in again.');
+      } else if (err.message?.includes('timeout') || err.name === 'AbortError') {
+        appendError('The request timed out. The AI server may be waking up — please try again in a moment.');
+      } else {
+        appendError('Something went wrong: ' + (err.message || 'Unknown error'));
+      }
+    } finally {
+      chatInput.disabled = false;
+      chatSend.disabled  = false;
+      chatInput.focus();
+    }
   };
 
   chatSend.addEventListener('click', handleSend);
   chatInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') handleSend();
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
   });
 }
 
