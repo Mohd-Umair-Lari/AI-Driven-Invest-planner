@@ -1,7 +1,4 @@
-/*
- * FinPass AI — Comprehensive Global Styles
- * All dashboard, landing page, and form styling consolidated here.
- */
+
 
 *,
 *::before,
@@ -22,7 +19,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Prevent input zoom on iOS */
 input[type="text"],
 input[type="email"],
 input[type="password"],
@@ -32,12 +28,10 @@ textarea {
   font-size: 16px;
 }
 
-/* Chart.js canvas responsive */
 canvas {
   max-width: 100%;
 }
 
-/* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -64,10 +58,6 @@ canvas {
   background: #64748b;
 }
 
-/* =========================================
-   Universal Utilities (Login, Register, etc.)
-   ========================================= */
-
 .glass {
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(20px);
@@ -93,7 +83,6 @@ canvas {
     linear-gradient(to bottom, #0f1423, #0b0f1a);
 }
 
-/* ── Login / Register page body theming ── */
 body.auth-page {
   background: radial-gradient(ellipse at 20% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 60%),
     radial-gradient(ellipse at 80% 20%, rgba(139, 92, 246, 0.07) 0%, transparent 55%),
@@ -109,7 +98,6 @@ html.dark body.auth-page {
     linear-gradient(to bottom, #0f1423, #0b0f1a);
 }
 
-/* From wizard.html (combining mesh-bg styles smoothly) */
 body.wizard-mesh {
   background: radial-gradient(ellipse at 30% 40%, rgba(99, 102, 241, 0.05) 0%, transparent 60%),
     radial-gradient(ellipse at 70% 70%, rgba(139, 92, 246, 0.05) 0%, transparent 55%),
@@ -219,10 +207,6 @@ body.wizard-mesh {
   transform: translateY(0);
 }
 
-/* =========================================
-   Index.html landing page styles
-   ========================================= */
-
 .glass-nav {
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(16px);
@@ -273,10 +257,6 @@ body.wizard-mesh {
   -webkit-text-fill-color: transparent;
 }
 
-/* =========================================
-   Wizard.html styles
-   ========================================= */
-
 .step {
   display: none;
 }
@@ -293,10 +273,6 @@ body.wizard-mesh {
 .dot.active {
   transform: scale(1.25);
 }
-
-/* =========================================
-   Dashboard.html styles
-   ========================================= */
 
 .sidebar-item {
   transition: all 0.2s ease;
@@ -367,7 +343,6 @@ body.wizard-mesh {
   border-color: #334155;
 }
 
-/* AI panel inner elements — light mode overrides */
 .ai-panel .ai-panel-title {
   color: #0f172a;
 }
@@ -384,7 +359,6 @@ body.wizard-mesh {
   color: #94a3b8;
 }
 
-/* Chat message cards inside AI panel */
 .ai-chat-card {
   background: rgba(0, 0, 0, 0.04);
   border: 1px solid rgba(0, 0, 0, 0.08);
@@ -421,7 +395,6 @@ body.wizard-mesh {
   color: #94a3b8;
 }
 
-/* Chat input inside AI panel */
 .ai-chat-input-field {
   width: 100%;
   background: rgba(0, 0, 0, 0.04);
@@ -456,9 +429,6 @@ body.wizard-mesh {
   border-color: #818cf8;
 }
 
-/* ── Dynamic chat message bubbles ── */
-
-/* User message bubble */
 .chat-user-msg {
   background: rgba(99, 102, 241, 0.12);
   border: 1px solid rgba(99, 102, 241, 0.25);
@@ -486,7 +456,6 @@ body.wizard-mesh {
   color: #c7d2fe;
 }
 
-/* AI response tag */
 .chat-response-tag {
   display: inline-block;
   font-size: 0.625rem;
@@ -505,7 +474,6 @@ body.wizard-mesh {
   border-color: rgba(16, 185, 129, 0.25);
 }
 
-/* AI response text (inside .ai-chat-card dynamically added) */
 .chat-ai-text {
   font-size: 0.75rem;
   color: #334155;
@@ -517,7 +485,6 @@ body.wizard-mesh {
   color: #94a3b8;
 }
 
-/* Typing indicator — animated bouncing dots */
 .chat-typing {
   display: flex;
   align-items: center;
@@ -544,7 +511,6 @@ body.wizard-mesh {
 
 .dark .chat-typing span { background: #475569; }
 
-/* Bullet list inside AI responses */
 .chat-list {
   margin: 0.4rem 0 0.2rem 1rem;
   padding: 0;
@@ -560,12 +526,10 @@ body.wizard-mesh {
 
 .dark .chat-list li { color: #94a3b8; }
 
-/* Disabled state for input while waiting */
 #ai-chat-input:disabled, #ai-chat-send:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
-
 
 .sankey-placeholder {
   width: 100%;
@@ -589,11 +553,6 @@ body.wizard-mesh {
   fill: #cbd5e1;
 }
 
-/* =========================================
-   Advisor.html styles
-   ========================================= */
-
-/* ── Light theme (default) ── */
 :root {
   --bg: #f8fafc;
   --surface: rgba(0, 0, 0, 0.03);
@@ -609,7 +568,6 @@ body.wizard-mesh {
   --back-hover: rgba(0, 0, 0, 0.06);
 }
 
-/* ── Dark theme ── */
 html.dark {
   --bg: #090d1a;
   --surface: rgba(255, 255, 255, 0.04);
@@ -626,7 +584,6 @@ body.advisor-page {
   min-height: 100vh;
 }
 
-/* ── Animated background ── */
 body.advisor-page::before {
   content: '';
   position: fixed;
@@ -644,7 +601,6 @@ html.dark body.advisor-page::before {
     radial-gradient(ellipse 60% 40% at 80% 80%, rgba(139, 92, 246, 0.10) 0%, transparent 60%);
 }
 
-/* ── Layout ── */
 .advisor-page .page {
   position: relative;
   z-index: 1;
@@ -653,7 +609,6 @@ html.dark body.advisor-page::before {
   padding: 2rem 1.5rem 4rem;
 }
 
-/* ── Back button ── */
 .back-btn {
   display: inline-flex;
   align-items: center;
@@ -675,7 +630,6 @@ html.dark body.advisor-page::before {
   background: var(--back-hover);
 }
 
-/* ── Hero header ── */
 .hero {
   display: flex;
   align-items: flex-start;
@@ -751,7 +705,6 @@ html:not(.dark) .hero-badge {
   margin-top: 0.5rem;
 }
 
-/* ── Profile strip ── */
 .profile-strip {
   display: flex;
   flex-wrap: wrap;
@@ -800,7 +753,6 @@ html.dark .pstat-value.indigo {
   color: #a5b4fc;
 }
 
-/* ── Loading state ── */
 #loading-state {
   display: flex;
   flex-direction: column;
@@ -868,7 +820,6 @@ html.dark .pstat-value.indigo {
   flex-shrink: 0;
 }
 
-/* ── Error state ── */
 #error-state {
   display: none;
   flex-direction: column;
@@ -913,7 +864,6 @@ html.dark .pstat-value.indigo {
   opacity: 0.85;
 }
 
-/* ── Allocation bar ── */
 #alloc-section {
   display: none;
   margin-bottom: 2rem;
@@ -971,7 +921,6 @@ html.dark .pstat-value.indigo {
   flex-shrink: 0;
 }
 
-/* ── Section cards ── */
 #insight-sections {
   display: none;
 }
@@ -1086,7 +1035,6 @@ html.dark .pstat-value.indigo {
   font-weight: 600;
 }
 
-/* ── Motivational footer ── */
 .motive-banner {
   display: none;
   background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(139, 92, 246, 0.05));
@@ -1113,7 +1061,6 @@ html.dark .motive-banner p {
   color: #c7d2fe;
 }
 
-/* ── Refresh button ── */
 .refresh-row {
   display: none;
   justify-content: center;
@@ -1151,7 +1098,6 @@ html.dark .motive-banner p {
   color: var(--muted);
 }
 
-/* ── Theme toggle button ── */
 .theme-btn {
   display: inline-flex;
   align-items: center;
@@ -1172,10 +1118,6 @@ html.dark .motive-banner p {
   background: var(--back-hover);
   color: var(--text);
 }
-
-/* =========================================
-   Profile Editor Styles (Dashboard)
-   ========================================= */
 
 .profile-section {
   background: white;

@@ -6,7 +6,6 @@ from rag.retriever import retrieve_user_context, retrieve_transactions_by_catego
 from rag.context_builder import build_financial_context, build_category_context
 from rag.embedder import embed_text, is_available as _embedding_available
 
-# ── Category keywords ───────────────────────────────────────────
 _CATEGORY_KEYWORDS = [
     "food", "groceries", "grocery", "dining", "restaurant",
     "rent", "housing", "home",
@@ -19,7 +18,6 @@ _CATEGORY_KEYWORDS = [
     "insurance", "emi", "loan",
 ]
 
-
 def _detect_category(question: str) -> Optional[str]:
     q = question.lower()
     for kw in _CATEGORY_KEYWORDS:
@@ -27,12 +25,11 @@ def _detect_category(question: str) -> Optional[str]:
             return kw
     return None
 
-
 def _build_system_prompt(context: str, history: List[Dict[str, str]], is_greeting: bool = False) -> str:
     history_block = ""
     if history:
         lines = []
-        for m in history[-8:]:   # last 8 messages for better context
+        for m in history[-8:]:
             role  = "User" if m["role"] == "user" else "FinPass AI"
             lines.append(f"{role}: {m['content']}")
         history_block = "\n--- CONVERSATION HISTORY ---\n" + "\n".join(lines) + "\n---\n\n"
@@ -68,7 +65,6 @@ def _build_system_prompt(context: str, history: List[Dict[str, str]], is_greetin
         f"{context_block}"
     )
 
-
 _GREETING_PATTERNS = [
     "hi", "hello", "hey", "good morning", "good evening", "good afternoon",
     "good night", "howdy", "sup", "what's up", "how are you", "namaste",
@@ -76,14 +72,12 @@ _GREETING_PATTERNS = [
     "thank you", "okay", "ok", "got it", "nice", "great", "cool"
 ]
 
-
 def _is_greeting_or_smalltalk(question: str) -> bool:
     q = question.lower().strip()
     if len(q.split()) <= 5:
         return any(p in q for p in _GREETING_PATTERNS)
     return False
 
-# RAG pipeline code
 def run_rag_chain(
     collection,
     email: str,
@@ -95,9 +89,8 @@ def run_rag_chain(
 
     is_greeting = _is_greeting_or_smalltalk(question)
 
-    # ── 1. For greetings, skip heavy data retrieval ───────────────
     if is_greeting:
-        # Fetch the user's first name for a personalized greeting
+
         user_doc = collection.find_one({"email": email}, {"Name": 1, "_id": 0})
         name = (user_doc or {}).get("Name", "").split()[0] if user_doc else ""
 
@@ -113,10 +106,8 @@ def run_rag_chain(
         except Exception as e:
             return {"success": True, "response": f"Hello{', ' + name if name else ''}! How can I help with your finances today?", "context_used": "greeting", "rag": False}
 
-    # ── 2. Retrieve structured data from MongoDB ─────────────────
     ctx = retrieve_user_context(collection, email)
 
-    # Merge frontend-supplied overrides
     if extra_context:
         ctx.update({k: v for k, v in extra_context.items() if v})
 
@@ -128,26 +119,24 @@ def run_rag_chain(
             "rag":          True,
         }
 
-    # ── 3. Vector search (semantic retrieval) ────────────────────
     semantic_chunks: List[str] = []
     vector_store = _get_vector_store(collection)
 
     if _embedding_available() and vector_store is not None:
         query_embedding = embed_text(question)
         if query_embedding:
-            # a) Retrieve relevant knowledge base chunks
+
             kb_chunks = vector_store.search_knowledge(query_embedding, limit=3)
-            # b) Retrieve relevant user-specific chunks
+
             user_chunks = vector_store.search_user_chunks(email, query_embedding, limit=2)
             semantic_chunks = kb_chunks + user_chunks
         else:
-            # Embedding call failed — fallback to keyword search
+
             semantic_chunks = vector_store.keyword_search_knowledge(question, limit=2)
     elif vector_store is not None:
-        # No embedding available — keyword fallback
+
         semantic_chunks = vector_store.keyword_search_knowledge(question, limit=2)
 
-    # ── 4. Build context string ──────────────────────────────────
     detected_category = None
     if intent and hasattr(intent, "entities"):
         detected_category = intent.entities.get("category")
@@ -162,14 +151,12 @@ def run_rag_chain(
         context_str  = build_financial_context(ctx)
         context_type = "full_profile+vector"
 
-    # Append semantic knowledge chunks if found
     if semantic_chunks:
         context_str += "\n\n=== RELEVANT FINANCIAL KNOWLEDGE ===\n"
         for i, chunk in enumerate(semantic_chunks, 1):
             context_str += f"\n[{i}] {chunk.strip()}\n"
         context_str += "=== END KNOWLEDGE ==="
 
-    # ── 5. Generate ──────────────────────────────────────────────
     system_prompt = _build_system_prompt(context_str, conversation_history or [])
     full_prompt   = f"{system_prompt}\n\nUser Question: {question}"
 
@@ -190,12 +177,10 @@ def run_rag_chain(
             "rag":          True,
         }
 
-
-# ── Lazy vector store singleton ──────────────────────────────────
 _vs_instance = None
 
 def _get_vector_store(collection):
-    """Returns a MongoVectorStore singleton bound to the same DB as collection."""
+
     global _vs_instance
     if _vs_instance is None:
         try:
@@ -210,5 +195,4 @@ def _get_vector_store(collection):
             logger.warning(f"Could not init MongoVectorStore: {e}")
             return None
     return _vs_instance
-
 

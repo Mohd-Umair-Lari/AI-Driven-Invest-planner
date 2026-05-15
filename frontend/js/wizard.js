@@ -75,7 +75,6 @@ function show() {
   dots.forEach((d, i) => d.classList.toggle("active", i <= step));
 }
 
-
 window.nextStep = async () => {
   const payload = buildRegistrationPayload(); 
   if (!payload.email) {

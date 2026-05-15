@@ -6,7 +6,6 @@ class MarketAPIAdapter:
     def fetch(self):
         raise NotImplementedError
 
-
 class VolatilityIndexAdapter(MarketAPIAdapter):
     def __init__(self, api_url: str):
         self.api_url = api_url
@@ -29,7 +28,7 @@ class VolatilityIndexAdapter(MarketAPIAdapter):
             confidence=confidence,
             timestamp=datetime.utcnow()
         )
-    
+
 class MockVolatilityAdapter(MarketAPIAdapter):
     def fetch(self):
         return MarketSignal(

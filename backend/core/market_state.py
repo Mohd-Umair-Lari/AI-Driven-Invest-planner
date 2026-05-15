@@ -10,7 +10,6 @@ class MarketSignal:
     confidence: float
     timestamp: datetime
 
-
 class MarketState:
     def __init__(self):
         self.signals: List[MarketSignal] = []

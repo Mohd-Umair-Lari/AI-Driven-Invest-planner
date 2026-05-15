@@ -1,12 +1,4 @@
-"""
-rag/mongo_vector_store.py
---------------------------
-MongoDB Atlas Vector Search integration.
-- Replaces ChromaDB — zero native build dependencies.
-- Stores embeddings directly in MongoDB collections alongside user data.
-- Uses $vectorSearch aggregation pipeline (Atlas Search required).
-- Falls back gracefully to keyword retrieval if vector search index not yet created.
-"""
+
 from typing import Any, Dict, List, Optional
 from datetime import datetime
 
@@ -15,30 +7,21 @@ try:
 except ImportError:
     import logging as _l; logger = _l.getLogger("mongo_vector_store")
 
-# ── Collection names ────────────────────────────────────────────
-KNOWLEDGE_COL = "financial_knowledge"   # Finance concepts knowledge base
-USER_CHUNKS_COL = "user_embeddings"     # Per-user profile + transaction chunks
+KNOWLEDGE_COL = "financial_knowledge"
+USER_CHUNKS_COL = "user_embeddings"
 
-# ── Vector search index name (must be created in Atlas UI once) ─
 VECTOR_INDEX_NAME = "finpass_vector_index"
 
-
 class MongoVectorStore:
-    """
-    Atlas Vector Search wrapper.
-    Falls back to text-regex search if the vector index doesn't exist yet.
-    """
 
     def __init__(self, db):
         self.db             = db
         self.knowledge_col  = db[KNOWLEDGE_COL]
         self.user_col       = db[USER_CHUNKS_COL]
-        self._index_ready   = None  # lazily detected
-
-    # ── Upsert knowledge chunks ─────────────────────────────────
+        self._index_ready   = None
 
     def upsert_knowledge(self, doc_id: str, text: str, embedding: List[float], metadata: Dict = None):
-        """Store a financial knowledge chunk with its embedding."""
+
         self.knowledge_col.update_one(
             {"doc_id": doc_id},
             {"$set": {
@@ -52,7 +35,7 @@ class MongoVectorStore:
         )
 
     def upsert_user_chunk(self, email: str, chunk_id: str, text: str, embedding: List[float], metadata: Dict = None):
-        """Store a user-specific chunk (profile summary, transaction, etc.) with embedding."""
+
         self.user_col.update_one(
             {"email": email, "chunk_id": chunk_id},
             {"$set": {
@@ -67,14 +50,12 @@ class MongoVectorStore:
         )
 
     def delete_user_chunks(self, email: str):
-        """Remove all embedded chunks for a user (called on profile update)."""
-        self.user_col.delete_many({"email": email})
 
-    # ── Vector search ───────────────────────────────────────────
+        self.user_col.delete_many({"email": email})
 
     def _vector_search(self, collection_name: str, query_embedding: List[float],
                        filter_dict: Dict = None, limit: int = 5) -> List[Dict]:
-        """Run Atlas $vectorSearch aggregation."""
+
         pipeline = [
             {
                 "$vectorSearch": {
@@ -105,12 +86,12 @@ class MongoVectorStore:
             return []
 
     def search_knowledge(self, query_embedding: List[float], limit: int = 4) -> List[str]:
-        """Semantic search over the financial knowledge base."""
+
         results = self._vector_search(KNOWLEDGE_COL, query_embedding, limit=limit)
         return [r["text"] for r in results if r.get("score", 0) > 0.5]
 
     def search_user_chunks(self, email: str, query_embedding: List[float], limit: int = 3) -> List[str]:
-        """Semantic search over a specific user's embedded chunks."""
+
         results = self._vector_search(
             USER_CHUNKS_COL,
             query_embedding,
@@ -119,10 +100,8 @@ class MongoVectorStore:
         )
         return [r["text"] for r in results if r.get("score", 0) > 0.5]
 
-    # ── Fallback text search (when index not yet ready) ─────────
-
     def keyword_search_knowledge(self, query: str, limit: int = 3) -> List[str]:
-        """Text-based fallback when vector index not yet configured."""
+
         words = [w for w in query.lower().split() if len(w) > 3]
         if not words:
             return []
@@ -132,8 +111,6 @@ class MongoVectorStore:
             {"text": 1, "_id": 0}
         ).limit(limit)
         return [d["text"] for d in docs]
-
-    # ── Stats ───────────────────────────────────────────────────
 
     def knowledge_count(self) -> int:
         return self.knowledge_col.count_documents({})

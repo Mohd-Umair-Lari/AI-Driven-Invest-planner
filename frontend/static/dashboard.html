@@ -29,10 +29,9 @@
 </head>
 <body class="flex h-screen overflow-hidden text-slate-800 dark:text-slate-200 transition-colors duration-200">
 
-    <!-- Sidebar -->
     <aside class="w-[260px] bg-white dark:bg-[#1e293b] border-r border-slate-200 dark:border-slate-700 flex flex-col justify-between h-full flex-shrink-0 relative z-20 transition-colors duration-200">
         <div>
-            <!-- Logo -->
+
             <div class="p-6 flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-[#4f46e5] flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -45,7 +44,6 @@
                 </div>
             </div>
 
-            <!-- Navigation -->
             <nav class="px-4 space-y-1 mt-2" id="sidebar-nav">
                 <a href="#" data-target="dashboard" class="sidebar-item active flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm">
                     <svg class="w-5 h-5 opacity-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
@@ -70,7 +68,6 @@
             </nav>
         </div>
 
-        <!-- User Profile Widget -->
         <div class="p-4 mx-4 mb-4 border border-slate-100 dark:border-slate-700 bg-[#f8fafc] dark:bg-[#0f172a] rounded-2xl flex items-center justify-between cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" onclick="window.logout()">
             <div class="flex items-center gap-3">
                 <div class="w-9 h-9 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-sm shrink-0" id="sidebar-avatar">A</div>
@@ -83,11 +80,9 @@
         </div>
     </aside>
 
-    <!-- Main Content -->
     <main class="flex-1 overflow-y-auto relative h-full bg-[#f8fafc] dark:bg-[#0f172a] transition-colors duration-200">
         <div class="max-w-[1400px] mx-auto p-8 lg:p-10">
-            
-            <!-- Header -->
+
             <header class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                 <div class="flex items-center gap-3">
                     <svg class="w-8 h-8 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
@@ -101,19 +96,19 @@
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         Verified Profile
                     </button>
-                    <!-- Theme Toggle -->
+
                     <button id="theme-toggle" class="p-2 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors focus:outline-none">
                         <svg id="theme-icon" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <!-- Icon injected by theme.js -->
+
                         </svg>
                     </button>
                 </div>
             </header>
 
             <div id="content-dashboard" class="content-tab">
-            <!-- Stat Cards -->
+
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
-                <!-- Card 1: Income -->
+
                 <div class="stat-card hover:shadow-md">
                     <div class="flex justify-between items-start mb-4">
                         <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/40 dark:to-blue-800/20 flex items-center justify-center text-blue-600 dark:text-blue-300 transition-colors shadow-sm">
@@ -126,7 +121,6 @@
                     <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-3 transition-colors">Gross income for this month</p>
                 </div>
 
-                <!-- Card 2: Portfolio -->
                 <div class="stat-card hover:shadow-md">
                     <div class="flex justify-between items-start mb-4">
                         <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-100 to-emerald-50 dark:from-emerald-900/40 dark:to-emerald-800/20 flex items-center justify-center text-emerald-600 dark:text-emerald-300 transition-colors shadow-sm">
@@ -139,7 +133,6 @@
                     <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-3 transition-colors">Current investment value</p>
                 </div>
 
-                <!-- Card 3: Goal Target -->
                 <div class="stat-card hover:shadow-md">
                     <div class="flex justify-between items-start mb-4">
                         <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-100 to-purple-50 dark:from-purple-900/40 dark:to-purple-800/20 flex items-center justify-center text-purple-600 dark:text-purple-300 transition-colors shadow-sm">
@@ -154,7 +147,6 @@
                     </p>
                 </div>
 
-                <!-- Card 4: Debt -->
                 <div class="stat-card hover:shadow-md">
                     <div class="flex justify-between items-start mb-4">
                         <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-red-100 to-red-50 dark:from-red-900/40 dark:to-red-800/20 flex items-center justify-center text-red-600 dark:text-red-300 transition-colors shadow-sm">
@@ -168,10 +160,8 @@
                 </div>
             </div>
 
-            <!-- Middle Section -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6 items-start">
-                
-                <!-- Cash Flow Donut -->
+
                 <div class="panel-card p-6 flex flex-col relative col-span-1 lg:col-span-1">
                     <h3 class="font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-4 transition-colors">
                         <svg class="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
@@ -182,7 +172,7 @@
                             <canvas id="cashFlowChart"></canvas>
                         </div>
                     </div>
-                    <!-- Custom Legend & Ratios -->
+
                     <div class="mt-4 w-full">
                         <div class="flex flex-col items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300 font-medium mb-4 transition-colors">
                             <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-[#f59e0b]"></div> Debt Repayment</div>
@@ -202,10 +192,9 @@
                     </div>
                 </div>
 
-                <!-- Goal Progress -->
                 <div class="panel-card p-6 flex flex-col col-span-1 lg:col-span-1">
                     <h3 class="font-bold text-slate-900 dark:text-white mb-8 mt-1 transition-colors">Goal Progress: <span id="goal-progress-name">Luxury Car</span></h3>
-                    
+
                     <div class="flex-1 flex flex-col justify-center mb-8">
                         <div class="flex justify-between items-end mb-2">
                             <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-2 py-1 rounded-md transition-colors" id="goal-progress-pct">24% COMPLETE</span>
@@ -214,7 +203,7 @@
                         <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-3.5 shadow-inner transition-colors">
                             <div class="bg-[#4f46e5] h-3.5 rounded-full shadow-sm transition-all duration-1000" style="width: 24%" id="goal-progress-bar"></div>
                         </div>
-                        
+
                         <div class="mt-12 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl p-5 transition-colors">
                             <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed text-center transition-colors">
                                 At your current investment rate, you are <span class="font-bold text-indigo-600 dark:text-indigo-400">on track</span> to reach this goal in <span class="font-bold text-slate-900 dark:text-white" id="goal-progress-time">24 months</span>.
@@ -223,7 +212,6 @@
                     </div>
                 </div>
 
-                <!-- AI Advisor Panel -->
                 <div class="ai-panel p-6 flex flex-col col-span-1 lg:col-span-1">
                     <div class="flex items-center gap-3 mb-6">
                         <div class="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-500 dark:text-indigo-300">
@@ -234,10 +222,9 @@
                             <p class="ai-panel-sub text-[11px] font-medium">Smart Suggestions &amp; Insights</p>
                         </div>
                     </div>
-                    
+
                     <div class="flex-1 overflow-y-auto pr-2 space-y-4 max-h-[300px]" style="scrollbar-width: thin; scrollbar-color: #334155 transparent;" id="ai-chat-messages">
-                        
-                        <!-- Insight 1 -->
+
                         <div class="ai-chat-card">
                             <div class="flex justify-between items-center mb-3">
                                 <span class="text-[10px] font-bold text-rose-600 dark:text-rose-400 bg-rose-100 dark:bg-rose-500/10 px-2 py-1 rounded tracking-wider">SAVINGS</span>
@@ -247,7 +234,6 @@
                             <p>Your current expenses are ₹45,000. We suggest maintaining an emergency fund of at least ₹2.7L (6 months) before aggressive investing.</p>
                         </div>
 
-                        <!-- Insight 2 -->
                         <div class="ai-chat-card">
                             <div class="flex justify-between items-center mb-3">
                                 <span class="text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-500/10 px-2 py-1 rounded tracking-wider">TAX</span>
@@ -258,8 +244,7 @@
                         </div>
 
                     </div>
-                    
-                    <!-- Chatbot Input -->
+
                     <div class="mt-4 relative shrink-0">
                         <input type="text" id="ai-chat-input" placeholder="Ask AI Advisor..." class="ai-chat-input-field">
                         <button id="ai-chat-send" class="absolute right-2 top-1/2 -translate-y-1/2 text-indigo-500 dark:text-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors">
@@ -270,9 +255,8 @@
 
             </div>
 
-            <!-- Bottom Section -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
-                <!-- Recommended Actions -->
+
                 <div class="panel-card p-6 col-span-1 lg:col-span-3">
                     <div class="flex items-center justify-between mb-6">
                         <h3 class="font-bold text-slate-900 dark:text-white flex items-center gap-2 transition-colors">
@@ -282,20 +266,17 @@
                         <span id="rec-health-badge" class="text-xs font-semibold px-3 py-1 rounded-full hidden"></span>
                     </div>
 
-                    <!-- Loading skeleton -->
                     <div id="rec-loading" class="space-y-3">
                         <div class="h-16 bg-slate-100 dark:bg-slate-700 rounded-xl animate-pulse"></div>
                         <div class="h-16 bg-slate-100 dark:bg-slate-700 rounded-xl animate-pulse"></div>
                         <div class="h-16 bg-slate-100 dark:bg-slate-700 rounded-xl animate-pulse"></div>
                     </div>
 
-                    <!-- Dynamic cards injected here -->
                     <div id="rec-actions-list" class="space-y-4 hidden"></div>
                 </div>
             </div>
 
-
-            </div> <!-- End content-dashboard -->
+            </div> 
 
             <div id="content-cashflow" class="content-tab hidden">
                 <div class="panel-card p-8 flex flex-col">
@@ -307,7 +288,6 @@
 
                     <div class="space-y-6">
 
-                        <!-- Proportional Stacked Bar -->
                         <div>
                             <div class="flex rounded-2xl overflow-hidden h-10 w-full shadow-sm">
                                 <div class="flex items-center justify-center text-white text-xs font-bold tracking-wide" style="width:45%;background:#ef4444;">45%</div>
@@ -323,10 +303,8 @@
                             </div>
                         </div>
 
-                        <!-- Allocation Rows -->
                         <div class="space-y-3">
 
-                            <!-- Living Expenses -->
                             <div class="flex items-center gap-5 p-5 rounded-2xl border border-rose-100 dark:border-rose-900/30 bg-gradient-to-r from-rose-50 to-white dark:from-rose-950/30 dark:to-slate-800/0 hover:shadow-sm transition-all">
                                 <div class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 bg-rose-100 dark:bg-rose-900/40">
                                     <svg class="w-5 h-5 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 22V12h6v10"/></svg>
@@ -346,7 +324,6 @@
                                 </div>
                             </div>
 
-                            <!-- Debt Repayment -->
                             <div class="flex items-center gap-5 p-5 rounded-2xl border border-amber-100 dark:border-amber-900/30 bg-gradient-to-r from-amber-50 to-white dark:from-amber-950/30 dark:to-slate-800/0 hover:shadow-sm transition-all">
                                 <div class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 bg-amber-100 dark:bg-amber-900/40">
                                     <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -366,7 +343,6 @@
                                 </div>
                             </div>
 
-                            <!-- Investments -->
                             <div class="flex items-center gap-5 p-5 rounded-2xl border border-emerald-100 dark:border-emerald-900/30 bg-gradient-to-r from-emerald-50 to-white dark:from-emerald-950/30 dark:to-slate-800/0 hover:shadow-sm transition-all">
                                 <div class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 bg-emerald-100 dark:bg-emerald-900/40">
                                     <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
@@ -386,7 +362,6 @@
                                 </div>
                             </div>
 
-                            <!-- Surplus Savings -->
                             <div class="flex items-center gap-5 p-5 rounded-2xl border border-indigo-100 dark:border-indigo-900/30 bg-gradient-to-r from-indigo-50 to-white dark:from-indigo-950/30 dark:to-slate-800/0 hover:shadow-sm transition-all">
                                 <div class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 bg-indigo-100 dark:bg-indigo-900/40">
                                     <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
@@ -406,9 +381,8 @@
                                 </div>
                             </div>
 
-                        </div><!-- end allocation rows -->
+                        </div>
 
-                        <!-- Summary Stats -->
                         <div class="grid grid-cols-3 gap-4 p-6 bg-slate-50 dark:bg-slate-700/30 rounded-2xl border border-slate-100 dark:border-slate-700">
                             <div class="text-center">
                                 <p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold mb-1">Savings Rate</p>
@@ -456,7 +430,6 @@
                         </button>
                     </div>
 
-                    <!-- Success/Error Messages -->
                     <div id="profile-success" class="success-message">
                         ✓ Profile updated successfully!
                     </div>
@@ -464,7 +437,6 @@
                         ✗ Failed to update profile. Please try again.
                     </div>
 
-                    <!-- Profile Read-Only View -->
                     <div id="profile-read-only" class="profile-read-only">
                         <div class="profile-item">
                             <label class="profile-item-label">Full Name</label>
@@ -496,7 +468,6 @@
                         </div>
                     </div>
 
-                    <!-- Profile Edit Form (Hidden by Default) -->
                     <form id="profile-edit-form" style="display: none;">
                         <div class="profile-form-grid">
                             <div class="form-group">
@@ -577,7 +548,6 @@
                 </div>
             </div>
 
-            <!-- Footer -->
             <footer class="text-center pb-10 border-t border-slate-200 dark:border-slate-700 pt-8 mt-4 transition-colors">
                 <div class="flex items-center justify-center gap-2 mb-3">
                     <svg class="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>

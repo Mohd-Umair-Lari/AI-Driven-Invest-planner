@@ -26,7 +26,7 @@ def goal_probability(user):
         goal_amt = user.get("Goal", {}).get("target-amt", 0)
         months = user.get("Goal", {}).get("target-time", 12)
         invest = user.get("investments", {}).get("invest-amt", 0)
-        
+
         if goal_amt <= 0 or months <= 0 or invest <= 0:
             return {"goal_probability": 0, "expected_value": 0}
     except Exception:
@@ -55,7 +55,7 @@ def generate_plan(user):
 
     if invest_amt <= 0:
         return {"Equity": 0, "Debt": 0, "Gold": 0}
-    
+
     allocation = asset_allocation(risk)
 
     plan = {}

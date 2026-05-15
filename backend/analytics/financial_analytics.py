@@ -7,7 +7,7 @@ def get_num(v, default=0):
         return float(v)
     except:
         return default
-    
+
 def compute_financial_health(user):
     income = get_num(user.get("financials", {}).get("monthly-income"))
     expenses = get_num(user.get("financials", {}).get("monthly-expenses"))

@@ -16,7 +16,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const email = document.getElementById("login-email")?.value.trim();
     const password = document.getElementById("login-password")?.value.trim();
 
-    // Validate inputs
     if (!email || !password) {
       alert("Please enter both email and password");
       return;
@@ -43,8 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (err) {
       console.error("❌ Login failed:", err);
       const errorMsg = err.message || "Login failed. Please try again.";
-      
-      // Show user-friendly error messages
+
       if (errorMsg.includes("401")) {
         alert("Invalid email or password. Please check and try again.");
       } else if (errorMsg.includes("500")) {
@@ -59,10 +57,9 @@ document.addEventListener("DOMContentLoaded", () => {
   if (oauthBtn) {
     oauthBtn.addEventListener("click", (e) => {
       e.preventDefault();
-      // Mock OAuth Flow for Demonstration
-      // In production, integrate Firebase Auth or Google Identity Services
+
       oauthBtn.innerHTML = `<svg class="animate-spin h-5 w-5 text-slate-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Connecting...`;
-      
+
       setTimeout(() => {
         const mockOAuthUser = {
           email: "demo.oauth@example.com",

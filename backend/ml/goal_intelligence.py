@@ -29,7 +29,7 @@ def normalize_user(user):
         "has_emergency_fund": bool(financials.get("em-fund-opted", False))
     }
 def compute_goal_intelligence(user):
-# 1. Data Extraction
+
     try:
         u=normalize_user(user)
         monthly_income = u['monthly_income']
@@ -48,7 +48,7 @@ def compute_goal_intelligence(user):
         return {
             "error": "Invalid financial values"
         }
-# 2. Risk → ROI mapping
+
     risk_roi_map = {
         "Low": 6,
         "Moderate": 10,
@@ -56,20 +56,17 @@ def compute_goal_intelligence(user):
     }
 
     annual_roi = risk_roi_map.get(risk_level, 8)
-    monthly_roi = annual_roi / 12 / 100  # convert % to decimal
+    monthly_roi = annual_roi / 12 / 100
 
-# 3. SIP Future Value
     n = target_time_months
     P = monthly_savings
     r = monthly_roi
 
     future_value = P * ((math.pow(1 + r, n) - 1) / r)
 
-# 4. Probability & Gap
     probability = min((future_value / target_amount) * 100, 120)
     gap = future_value - target_amount
 
-# 5. Verdict
     if probability >= 100:
         verdict = "Goal Achievable"
     elif probability >= 75:
@@ -79,7 +76,6 @@ def compute_goal_intelligence(user):
     else:
         verdict = "Goal Unlikely Without Changes"
 
-# 6. Final Output
     return {
         "monthly_savings": monthly_savings,
         "expected_corpus": int(future_value),

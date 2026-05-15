@@ -5,7 +5,6 @@ from services.intelligence_service import IntelligenceService
 intelligence_bp = Blueprint("intelligence", __name__)
 service = IntelligenceService()
 
-
 @intelligence_bp.route("/intelligence/insights", methods=["POST"])
 def get_insights():
     data = request.get_json(silent=True) or {}

@@ -30,11 +30,10 @@
 </head>
 <body class="mesh-bg min-h-screen flex items-center justify-center p-4 transition-colors duration-200">
 
-  <!-- Theme Toggle Top Right -->
   <div class="fixed top-6 right-6 z-50">
     <button id="theme-toggle" class="p-2.5 rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 transition-colors shadow-sm focus:outline-none">
         <svg id="theme-icon" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <!-- Icon injected by theme.js -->
+
         </svg>
     </button>
   </div>
@@ -46,7 +45,6 @@
 
   <div class="w-full max-w-lg relative z-10">
 
-    <!-- Header -->
     <div class="text-center mb-8">
       <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/30 mb-3">
         <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
@@ -57,7 +55,6 @@
       <p class="text-slate-500 dark:text-slate-400 text-sm mt-1 transition-colors">Complete these steps to get personalised advice</p>
     </div>
 
-    <!-- Progress Dots -->
     <div class="flex items-center justify-center gap-2 mb-8">
       <span class="dot w-3 h-3 rounded-full bg-indigo-500 active"></span>
       <span class="w-8 h-px bg-slate-300 dark:bg-slate-700 transition-colors"></span>
@@ -68,10 +65,8 @@
       <span class="dot w-3 h-3 rounded-full bg-slate-300 dark:bg-slate-700 transition-colors"></span>
     </div>
 
-    <!-- Card -->
     <div class="glass rounded-2xl p-8 shadow-2xl transition-colors duration-200">
 
-      <!-- Step 1: Goal Setup -->
       <div class="step active">
         <div class="flex items-center gap-3 mb-6">
           <div class="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center transition-colors">
@@ -110,7 +105,6 @@
         </div>
       </div>
 
-      <!-- Step 2: Financials -->
       <div class="step">
         <div class="flex items-center gap-3 mb-6">
           <div class="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center transition-colors">
@@ -156,7 +150,6 @@
         </div>
       </div>
 
-      <!-- Step 3: Investments -->
       <div class="step">
         <div class="flex items-center gap-3 mb-6">
           <div class="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center transition-colors">
@@ -203,7 +196,6 @@
         </div>
       </div>
 
-      <!-- Step 4: Confirm -->
       <div class="step">
         <div class="flex items-center gap-3 mb-6">
           <div class="w-8 h-8 rounded-lg bg-violet-100 dark:bg-violet-500/20 flex items-center justify-center transition-colors">
@@ -242,7 +234,7 @@
         </div>
       </div>
 
-    </div><!-- /glass card -->
+    </div>
   </div>
 
   <script src="../js/theme.js"></script>

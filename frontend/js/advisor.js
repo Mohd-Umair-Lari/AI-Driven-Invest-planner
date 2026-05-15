@@ -1,4 +1,4 @@
-// AI Advisor Chatbot
+
 class AdvisorChatbot {
   constructor() {
     this.messageContainer = null;
@@ -16,7 +16,6 @@ class AdvisorChatbot {
       return false;
     }
 
-    // Get user from localStorage
     const userStr = localStorage.getItem('user');
     if (userStr) {
       this.currentUser = JSON.parse(userStr);
@@ -109,13 +108,12 @@ class AdvisorChatbot {
       return;
     }
 
-    // Add user message to UI
     this.addMessage('user', message);
     this.inputField.value = '';
     this.setLoading(true);
 
     try {
-      // Prepare context from user data
+
       const context = {
         monthly_income: this.currentUser.financials?.['monthly-income'] || 0,
         monthly_expenses: this.currentUser.financials?.['monthly-expenses'] || 0,
@@ -124,7 +122,6 @@ class AdvisorChatbot {
         risk_appetite: this.currentUser['Risk-Appetite'] || 'Moderate'
       };
 
-      // Send to API
       const response = await fetch('/api/advisor/chat', {
         method: 'POST',
         headers: {
@@ -142,7 +139,7 @@ class AdvisorChatbot {
       }
 
       const data = await response.json();
-      
+
       if (data.success) {
         this.addMessage('advisor', data.response);
       } else {
@@ -218,7 +215,6 @@ class AdvisorChatbot {
   }
 }
 
-// Initialize when dashboard loads
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     const advisor = new AdvisorChatbot();

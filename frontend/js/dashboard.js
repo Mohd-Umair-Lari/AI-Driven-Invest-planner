@@ -4,9 +4,8 @@ console.log("📊 Dashboard Initializing...");
 
 let charts = {};
 let currentUser = null;
-let metricsData = {}; // Store metrics for chart recreation
+let metricsData = {};
 
-// ===== HELPERS =====
 function formatCurrency(value) {
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
@@ -30,7 +29,6 @@ function safeExtract(obj, path, defaultVal = 0) {
   return value ?? defaultVal;
 }
 
-// ===== LOAD USER =====
 async function loadUserData() {
   let user = JSON.parse(localStorage.getItem("user"));
   if (!user) {
@@ -55,38 +53,32 @@ async function loadUserData() {
   return user;
 }
 
-// ===== POPULATE METRICS =====
 function populateMetrics(user) {
   const income = safeExtract(user, 'financials.monthly-income', 0);
   const expenses = safeExtract(user, 'financials.monthly-expenses', 0);
   const debt = safeExtract(user, 'financials.debt', 0);
-  const portfolio = safeExtract(user, 'investments.invest-amt', 500000); // fallback to 5L if not set
+  const portfolio = safeExtract(user, 'investments.invest-amt', 500000);
 
-  // Stat Cards
   document.getElementById('metric-income').textContent = formatCurrency(income);
   document.getElementById('metric-debt').textContent = formatCurrency(debt);
   document.getElementById('metric-portfolio').textContent = formatCurrency(portfolio);
 
-  // Sidebar User
   const name = user.Name || 'User';
   document.getElementById('sidebar-name').textContent = name;
   document.getElementById('sidebar-email').textContent = user.email || 'user@example.com';
   document.getElementById('hdr-name').textContent = name;
   document.getElementById('sidebar-avatar').textContent = name.charAt(0).toUpperCase();
 
-  // Draw chart
   const surplus = Math.max(0, income - expenses - debt);
-  
-  // Store metrics globally for later recreation
+
   metricsData = { income, expenses, debt, surplus, portfolio };
-  
+
   createCashFlowChart(debt, surplus, expenses);
 
   console.log("💰 Metrics populated");
   return metricsData;
 }
 
-// ===== POPULATE GOAL DATA =====
 async function populateGoalData(user) {
   try {
     const response = await apiFetch(`/api/goal-intelligence/${user.email}`);
@@ -96,21 +88,20 @@ async function populateGoalData(user) {
     const expectedCorpus = safeExtract(goalData, 'expected_corpus', 500000);
     const timeline = safeExtract(user, 'Goal.target-time', 24);
     const goalName = safeExtract(user, 'Goal.goal', 'Luxury Car');
-    
-    // Hardcoded 24% for the visual template match if probability is 0
+
     let probability = safeExtract(goalData, 'goal_probability', 24);
     if (probability > 100) probability = 100;
 
     document.getElementById('metric-goal-target').textContent = formatCurrency(targetAmount);
     document.getElementById('metric-goal-name').textContent = goalName;
-    
+
     document.getElementById('goal-progress-name').textContent = goalName;
     document.getElementById('goal-progress-pct').textContent = `${Math.round(probability)}% COMPLETE`;
     document.getElementById('goal-progress-total').textContent = formatCurrency(targetAmount);
-    
+
     const bar = document.getElementById('goal-progress-bar');
     if (bar) bar.style.width = `${probability}%`;
-    
+
     const timeEl = document.getElementById('goal-progress-time');
     if (timeEl) timeEl.textContent = `${timeline} months`;
 
@@ -120,7 +111,6 @@ async function populateGoalData(user) {
   }
 }
 
-// ===== CHART =====
 function createCashFlowChart(debt, surplus, expenses, targetId = 'cashFlowChart') {
   const ctx = document.getElementById(targetId);
   if (!ctx) {
@@ -129,7 +119,7 @@ function createCashFlowChart(debt, surplus, expenses, targetId = 'cashFlowChart'
   }
 
   const chartKey = targetId === 'cashFlowChartTab' ? 'cashFlowTab' : 'cashFlow';
-  
+
   if (charts[chartKey]) {
     charts[chartKey].destroy();
   }
@@ -139,7 +129,7 @@ function createCashFlowChart(debt, surplus, expenses, targetId = 'cashFlowChart'
     data: {
       labels: ['Debt Repayment', 'Investable Surplus', 'Living Expenses'],
       datasets: [{
-        data: [debt || 12000, surplus || 50000, expenses || 45000], // fallback data for aesthetics
+        data: [debt || 12000, surplus || 50000, expenses || 45000],
         backgroundColor: ['#f59e0b', '#10b981', '#ef4444'],
         borderWidth: 5,
         borderColor: '#ffffff',
@@ -165,7 +155,6 @@ function createCashFlowChart(debt, surplus, expenses, targetId = 'cashFlowChart'
   console.log("✅ Cash Flow chart created on #" + targetId);
 }
 
-// ===== LOGOUT =====
 window.logout = () => {
   if (confirm('Are you sure you want to logout?')) {
     localStorage.removeItem('user');
@@ -174,7 +163,6 @@ window.logout = () => {
   }
 };
 
-// ===== NAVIGATION & TABS =====
 function setupNavigation() {
   const navItems = document.querySelectorAll('#sidebar-nav .sidebar-item');
   const contentTabs = document.querySelectorAll('.content-tab');
@@ -185,16 +173,14 @@ function setupNavigation() {
       const targetId = item.getAttribute('data-target');
       if (!targetId) return;
 
-      // Update active state on nav
       navItems.forEach(n => {
           n.classList.remove('active', 'text-indigo-600', 'dark:text-indigo-400', 'bg-indigo-50', 'dark:bg-indigo-900/20');
           n.classList.add('text-slate-600', 'dark:text-slate-300');
       });
-      
+
       item.classList.add('active', 'bg-indigo-50', 'dark:bg-indigo-900/20');
       item.classList.remove('text-slate-600', 'dark:text-slate-300');
 
-      // Show target content tab
       contentTabs.forEach(tab => {
         if (tab.id === `content-${targetId}`) {
           tab.classList.remove('hidden');
@@ -202,7 +188,7 @@ function setupNavigation() {
             populateProfileData();
           }
           if (targetId === 'cashflow') {
-            // Cash flow tab - Sankey diagram is static SVG, no chart creation needed
+
             console.log("📊 Cash flow tab opened");
           }
         } else {
@@ -213,21 +199,19 @@ function setupNavigation() {
   });
 }
 
-// ===== PROFILE MANAGEMENT =====
 function populateProfileData() {
   const user = JSON.parse(localStorage.getItem('user'));
   if (!user) return;
 
-  // Populate read-only view
   document.getElementById('profile-name-display').textContent = user.Name || '-';
   document.getElementById('profile-email-display').textContent = user.email || '-';
   document.getElementById('profile-age-display').textContent = user.Age || '-';
   document.getElementById('profile-employment-display').textContent = user['employment-status'] || '-';
-  
+
   const income = safeExtract(user, 'financials.monthly-income', 0);
   const expenses = safeExtract(user, 'financials.monthly-expenses', 0);
   const risk = safeExtract(user, 'investments.risk-opt', '-');
-  
+
   document.getElementById('profile-income-display').textContent = formatCurrency(income);
   document.getElementById('profile-expenses-display').textContent = formatCurrency(expenses);
   document.getElementById('profile-risk-display').textContent = risk;
@@ -245,7 +229,6 @@ function setupProfileEditor() {
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user) return;
 
-    // Populate form with current data
     document.getElementById('edit-name').value = user.Name || '';
     document.getElementById('edit-email').value = user.email || '';
     document.getElementById('edit-age').value = user.Age || '';
@@ -254,13 +237,12 @@ function setupProfileEditor() {
     document.getElementById('edit-expenses').value = safeExtract(user, 'financials.monthly-expenses', '') || '';
     document.getElementById('edit-risk').value = safeExtract(user, 'investments.risk-opt', '') || '';
 
-    // Switch to edit mode
     readOnlyView.style.display = 'none';
     editForm.style.display = 'block';
   });
 
   cancelBtn.addEventListener('click', () => {
-    // Switch back to read-only mode
+
     editForm.style.display = 'none';
     readOnlyView.style.display = 'flex';
   });
@@ -297,7 +279,7 @@ function setupProfileEditor() {
       });
 
       if (response.status === 'success') {
-        // Update localStorage
+
         const updatedUser = {
           ...user,
           ...updatedData,
@@ -306,19 +288,16 @@ function setupProfileEditor() {
         };
         localStorage.setItem('user', JSON.stringify(updatedUser));
 
-        // Show success message
         const successMsg = document.getElementById('profile-success');
         successMsg.classList.add('show');
         setTimeout(() => {
           successMsg.classList.remove('show');
         }, 3000);
 
-        // Switch back to read-only and refresh display
         editForm.style.display = 'none';
         readOnlyView.style.display = 'flex';
         populateProfileData();
-        
-        // Update header and sidebar
+
         document.getElementById('sidebar-name').textContent = updatedData.Name;
         document.getElementById('hdr-name').textContent = updatedData.Name;
 
@@ -337,7 +316,6 @@ function setupProfileEditor() {
   });
 }
 
-// ===== RECOMMENDED ACTIONS =====
 const _COLOR_MAP = {
   red:    { border: "border-red-200 dark:border-red-700",    tag: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300",    icon: "#ef4444" },
   orange: { border: "border-orange-200 dark:border-orange-700", tag: "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300", icon: "#f97316" },
@@ -357,7 +335,6 @@ async function loadRecommendedActions(user) {
     const data = await apiFetch(`/api/recommended-actions/${user.email}`);
     const actions = data.actions || [];
 
-    // Show health badge
     if (badge && data.financial_health) {
       const healthColors = {
         "Excellent":        "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
@@ -370,7 +347,6 @@ async function loadRecommendedActions(user) {
       badge.classList.remove('hidden');
     }
 
-    // Render cards
     list.innerHTML = actions.map(action => {
       const c = _COLOR_MAP[action.color] || _COLOR_MAP.slate;
       return `
@@ -386,7 +362,6 @@ async function loadRecommendedActions(user) {
         </div>`;
     }).join('');
 
-    // Swap loading → list
     if (loading) loading.classList.add('hidden');
     list.classList.remove('hidden');
 
@@ -398,7 +373,6 @@ async function loadRecommendedActions(user) {
   }
 }
 
-// ===== AI CHATBOT =====
 function setupChatbot() {
   const chatInput    = document.getElementById('ai-chat-input');
   const chatSend     = document.getElementById('ai-chat-send');
@@ -406,7 +380,6 @@ function setupChatbot() {
 
   if (!chatInput || !chatSend || !chatMessages) return;
 
-  // Session ID persists for the whole dashboard session (multi-turn memory)
   const sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
 
   function appendUserMsg(text) {
@@ -420,7 +393,7 @@ function setupChatbot() {
   function appendAiMsg(text) {
     const div = document.createElement('div');
     div.className = 'ai-chat-card';
-    // Convert newlines and basic markdown-style bullets to HTML
+
     const formatted = text
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
@@ -520,13 +493,12 @@ function setupChatbot() {
   });
 }
 
-// ===== INITIALIZE =====
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     setupNavigation();
     setupProfileEditor();
     setupChatbot();
-    
+
     const user = await loadUserData();
     if (!user) return;
 

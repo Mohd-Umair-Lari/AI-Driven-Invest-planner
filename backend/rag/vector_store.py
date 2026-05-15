@@ -1,18 +1,8 @@
-"""
-rag/vector_store.py
---------------------
-ChromaDB abstraction layer.
-- Graceful fallback: if chromadb is not installed, vector search is skipped.
-- All user data lives in MongoDB. This adds *semantic search* on top.
-- Swap-ready: replace the _ChromaBackend with Pinecone/Qdrant without
-  touching any calling code.
-"""
+
 from typing import Any, Dict, List, Optional
 from loguru import logger
 
-
 class _ChromaBackend:
-    """Thin wrapper around ChromaDB client."""
 
     def __init__(self, persist_dir: str, collection_name: str):
         import chromadb
@@ -46,12 +36,7 @@ class _ChromaBackend:
     def delete_by_email(self, email: str):
         self._col.delete(where={"email": email})
 
-
 class VectorStore:
-    """
-    Public interface. Import this — never import _ChromaBackend directly.
-    Falls back silently if chromadb is unavailable (HF free tier etc.).
-    """
 
     def __init__(self):
         self._backend: Optional[_ChromaBackend] = None
@@ -89,18 +74,16 @@ class VectorStore:
         email: Optional[str] = None,
         n_results: int = 5,
     ) -> List[str]:
-        """Returns top-k relevant text chunks."""
+
         if not self._available:
             return []
         where = {"email": email} if email else None
         results = self._backend.query(embedding, n_results, where)
-        # Filter by distance threshold (cosine < 0.5 = relevant)
+
         return [r["document"] for r in results if r["distance"] < 0.5]
 
     def delete_user_data(self, email: str):
         if self._available:
             self._backend.delete_by_email(email)
 
-
-# Singleton — import this everywhere
 vector_store = VectorStore()

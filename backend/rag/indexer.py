@@ -1,11 +1,4 @@
-"""
-rag/indexer.py
---------------
-Orchestrates embedding + storage for:
-1. Knowledge base seeding (run once / on startup if not already seeded)
-2. User profile indexing (run on signup / profile update)
-3. Transaction indexing (run when transactions are added)
-"""
+
 from typing import Any, Dict, List
 from datetime import datetime
 
@@ -18,15 +11,8 @@ from rag.embedder import embed_text, embed_batch, is_available
 from rag.knowledge_base import get_all_chunks
 from rag.mongo_vector_store import MongoVectorStore
 
-
-# ── Knowledge base seeding ─────────────────────────────────────
-
 def seed_knowledge_base(vector_store: MongoVectorStore, force: bool = False) -> int:
-    """
-    Seed the financial knowledge base into MongoDB.
-    Skips if already seeded (checks count). Use force=True to re-seed.
-    Returns number of chunks seeded.
-    """
+
     if not is_available():
         logger.warning("Embedding not available — knowledge base seeding skipped.")
         return 0
@@ -58,14 +44,8 @@ def seed_knowledge_base(vector_store: MongoVectorStore, force: bool = False) -> 
     logger.info(f"Knowledge base seeding complete: {seeded}/{len(chunks)} chunks stored.")
     return seeded
 
-
-# ── User profile indexing ──────────────────────────────────────
-
 def _build_user_narrative(user: Dict[str, Any]) -> str:
-    """
-    Converts a user's MongoDB document into a rich text narrative
-    that can be embedded and searched semantically.
-    """
+
     fin  = user.get("financials") or {}
     inv  = user.get("investments") or {}
     goal = user.get("Goal") or {}
@@ -96,9 +76,8 @@ def _build_user_narrative(user: Dict[str, Any]) -> str:
         f"Financial goal: {goal_name} with target of ₹{target_amt:,.0f} in {timeline} months."
     )
 
-
 def _build_transaction_chunk(transactions: List[Dict], max_txns: int = 20) -> str:
-    """Build a text chunk summarising recent transactions."""
+
     if not transactions:
         return ""
     recent = transactions[-max_txns:]
@@ -113,13 +92,8 @@ def _build_transaction_chunk(transactions: List[Dict], max_txns: int = 20) -> st
         lines.append(f"{date} | {cat} | {sign}₹{amt:,.0f} | {desc[:50]}")
     return "\n".join(lines)
 
-
 def index_user_profile(vector_store: MongoVectorStore, user: Dict[str, Any]) -> bool:
-    """
-    Embed and store a user's financial profile + transactions.
-    Called on signup, profile update, or transaction addition.
-    Returns True on success.
-    """
+
     if not is_available():
         logger.debug("Embedding not available — user indexing skipped.")
         return False
@@ -128,23 +102,19 @@ def index_user_profile(vector_store: MongoVectorStore, user: Dict[str, Any]) -> 
     if not email:
         return False
 
-    # Remove old chunks for this user
     vector_store.delete_user_chunks(email)
 
     chunks_to_index = []
 
-    # Chunk 1: Full profile narrative
     narrative = _build_user_narrative(user)
     if narrative:
         chunks_to_index.append(("profile_narrative", narrative))
 
-    # Chunk 2: Transaction history
     transactions = user.get("transactions", [])
     txn_text = _build_transaction_chunk(transactions)
     if txn_text:
         chunks_to_index.append(("transaction_history", txn_text))
 
-    # Chunk 3: Goal summary
     goal = user.get("Goal") or {}
     if goal:
         goal_text = (

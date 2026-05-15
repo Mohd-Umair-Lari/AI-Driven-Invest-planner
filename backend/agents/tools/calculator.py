@@ -1,19 +1,9 @@
-"""
-agents/tools/calculator.py
----------------------------
-Pure financial math tools — no LLM needed, deterministic outputs.
-These are called by agents to produce exact numbers before
-the LLM explains them in natural language.
-"""
+
 import math
 from typing import Dict, Any
 
-
 def sip_future_value(monthly_amount: float, annual_rate: float, years: float) -> Dict[str, Any]:
-    """
-    Compound growth of a monthly SIP.
-    Formula: FV = P × [((1+r)^n - 1) / r] × (1+r)
-    """
+
     if monthly_amount <= 0 or years <= 0:
         return {"future_value": 0, "total_invested": 0, "total_gain": 0}
 
@@ -32,12 +22,8 @@ def sip_future_value(monthly_amount: float, annual_rate: float, years: float) ->
         "xirr_approx":    round(annual_rate, 1),
     }
 
-
 def emi_calculator(principal: float, annual_rate: float, months: int) -> Dict[str, Any]:
-    """
-    Standard reducing-balance EMI formula.
-    EMI = P × r × (1+r)^n / ((1+r)^n - 1)
-    """
+
     if principal <= 0 or months <= 0:
         return {"emi": 0, "total_payment": 0, "total_interest": 0}
 
@@ -55,23 +41,18 @@ def emi_calculator(principal: float, annual_rate: float, months: int) -> Dict[st
         "principal":      round(principal, 2),
     }
 
-
 def goal_feasibility(
     target_amount: float,
     monthly_invest: float,
     years: float,
     annual_rate: float = 12.0,
 ) -> Dict[str, Any]:
-    """
-    Check whether the user can reach their goal with current SIP.
-    Returns probability score (0-100) and shortfall.
-    """
+
     result = sip_future_value(monthly_invest, annual_rate, years)
     fv = result["future_value"]
     probability = min(100, round((fv / target_amount) * 100, 1)) if target_amount > 0 else 0
     shortfall = max(0, target_amount - fv)
 
-    # Required SIP to hit target exactly
     r = (annual_rate / 100) / 12
     n = years * 12
     if r == 0 or n == 0:
@@ -89,9 +70,8 @@ def goal_feasibility(
         "years":             years,
     }
 
-
 def savings_rate(income: float, expenses: float) -> Dict[str, Any]:
-    """Simple savings rate and surplus calculation."""
+
     surplus = max(0, income - expenses)
     rate = round(surplus / income * 100, 1) if income > 0 else 0
     return {

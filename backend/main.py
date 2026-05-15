@@ -9,18 +9,15 @@ import certifi
 from bson import ObjectId
 from dotenv import load_dotenv
 
-# ── Flask imports ──────────────────────────────────────────────
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from werkzeug.security import check_password_hash, generate_password_hash
 
-# ── FastAPI imports ────────────────────────────────────────────
 from fastapi import FastAPI, HTTPException, Path as FPath, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.wsgi import WSGIMiddleware
 from pymongo import MongoClient
 
-# ── Internal modules ───────────────────────────────────────────
 from api.schemas import (
     AdvisorChatRequest,
     IntelligenceRequest,
@@ -51,10 +48,6 @@ from config.logging_config import setup_logging
 
 log = setup_logging()
 
-# ══════════════════════════════════════════════════════════════
-#  Bootstrap
-# ══════════════════════════════════════════════════════════════
-
 load_dotenv()
 
 try:
@@ -82,15 +75,13 @@ _mongo = MongoClient(
 _mongo.admin.command("ping")
 db                = _mongo[DB_NAME]
 collection        = db[COLLECTION_NAME]
-conversations_col = db["conversations"]   # multi-turn chat memory
-documents_col     = db["documents"]       # RAG document metadata
+conversations_col = db["conversations"]
+documents_col     = db["documents"]
 
-# ── RAG Vector Store (MongoDB Atlas) ─────────────────────────
 from rag.mongo_vector_store import MongoVectorStore
 from rag.indexer import seed_knowledge_base, index_user_profile
 _vector_store = MongoVectorStore(db)
 
-# Seed knowledge base in background (non-blocking)
 import threading
 def _seed_kb_async():
     try:
@@ -105,7 +96,7 @@ def _seed_kb_async():
 threading.Thread(target=_seed_kb_async, daemon=True).start()
 
 def _trigger_user_indexing(email: str):
-    """Spawns a background thread to embed and index the user's profile."""
+
     def _do_index():
         try:
             user = collection.find_one({"email": email})
@@ -115,17 +106,14 @@ def _trigger_user_indexing(email: str):
             print(f"⚠️  User indexing failed for {email}: {e}")
     threading.Thread(target=_do_index, daemon=True).start()
 
-
-# ── Services wired to MongoDB ─────────────────────────────────
 memory      = ConversationMemory(conversations_col)
 
 def _get_orchestrator() -> AIOrchestrator:
-    """FastAPI dependency — creates orchestrator per request (stateless)."""
+
     return AIOrchestrator(collection, conversations_col)
 
-# ── JWT dependency ─────────────────────────────────────────────
 async def _require_auth(authorization: str = Header(default="")) -> str:
-    """FastAPI dependency: validates Bearer token, returns email."""
+
     if not authorization.startswith("Bearer "):
         raise HTTPException(401, "Missing or invalid Authorization header")
     token = authorization.removeprefix("Bearer ").strip()
@@ -134,16 +122,11 @@ async def _require_auth(authorization: str = Header(default="")) -> str:
         raise HTTPException(401, "Token expired or invalid")
     return email
 
-# ── Shared CORS origins ────────────────────────────────────────
 _ORIGINS = [
     "http://localhost:3000", "http://localhost:5173", "http://localhost:8080",
     "http://127.0.0.1:3000", "http://127.0.0.1:5173", "http://127.0.0.1:8080",
     "https://ai-driven-invest-planner.vercel.app",
 ]
-
-# ══════════════════════════════════════════════════════════════
-#  Helpers
-# ══════════════════════════════════════════════════════════════
 
 def _serialize(doc: dict) -> dict:
     doc = dict(doc)
@@ -159,23 +142,14 @@ def _ensure_onboarding(email: str, user: dict) -> dict:
         user["onboarding"] = ob
     return user
 
-# ══════════════════════════════════════════════════════════════
-#  Flask App  (legacy WSGI — still handles Blueprint routes)
-# ══════════════════════════════════════════════════════════════
-
 flask_app = Flask(__name__)
 CORS(flask_app, resources={r"/api/*": {"origins": _ORIGINS}}, supports_credentials=True)
 flask_app.register_blueprint(intelligence_bp, url_prefix="/api")
 flask_app.register_blueprint(advisor_bp,      url_prefix="/api")
 
-# keep Flask health alive
 @flask_app.route("/")
 def _flask_health():
     return {"status": "ok", "engine": "flask"}
-
-# ══════════════════════════════════════════════════════════════
-#  FastAPI App  (primary ASGI — Pydantic validation + /docs)
-# ══════════════════════════════════════════════════════════════
 
 api = FastAPI(
     title="FinPass AI – Financial Advisor API",
@@ -192,8 +166,6 @@ api.add_middleware(
     allow_headers=["*"],
 )
 
-# ── Health ─────────────────────────────────────────────────────
-
 @api.get("/", tags=["Health"])
 async def health():
     return {"status": "ok", "service": "FinPass Backend", "version": "v2 (FastAPI+Flask)"}
@@ -202,7 +174,7 @@ async def health():
 async def test_connection():
     try:
         _mongo.admin.command("ping")
-        # Test database access
+
         test_user = collection.find_one({"email": "test@example.com"})
         return {
             "status": "success", 
@@ -217,18 +189,16 @@ async def test_connection():
 
 @api.post("/api/test-login", tags=["Health"])
 async def test_login(body: LoginRequest):
-    """Test endpoint to diagnose login issues."""
+
     try:
         log.info(f"🧪 Testing login for: {body.email}")
-        
-        # Step 1: Database connection
+
         _mongo.admin.command("ping")
         log.info("✅ MongoDB connected")
-        
-        # Step 2: Find user
+
         user = collection.find_one({"email": body.email})
         log.info(f"📍 User lookup result: {'Found' if user else 'Not found'}")
-        
+
         if not user:
             return {
                 "status": "failed",
@@ -236,16 +206,14 @@ async def test_login(body: LoginRequest):
                 "email": body.email,
                 "step": "user_lookup"
             }
-        
-        # Step 3: Check password hash
+
         stored_hash = user.get("password", "")
         log.info(f"🔐 Password hash type: {type(stored_hash).__name__}")
         log.info(f"🔐 Password hash starts with: {str(stored_hash)[:20]}")
-        
-        # Step 4: Verify password
+
         password_valid = verify_password(body.password, stored_hash)
         log.info(f"✓ Password verification: {'SUCCESS' if password_valid else 'FAILED'}")
-        
+
         return {
             "status": "success",
             "email": body.email,
@@ -254,7 +222,7 @@ async def test_login(body: LoginRequest):
             "hash_type": type(stored_hash).__name__,
             "step": "complete"
         }
-        
+
     except Exception as e:
         log.error(f"Test login error: {str(e)}", exc_info=True)
         return {
@@ -263,41 +231,34 @@ async def test_login(body: LoginRequest):
             "type": type(e).__name__
         }
 
-# ── Auth ───────────────────────────────────────────────────────
-
 @api.post("/api/login", tags=["Auth"])
 async def api_login(body: LoginRequest):
     try:
-        # Log the login attempt
+
         log.info(f"🔐 Login attempt for: {body.email}")
-        
-        # Check if user exists in database
+
         user = collection.find_one({"email": body.email})
         if not user:
             log.warning(f"❌ User not found: {body.email}")
             raise HTTPException(401, "Invalid credentials")
-        
-        # Verify password
+
         if not verify_password(body.password, user.get("password", "")):
             log.warning(f"❌ Invalid password for user: {body.email}")
             raise HTTPException(401, "Invalid credentials")
-        
+
         log.info(f"✅ Password verified for: {body.email}")
-        
-        # Ensure onboarding status exists
+
         user = _ensure_onboarding(body.email, user)
 
-        # Issue JWT tokens
         access  = create_access_token(body.email)
         refresh = create_refresh_token()
-        
-        # Update last login and refresh token hash
+
         collection.update_one(
             {"email": body.email},
             {"$set": {"refresh_token_hash": hash_refresh_token(refresh),
                       "last_login": datetime.utcnow().isoformat()}}
         )
-        
+
         log.info(f"✅ Login successful for: {body.email}")
         return {
             "status":        "success",
@@ -306,9 +267,9 @@ async def api_login(body: LoginRequest):
             "refresh_token": refresh,
             "token_type":    "bearer",
         }
-    
+
     except HTTPException:
-        # Re-raise HTTP exceptions (401, 409, etc.)
+
         raise
     except Exception as e:
         log.error(f"🔥 Login error for {body.email}: {str(e)}", exc_info=True)
@@ -318,13 +279,11 @@ async def api_login(body: LoginRequest):
 async def api_signup(body: SignupRequest):
     try:
         log.info(f"📝 Signup attempt for: {body.email}")
-        
-        # Check if email already exists
+
         if collection.find_one({"email": body.email}):
             log.warning(f"⚠️  Email already registered: {body.email}")
             raise HTTPException(409, "Email already registered")
-        
-        # Create new user document
+
         doc = {
             "_id": ObjectId(),
             "Name": body.Name,
@@ -343,26 +302,22 @@ async def api_signup(body: SignupRequest):
             },
             "created_at": datetime.utcnow().isoformat(),
         }
-        
-        # Insert user into database
+
         result = collection.insert_one(doc)
         log.info(f"✅ User created: {body.email} (ID: {result.inserted_id})")
-        
-        # Issue JWT tokens
+
         access  = create_access_token(body.email)
         refresh = create_refresh_token()
-        
-        # Store refresh token hash
+
         collection.update_one(
             {"email": body.email},
             {"$set": {"refresh_token_hash": hash_refresh_token(refresh)}}
         )
-        
-        # Trigger background indexing
+
         _trigger_user_indexing(body.email)
-        
+
         log.info(f"✅ Signup successful for: {body.email}")
-        
+
         return {
             "status":        "success",
             "user":          _serialize(doc),
@@ -370,17 +325,16 @@ async def api_signup(body: SignupRequest):
             "refresh_token": refresh,
             "token_type":    "bearer",
         }
-    
+
     except HTTPException:
         raise
     except Exception as e:
         log.error(f"🔥 Signup error for {body.email}: {str(e)}", exc_info=True)
         raise HTTPException(500, f"Signup failed: {str(e)}")
 
-
 @api.post("/api/auth/refresh", tags=["Auth"])
 async def refresh_token(body: dict):
-    """Exchange a valid refresh token for a new access token."""
+
     email   = body.get("email", "")
     refresh = body.get("refresh_token", "")
     if not email or not refresh:
@@ -395,8 +349,6 @@ async def refresh_token(body: dict):
     collection.update_one({"email": email},
         {"$set": {"refresh_token_hash": hash_refresh_token(new_refresh)}})
     return {"access_token": new_access, "refresh_token": new_refresh, "token_type": "bearer"}
-
-# ── Onboarding ────────────────────────────────────────────────
 
 @api.post("/api/onboarding/start", tags=["Onboarding"])
 async def onboarding_start(body: OnboardingStartRequest):
@@ -450,8 +402,6 @@ async def onboarding_status(email: str = FPath(...)):
         "state": ob.get("status"), "current_step": ob.get("current_step"),
         "data": ob.get("data", {})}}
 
-# ── User ───────────────────────────────────────────────────────
-
 @api.get("/api/user/{email}", tags=["User"])
 async def get_user(email: str = FPath(...)):
     user = collection.find_one({"email": email}, {"_id": 0, "password": 0})
@@ -467,13 +417,10 @@ async def update_user(body: UserUpdateRequest, email: str = FPath(...)):
         "investments": body.investments or {}, "progress": body.progress or {},
     }})
     if result.matched_count == 0: raise HTTPException(404, "User not found")
-    
-    # Re-index the user profile now that it has changed
-    _trigger_user_indexing(email)
-    
-    return {"status": "success"}
 
-# ── Analytics ─────────────────────────────────────────────────
+    _trigger_user_indexing(email)
+
+    return {"status": "success"}
 
 @api.get("/api/analytics/{email}", tags=["Analytics"])
 async def analytics(email: str = FPath(...)):
@@ -510,11 +457,8 @@ async def agent_api(email: str = FPath(...)):
     except Exception as e:
         return {"agent": {"action": "ERROR", "message": "Failed", "reason": str(e)}}
 
-
-# ── Personalised Recommended Actions ────────────────────────────
-
 def _get_num(obj, *keys, default=0.0):
-    """Safely traverse nested dicts with multiple possible key names."""
+
     for key in keys:
         val = (obj or {}).get(key)
         if val is not None:
@@ -524,19 +468,13 @@ def _get_num(obj, *keys, default=0.0):
                 pass
     return default
 
-
 @api.get("/api/recommended-actions/{email}", tags=["Analytics"])
 async def recommended_actions(email: str = FPath(...)):
-    """
-    Compute personalised, priority-ranked action cards based on
-    the user's actual financial profile stored in MongoDB.
-    Returns a list of action dicts: {title, subtitle, priority, tag, color}
-    """
+
     user = collection.find_one({"email": email}, {"_id": 0, "password": 0})
     if not user:
         raise HTTPException(404, "User not found")
 
-    # ── Pull raw numbers ─────────────────────────────────────────
     fin        = user.get("financials") or {}
     inv        = user.get("investments") or {}
     goal       = user.get("Goal") or {}
@@ -547,7 +485,7 @@ async def recommended_actions(email: str = FPath(...)):
     debt       = _get_num(fin, "debt")
     invest_amt = _get_num(inv, "invest-amt")
     risk       = (inv.get("risk-opt") or "moderate").lower()
-    timeline   = _get_num(goal, "target-time")        # months
+    timeline   = _get_num(goal, "target-time")
     target_amt = _get_num(goal, "target-amt")
     goal_name  = goal.get("goal", "your goal")
     sav_ratio  = health.get("savings_ratio", 0)
@@ -557,7 +495,6 @@ async def recommended_actions(email: str = FPath(...)):
 
     actions = []
 
-    # ── Rule 1: Emergency fund check ────────────────────────────
     em_fund = fin.get("em-fund-opted", False)
     if not em_fund or surplus < 5000:
         months_covered = (invest_amt / expenses) if expenses > 0 else 0
@@ -570,7 +507,6 @@ async def recommended_actions(email: str = FPath(...)):
                 "color": "red",
             })
 
-    # ── Rule 2: High expense ratio ───────────────────────────────
     if exp_ratio > 0.75 and income > 0:
         over_spend = expenses - (income * 0.6)
         actions.append({
@@ -581,7 +517,6 @@ async def recommended_actions(email: str = FPath(...)):
             "color": "orange",
         })
 
-    # ── Rule 3: Debt-heavy ──────────────────────────────────────
     debt_ratio = debt / income if income > 0 else 0
     if debt_ratio > 0.4:
         actions.append({
@@ -592,7 +527,6 @@ async def recommended_actions(email: str = FPath(...)):
             "color": "red",
         })
 
-    # ── Rule 4: SIP increase opportunity ────────────────────────
     if sav_ratio > 0.25 and invest_amt > 0:
         sip_boost = round(invest_amt * 0.10 / 500) * 500
         actions.append({
@@ -612,7 +546,6 @@ async def recommended_actions(email: str = FPath(...)):
             "color": "indigo",
         })
 
-    # ── Rule 5: Goal on track / off track ───────────────────────
     if target_amt > 0 and timeline > 0 and income > 0:
         required_monthly = target_amt / timeline
         if invest_amt < required_monthly * 0.8:
@@ -633,7 +566,6 @@ async def recommended_actions(email: str = FPath(...)):
                 "color": "green",
             })
 
-    # ── Rule 6: Risk mismatch ────────────────────────────────────
     age = _get_num(user, "Age")
     if age > 50 and risk in ("aggressive", "high"):
         actions.append({
@@ -652,7 +584,6 @@ async def recommended_actions(email: str = FPath(...)):
             "color": "indigo",
         })
 
-    # ── Rule 7: Tax planning nudge ───────────────────────────────
     if income > 50000:
         actions.append({
             "title": "Maximise 80C Deductions",
@@ -662,7 +593,6 @@ async def recommended_actions(email: str = FPath(...)):
             "color": "indigo",
         })
 
-    # ── Fallback if profile is empty ────────────────────────────
     if not actions:
         actions.append({
             "title": "Complete Your Financial Profile",
@@ -672,19 +602,12 @@ async def recommended_actions(email: str = FPath(...)):
             "color": "slate",
         })
 
-    # Sort by priority, then return top 5
     actions.sort(key=lambda x: x["priority"])
     return {"actions": actions[:5], "financial_health": fin_health, "savings_ratio": sav_ratio}
 
-# ── AI Advisor Chat (Orchestrator-powered, RAG + Memory) ───────
-
 @api.post("/api/advisor/chat", tags=["AI Advisor"])
 async def advisor_chat(body: AdvisorChatRequest):
-    """
-    Full orchestration pipeline:
-    Intent classify → RAG retrieve → Groq LLM → Memory store.
-    Pass `session_id` in request body for multi-turn conversations.
-    """
+
     ctx        = body.context
     session_id = getattr(body, "session_id", None) or str(uuid.uuid4())
     extra = {
@@ -704,47 +627,39 @@ async def advisor_chat(body: AdvisorChatRequest):
         raise HTTPException(500, result.get("response", "AI error"))
     return {**result, "user_email": body.email}
 
-
 @api.post("/api/rag/chat", tags=["AI Advisor"])
 async def rag_chat(body: AdvisorChatRequest):
-    """Alias — explicit RAG endpoint."""
+
     return await advisor_chat(body)
-
-
-# ── Chat History ───────────────────────────────────────────────
 
 @api.get("/api/chat/sessions/{email}", tags=["Chat History"])
 async def get_sessions(email: str = FPath(...)):
-    """List all conversation sessions for a user."""
-    return {"sessions": memory.list_sessions(email)}
 
+    return {"sessions": memory.list_sessions(email)}
 
 @api.get("/api/chat/history/{email}/{session_id}", tags=["Chat History"])
 async def get_history(email: str = FPath(...), session_id: str = FPath(...)):
-    """Get full message history for a specific session."""
+
     session = memory.get_session(email, session_id)
     if not session:
         raise HTTPException(404, "Session not found")
     return session
 
-
 @api.delete("/api/chat/history/{email}/{session_id}", tags=["Chat History"])
 async def clear_session(email: str = FPath(...), session_id: str = FPath(...)):
-    """Clear a specific chat session."""
+
     memory.clear_session(email, session_id)
     return {"status": "cleared"}
 
-
 @api.delete("/api/chat/history/{email}", tags=["Chat History"])
 async def clear_all_sessions(email: str = FPath(...)):
-    """Clear all chat sessions for a user."""
+
     memory.clear_all(email)
     return {"status": "all sessions cleared"}
 
-
 @api.post("/api/transactions/{email}", tags=["Transactions"], status_code=201)
 async def add_transactions(email: str = FPath(...), transactions: list = None):
-    """Store transaction records. Each: {date, category, description, amount, type}"""
+
     if not transactions:
         raise HTTPException(400, "No transactions provided")
     result = collection.update_one(
@@ -755,17 +670,13 @@ async def add_transactions(email: str = FPath(...), transactions: list = None):
         raise HTTPException(404, "User not found")
     return {"status": "success", "added": len(transactions)}
 
-
 @api.get("/api/transactions/{email}", tags=["Transactions"])
 async def get_transactions(email: str = FPath(...)):
-    """Fetch all stored transactions for a user."""
+
     user = collection.find_one({"email": email}, {"_id": 0, "transactions": 1})
     if not user:
         raise HTTPException(404, "User not found")
     return {"transactions": user.get("transactions", [])}
-
-
-# ── Intelligence ───────────────────────────────────────────────
 
 @api.post("/api/intelligence/insights", tags=["Intelligence"])
 async def intelligence_insights(body: IntelligenceRequest):
@@ -776,8 +687,6 @@ async def intelligence_insights(body: IntelligenceRequest):
         return {"insights": IntelligenceService().run(state)}
     except Exception as e:
         raise HTTPException(500, str(e))
-
-# ── Analyze Finances ───────────────────────────────────────────
 
 @api.get("/api/analyze-finances/{email}", tags=["Analytics"])
 async def analyze_finances(email: str = FPath(...)):
@@ -821,8 +730,6 @@ async def analyze_finances(email: str = FPath(...)):
         return {"financial_health_score": min(100, score),
                 "analysis": f"Savings rate: {sr*100:.1f}%.",
                 "recommendations": recs[:3], "investment_strategy": allocation}
-
-# ── Init Test Data (dev helper) ────────────────────────────────
 
 @api.post("/api/init-test-data/{email}", tags=["Dev"])
 async def init_test_data(email: str = FPath(...)):

@@ -23,7 +23,6 @@ class Insight:
             "explanation_ref": self.explanation_ref
         }
 
-
 class InsightFactory:
     @staticmethod
     def threat(message: str, severity: str, impact_area: str, confidence: float):

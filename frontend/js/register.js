@@ -12,7 +12,6 @@ btn.addEventListener("click", async () => {
     Age: document.getElementById("age").value,
     "employment-status": document.getElementById("status").value,
 
-    // empty objects – filled later by wizard
     Goal: {},
     financials: {},
     investments: {},
@@ -30,10 +29,8 @@ btn.addEventListener("click", async () => {
       body: JSON.stringify(payload)
     });
 
-    // save user session
     localStorage.setItem("user", JSON.stringify(res.user));
 
-    // go to wizard
     window.location.href = "/static/wizard.html";
 
   } catch (err) {

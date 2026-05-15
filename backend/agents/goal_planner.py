@@ -1,15 +1,9 @@
-"""
-agents/goal_planner.py
------------------------
-Handles goal planning, SIP calculation, and EMI queries.
-Uses deterministic calculator tools, then asks LLM to explain.
-"""
+
 from typing import Any, Dict
 
 from agents.base_agent import BaseAgent, AgentResult, Tool
 from agents.tools.calculator import sip_future_value, emi_calculator, goal_feasibility
 from ai.groq_client import generate_response
-
 
 class GoalPlannerAgent(BaseAgent):
     name = "GoalPlannerAgent"
@@ -39,7 +33,6 @@ class GoalPlannerAgent(BaseAgent):
         debt         = user_context.get("debt", 0)
         years        = round(target_months / 12, 1)
 
-        # ── Run deterministic tools ─────────────────────────────
         calc_data = {}
         q = query.lower()
 
@@ -53,7 +46,6 @@ class GoalPlannerAgent(BaseAgent):
             calc_data = sip_future_value(income * 0.2, annual_rate=12.0, years=years)
             tool_used = "sip_calculator"
 
-        # ── Build explain prompt ────────────────────────────────
         prompt = (
             f"You are FinPass AI. Here are the exact calculated numbers for this user:\n\n"
             f"{calc_data}\n\n"

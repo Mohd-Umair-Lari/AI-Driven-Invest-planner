@@ -1,51 +1,37 @@
-"""
-orchestrator/intent_classifier.py
-----------------------------------
-Lightweight rule-based + keyword intent classifier.
-Routes user queries to the correct agent/tool without burning LLM tokens.
-Designed to be replaced by a fine-tuned classifier later.
-"""
+
 from dataclasses import dataclass
 from enum import Enum
 from typing import List, Optional
 
-
 class Intent(str, Enum):
-    # Spending / budget
-    SPENDING_QUERY       = "spending_query"       # "how much did I spend on food?"
-    BUDGET_ADVICE        = "budget_advice"         # "how can I save more?"
-    EXPENSE_BREAKDOWN    = "expense_breakdown"     # "show my expenses"
 
-    # Investment
-    INVESTMENT_QUERY     = "investment_query"      # "where should I invest?"
-    PORTFOLIO_ANALYSIS   = "portfolio_analysis"    # "analyze my portfolio"
-    MARKET_QUERY         = "market_query"          # "how is Nifty doing?"
+    SPENDING_QUERY       = "spending_query"
+    BUDGET_ADVICE        = "budget_advice"
+    EXPENSE_BREAKDOWN    = "expense_breakdown"
 
-    # Goals
-    GOAL_PLANNING        = "goal_planning"         # "will I reach my goal?"
-    SIP_CALCULATION      = "sip_calculation"       # "calculate my SIP"
-    EMI_CALCULATION      = "emi_calculation"       # "what is my EMI?"
+    INVESTMENT_QUERY     = "investment_query"
+    PORTFOLIO_ANALYSIS   = "portfolio_analysis"
+    MARKET_QUERY         = "market_query"
 
-    # Financial health
-    HEALTH_ANALYSIS      = "health_analysis"       # "what's my financial health?"
-    DEBT_ADVICE          = "debt_advice"           # "how to reduce my debt?"
+    GOAL_PLANNING        = "goal_planning"
+    SIP_CALCULATION      = "sip_calculation"
+    EMI_CALCULATION      = "emi_calculation"
 
-    # General / fallback
-    GENERAL_ADVICE       = "general_advice"        # catch-all
+    HEALTH_ANALYSIS      = "health_analysis"
+    DEBT_ADVICE          = "debt_advice"
+
+    GENERAL_ADVICE       = "general_advice"
     GREETING             = "greeting"
-
 
 @dataclass
 class ClassifiedIntent:
     intent: Intent
     confidence: float
     entities: dict
-    agent: str   # which agent should handle this
+    agent: str
 
-
-# ── Keyword maps ───────────────────────────────────────────────
 _INTENT_RULES: List[tuple] = [
-    # (keywords, intent, agent)
+
     (["spend", "spent", "food", "grocery", "groceries", "rent", "dining",
       "transport", "medical", "shopping", "entertainment", "category"],
      Intent.SPENDING_QUERY, "BudgetOptimizerAgent"),
@@ -82,12 +68,8 @@ _INTENT_RULES: List[tuple] = [
      Intent.EXPENSE_BREAKDOWN, "BudgetOptimizerAgent"),
 ]
 
-
 def classify_intent(query: str) -> ClassifiedIntent:
-    """
-    O(n) rule-based classifier — fast and deterministic.
-    Returns the best matching intent with which agent should handle it.
-    """
+
     q = query.lower()
     best_score = 0
     best_intent = Intent.GENERAL_ADVICE
@@ -103,7 +85,6 @@ def classify_intent(query: str) -> ClassifiedIntent:
 
     confidence = min(1.0, best_score / 3) if best_score > 0 else 0.3
 
-    # ── Entity extraction ──────────────────────────────────────
     entities: dict = {}
     spending_cats = ["food", "rent", "transport", "medical", "entertainment",
                      "shopping", "groceries", "utilities", "insurance"]
