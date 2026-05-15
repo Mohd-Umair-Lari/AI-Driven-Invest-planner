@@ -18,20 +18,36 @@ def _get_client():
     return _client
 
 
-def generate_response(prompt: str) -> str:
+def generate_response(prompt: str, system_prompt: str = None) -> str:
+    """
+    Call the Groq LLM.
+    - If system_prompt is given, it is used as the system message.
+    - Otherwise the full prompt is sent as the user message with a minimal system role.
+    """
     client = _get_client()
-    response = client.chat.completions.create(
-        messages=[
+
+    if system_prompt:
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user",   "content": prompt},
+        ]
+    else:
+        # Legacy: full prompt as user message
+        messages = [
             {
                 "role": "system",
                 "content": (
-                    "You are FinPass AI, a precise and honest personal finance advisor "
-                    "focused on long-term planning, discipline, and explainable strategies."
+                    "You are FinPass AI, a professional AI-powered personal finance advisor "
+                    "for Indian investors. You are knowledgeable, warm, and professional."
                 ),
             },
             {"role": "user", "content": prompt},
-        ],
+        ]
+
+    response = client.chat.completions.create(
+        messages=messages,
         model=MODEL,
-        temperature=0.5,
+        temperature=0.7,   # Higher than 0.5 → more natural and varied responses
+        max_tokens=1024,
     )
     return response.choices[0].message.content

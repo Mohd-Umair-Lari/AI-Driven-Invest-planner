@@ -472,53 +472,17 @@ async def agent_api(email: str = FPath(...)):
     except Exception as e:
         return {"agent": {"action": "ERROR", "message": "Failed", "reason": str(e)}}
 
-# ── AI Advisor Chat (RAG-powered) ─────────────────────────────
+# ── AI Advisor Chat (Orchestrator-powered, RAG + Memory) ───────
 
 @api.post("/api/advisor/chat", tags=["AI Advisor"])
 async def advisor_chat(body: AdvisorChatRequest):
     """
-    RAG-powered chat endpoint.
-    Retrieves the user's full financial profile from MongoDB,
-    builds a grounded context, then calls Groq with that context.
-    The AI answers ONLY from the retrieved data — no hallucination.
-    """
-    # Pass any frontend-supplied numbers as supplementary context
-    ctx = body.context
-    extra = {
-        "income":   ctx.monthly_income if ctx else 0,
-        "expenses": ctx.monthly_expenses if ctx else 0,
-        "debt":     ctx.debt if ctx else 0,
-        "risk":     ctx.risk_appetite if ctx else "moderate",
-    }
-
-    result = run_rag_chain(
-        collection=collection,
-        email=body.email,
-        question=body.question,
-        extra_context=extra,
-    )
-
-    if not result["success"]:
-        raise HTTPException(500, result["response"])
-
-    return {
-        "success":      True,
-        "response":     result["response"],
-        "user_email":   body.email,
-        "rag":          True,
-        "context_used": result.get("context_used"),
-    }
-
-
-@api.post("/api/advisor/chat", tags=["AI Advisor"])
-async def advisor_chat(body: AdvisorChatRequest):
-    """
-    Orchestrator-powered chat. Full pipeline:
-    Intent classify → RAG retrieve → Agent select → Groq → Memory store.
+    Full orchestration pipeline:
+    Intent classify → RAG retrieve → Groq LLM → Memory store.
     Pass `session_id` in request body for multi-turn conversations.
     """
-    ctx         = body.context
-    session_id  = getattr(body, "session_id", None) or str(uuid.uuid4())
+    ctx        = body.context
+    session_id = getattr(body, "session_id", None) or str(uuid.uuid4())
     extra = {
         "income":   ctx.monthly_income if ctx else 0,
         "expenses": ctx.monthly_expenses if ctx else 0,
