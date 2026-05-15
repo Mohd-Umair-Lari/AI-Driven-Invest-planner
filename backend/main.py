@@ -472,6 +472,172 @@ async def agent_api(email: str = FPath(...)):
     except Exception as e:
         return {"agent": {"action": "ERROR", "message": "Failed", "reason": str(e)}}
 
+
+# ── Personalised Recommended Actions ────────────────────────────
+
+def _get_num(obj, *keys, default=0.0):
+    """Safely traverse nested dicts with multiple possible key names."""
+    for key in keys:
+        val = (obj or {}).get(key)
+        if val is not None:
+            try:
+                return float(val)
+            except (TypeError, ValueError):
+                pass
+    return default
+
+
+@api.get("/api/recommended-actions/{email}", tags=["Analytics"])
+async def recommended_actions(email: str = FPath(...)):
+    """
+    Compute personalised, priority-ranked action cards based on
+    the user's actual financial profile stored in MongoDB.
+    Returns a list of action dicts: {title, subtitle, priority, tag, color}
+    """
+    user = collection.find_one({"email": email}, {"_id": 0, "password": 0})
+    if not user:
+        raise HTTPException(404, "User not found")
+
+    # ── Pull raw numbers ─────────────────────────────────────────
+    fin        = user.get("financials") or {}
+    inv        = user.get("investments") or {}
+    goal       = user.get("Goal") or {}
+    health     = compute_financial_health(user)
+
+    income     = _get_num(fin, "monthly-income")
+    expenses   = _get_num(fin, "monthly-expenses")
+    debt       = _get_num(fin, "debt")
+    invest_amt = _get_num(inv, "invest-amt")
+    risk       = (inv.get("risk-opt") or "moderate").lower()
+    timeline   = _get_num(goal, "target-time")        # months
+    target_amt = _get_num(goal, "target-amt")
+    goal_name  = goal.get("goal", "your goal")
+    sav_ratio  = health.get("savings_ratio", 0)
+    exp_ratio  = health.get("expense_ratio", 0)
+    fin_health = health.get("financial_health", "")
+    surplus    = max(0, income - expenses - debt)
+
+    actions = []
+
+    # ── Rule 1: Emergency fund check ────────────────────────────
+    em_fund = fin.get("em-fund-opted", False)
+    if not em_fund or surplus < 5000:
+        months_covered = (invest_amt / expenses) if expenses > 0 else 0
+        if months_covered < 3:
+            actions.append({
+                "title": "Build Your Emergency Fund",
+                "subtitle": f"You have less than 3 months of expenses (₹{expenses:,.0f}/mo) saved as a buffer. Aim for ₹{expenses * 6:,.0f}.",
+                "priority": 1,
+                "tag": "Critical",
+                "color": "red",
+            })
+
+    # ── Rule 2: High expense ratio ───────────────────────────────
+    if exp_ratio > 0.75 and income > 0:
+        over_spend = expenses - (income * 0.6)
+        actions.append({
+            "title": "Reduce Monthly Expenses",
+            "subtitle": f"You're spending {exp_ratio*100:.0f}% of income on expenses. Cutting ₹{over_spend:,.0f}/mo could free up significant savings.",
+            "priority": 1 if exp_ratio > 0.85 else 2,
+            "tag": "High Priority",
+            "color": "orange",
+        })
+
+    # ── Rule 3: Debt-heavy ──────────────────────────────────────
+    debt_ratio = debt / income if income > 0 else 0
+    if debt_ratio > 0.4:
+        actions.append({
+            "title": "Accelerate Debt Repayment",
+            "subtitle": f"Your EMI/debt (₹{debt:,.0f}) is {debt_ratio*100:.0f}% of income. Prioritise clearing high-interest debt before increasing investments.",
+            "priority": 2,
+            "tag": "Debt Alert",
+            "color": "red",
+        })
+
+    # ── Rule 4: SIP increase opportunity ────────────────────────
+    if sav_ratio > 0.25 and invest_amt > 0:
+        sip_boost = round(invest_amt * 0.10 / 500) * 500
+        actions.append({
+            "title": f"Increase SIP by ₹{sip_boost:,.0f}/mo",
+            "subtitle": f"Your savings rate is healthy at {sav_ratio*100:.0f}%. A 10% SIP step-up each year can significantly accelerate your corpus.",
+            "priority": 3,
+            "tag": "Growth",
+            "color": "green",
+        })
+    elif sav_ratio > 0.1 and invest_amt == 0:
+        invest_suggestion = round(surplus * 0.5 / 500) * 500
+        actions.append({
+            "title": "Start a SIP Investment",
+            "subtitle": f"You have a monthly surplus of ₹{surplus:,.0f}. Starting a SIP of ₹{invest_suggestion:,.0f}/mo can help build long-term wealth.",
+            "priority": 2,
+            "tag": "Action Required",
+            "color": "indigo",
+        })
+
+    # ── Rule 5: Goal on track / off track ───────────────────────
+    if target_amt > 0 and timeline > 0 and income > 0:
+        required_monthly = target_amt / timeline
+        if invest_amt < required_monthly * 0.8:
+            gap = required_monthly - invest_amt
+            actions.append({
+                "title": f"Top-up Investment for '{goal_name}'",
+                "subtitle": f"To reach ₹{target_amt:,.0f} in {int(timeline)} months you need ~₹{required_monthly:,.0f}/mo. Current SIP is ₹{invest_amt:,.0f} — gap of ₹{gap:,.0f}.",
+                "priority": 2,
+                "tag": "Goal Gap",
+                "color": "amber",
+            })
+        else:
+            actions.append({
+                "title": f"Stay the Course on '{goal_name}'",
+                "subtitle": f"You're on track! Keep your ₹{invest_amt:,.0f} SIP consistent and review the plan every 6 months.",
+                "priority": 4,
+                "tag": "On Track",
+                "color": "green",
+            })
+
+    # ── Rule 6: Risk mismatch ────────────────────────────────────
+    age = _get_num(user, "Age")
+    if age > 50 and risk in ("aggressive", "high"):
+        actions.append({
+            "title": "Review Risk Appetite",
+            "subtitle": f"At age {int(age)}, an aggressive risk profile may expose you to significant volatility. Consider shifting 20-30% to debt/balanced funds.",
+            "priority": 3,
+            "tag": "Risk Review",
+            "color": "amber",
+        })
+    elif age < 30 and risk in ("conservative", "low"):
+        actions.append({
+            "title": "Consider Higher-Growth Assets",
+            "subtitle": f"At age {int(age)}, a conservative strategy may limit your long-term wealth. Consider allocating 40-60% to equity for better returns.",
+            "priority": 3,
+            "tag": "Opportunity",
+            "color": "indigo",
+        })
+
+    # ── Rule 7: Tax planning nudge ───────────────────────────────
+    if income > 50000:
+        actions.append({
+            "title": "Maximise 80C Deductions",
+            "subtitle": f"With ₹{income:,.0f} monthly income, ensure you're fully using your ₹1.5L annual 80C limit via ELSS, PPF, or life insurance.",
+            "priority": 4,
+            "tag": "Tax Saving",
+            "color": "indigo",
+        })
+
+    # ── Fallback if profile is empty ────────────────────────────
+    if not actions:
+        actions.append({
+            "title": "Complete Your Financial Profile",
+            "subtitle": "Add your income, expenses, and investment details to receive personalised recommendations.",
+            "priority": 1,
+            "tag": "Setup Required",
+            "color": "slate",
+        })
+
+    # Sort by priority, then return top 5
+    actions.sort(key=lambda x: x["priority"])
+    return {"actions": actions[:5], "financial_health": fin_health, "savings_ratio": sav_ratio}
+
 # ── AI Advisor Chat (Orchestrator-powered, RAG + Memory) ───────
 
 @api.post("/api/advisor/chat", tags=["AI Advisor"])

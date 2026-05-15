@@ -337,6 +337,67 @@ function setupProfileEditor() {
   });
 }
 
+// ===== RECOMMENDED ACTIONS =====
+const _COLOR_MAP = {
+  red:    { border: "border-red-200 dark:border-red-700",    tag: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300",    icon: "#ef4444" },
+  orange: { border: "border-orange-200 dark:border-orange-700", tag: "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300", icon: "#f97316" },
+  amber:  { border: "border-amber-200 dark:border-amber-700",  tag: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",  icon: "#f59e0b" },
+  green:  { border: "border-emerald-200 dark:border-emerald-700", tag: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300", icon: "#10b981" },
+  indigo: { border: "border-indigo-200 dark:border-indigo-700", tag: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300", icon: "#6366f1" },
+  slate:  { border: "border-slate-200 dark:border-slate-600",  tag: "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300",  icon: "#64748b" },
+};
+
+async function loadRecommendedActions(user) {
+  const loading = document.getElementById('rec-loading');
+  const list    = document.getElementById('rec-actions-list');
+  const badge   = document.getElementById('rec-health-badge');
+  if (!list) return;
+
+  try {
+    const data = await apiFetch(`/api/recommended-actions/${user.email}`);
+    const actions = data.actions || [];
+
+    // Show health badge
+    if (badge && data.financial_health) {
+      const healthColors = {
+        "Excellent":        "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
+        "Good":             "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
+        "Needs Improvement":"bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
+        "Critical":         "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300",
+      };
+      badge.textContent = `Financial Health: ${data.financial_health}`;
+      badge.className = `text-xs font-semibold px-3 py-1 rounded-full ${healthColors[data.financial_health] || "bg-slate-100 text-slate-600"}`;
+      badge.classList.remove('hidden');
+    }
+
+    // Render cards
+    list.innerHTML = actions.map(action => {
+      const c = _COLOR_MAP[action.color] || _COLOR_MAP.slate;
+      return `
+        <div class="border ${c.border} rounded-xl p-4 hover:shadow-md cursor-default transition-all bg-white dark:bg-slate-800 flex items-start gap-3">
+          <div class="mt-0.5 shrink-0 w-2 h-2 rounded-full mt-2" style="background:${c.icon}"></div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h4 class="text-sm font-bold text-slate-800 dark:text-slate-200">${action.title}</h4>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${c.tag}">${action.tag}</span>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">${action.subtitle}</p>
+          </div>
+        </div>`;
+    }).join('');
+
+    // Swap loading → list
+    if (loading) loading.classList.add('hidden');
+    list.classList.remove('hidden');
+
+  } catch (err) {
+    console.warn('⚠️ Recommended actions failed:', err.message);
+    if (loading) loading.classList.add('hidden');
+    list.innerHTML = `<p class="text-sm text-slate-400">Could not load recommendations. Please try refreshing.</p>`;
+    list.classList.remove('hidden');
+  }
+}
+
 // ===== AI CHATBOT =====
 function setupChatbot() {
   const chatInput    = document.getElementById('ai-chat-input');
@@ -470,7 +531,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!user) return;
 
     populateMetrics(user);
-    await populateGoalData(user);
+    await Promise.all([
+      populateGoalData(user),
+      loadRecommendedActions(user),
+    ]);
 
     console.log("✅ Dashboard Ready");
   } catch (err) {
