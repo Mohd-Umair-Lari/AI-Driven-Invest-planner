@@ -1,12 +1,3 @@
-"""
-rag/rag_chain.py  (v2)
------------------------
-Full RAG pipeline — now accepts conversation history and classified intent
-so the LLM has multi-turn context and the right focus.
-
-MongoDB is the sole store for user data. ChromaDB (optional) adds
-semantic search on top — falls back gracefully if not configured.
-"""
 import re
 from typing import Any, Dict, List, Optional
 
@@ -37,11 +28,6 @@ def _detect_category(question: str) -> Optional[str]:
 
 
 def _build_system_prompt(context: str, history: List[Dict[str, str]], is_greeting: bool = False) -> str:
-    """
-    Builds a professional but conversational system prompt.
-    - For greetings/smalltalk: warm but redirects to finance.
-    - For financial queries: grounds the answer in user data.
-    """
     history_block = ""
     if history:
         lines = []
@@ -61,7 +47,7 @@ def _build_system_prompt(context: str, history: List[Dict[str, str]], is_greetin
         "- You speak in clear, natural English. Your tone is confident and helpful, never stiff.\n"
         "- You remember the conversation context and refer back to it naturally.\n\n"
         "GREETING RULES (IMPORTANT):\n"
-        "- NEVER say 'Namaste' or 'Namaskar'. Use natural English greetings only: 'Hello', 'Hi', 'Hey', 'Good to see you'.\n"
+        "- Use natural English greetings only: 'Hello', 'Hi', 'Hey', 'Good to see you'.\n"
         "- Don't repeat the same greeting phrase. Vary your openings across messages.\n"
         "- Don't start every response with 'Great question!' or 'Absolutely!' — be natural.\n\n"
         "WHAT YOU DO:\n"
@@ -92,12 +78,11 @@ _GREETING_PATTERNS = [
 
 def _is_greeting_or_smalltalk(question: str) -> bool:
     q = question.lower().strip()
-    # Short messages with greeting words
     if len(q.split()) <= 5:
         return any(p in q for p in _GREETING_PATTERNS)
     return False
 
-
+# RAG pipeline code
 def run_rag_chain(
     collection,
     email: str,
@@ -106,11 +91,6 @@ def run_rag_chain(
     conversation_history: Optional[List[Dict[str, str]]] = None,
     intent=None,
 ) -> Dict[str, Any]:
-    """
-    Full RAG pipeline.
-    - Detects greetings and handles them conversationally.
-    - For financial queries, retrieves user data and grounds the answer.
-    """
 
     is_greeting = _is_greeting_or_smalltalk(question)
 
