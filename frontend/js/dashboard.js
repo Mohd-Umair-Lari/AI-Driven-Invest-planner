@@ -513,3 +513,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.error("🔥 Dashboard init failed:", err);
   }
 });
+
+window.toggleSidebar = function() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  if (!sidebar || !overlay) return;
+  
+  if (sidebar.classList.contains('-translate-x-full')) {
+    // Open sidebar
+    sidebar.classList.remove('-translate-x-full');
+    overlay.classList.remove('hidden');
+    // slight delay to allow display:block to take effect before opacity transition
+    setTimeout(() => {
+      overlay.classList.remove('opacity-0');
+    }, 10);
+  } else {
+    // Close sidebar
+    sidebar.classList.add('-translate-x-full');
+    overlay.classList.add('opacity-0');
+    // wait for transition to finish before hiding
+    setTimeout(() => {
+      overlay.classList.add('hidden');
+    }, 300);
+  }
+};
