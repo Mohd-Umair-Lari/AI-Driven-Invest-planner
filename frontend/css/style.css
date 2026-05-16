@@ -1441,3 +1441,9 @@ html.dark .motive-banner p {
     width: 100%;
   }
 }
+
+@media(min-width: 768px) {
+  #sidebar.desktop-collapsed {
+    margin-left: -260px;
+  }
+}
