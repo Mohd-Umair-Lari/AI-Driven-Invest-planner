@@ -31,7 +31,7 @@
 <body class="mesh-bg min-h-screen flex items-center justify-center p-4 transition-colors duration-200">
 
   <div class="fixed top-6 right-6 z-50">
-    <button id="theme-toggle" class="p-2.5 rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 transition-colors shadow-sm focus:outline-none">
+    <button id="theme-toggle" class="p-2.5 rounded-full bg-white/80 dark:bg-[#1a1a1a]/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-yellow-400 hover:bg-white dark:hover:bg-[#2a2a2a] transition-colors shadow-sm focus:outline-none">
         <svg id="theme-icon" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 
         </svg>
@@ -52,7 +52,7 @@
         </svg>
       </div>
       <h1 class="text-2xl font-bold text-slate-900 dark:text-white transition-colors">Set Up Your Profile</h1>
-      <p class="text-slate-500 dark:text-slate-400 text-sm mt-1 transition-colors">Complete these steps to get personalised advice</p>
+      <p class="text-slate-500 dark:text-white text-sm mt-1 transition-colors">Complete these steps to get personalised advice</p>
     </div>
 
     <div class="flex items-center justify-center gap-2 mb-8">
@@ -81,25 +81,25 @@
         </div>
         <div class="space-y-4">
           <div>
-            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider transition-colors">Financial Goal</label>
+            <label class="block text-xs font-medium text-slate-500 dark:text-yellow-400 mb-1.5 uppercase tracking-wider transition-colors">Financial Goal</label>
             <input id="goal-name" type="text" placeholder="e.g. Early Retirement, Car Purchase" class="input-field" />
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider transition-colors">Target Amount (₹)</label>
+              <label class="block text-xs font-medium text-slate-500 dark:text-yellow-400 mb-1.5 uppercase tracking-wider transition-colors">Target Amount (₹)</label>
               <input id="goal-amount" type="number" placeholder="5,000,000" class="input-field" />
             </div>
             <div>
-              <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider transition-colors">Timeline (months)</label>
+              <label class="block text-xs font-medium text-slate-500 dark:text-yellow-400 mb-1.5 uppercase tracking-wider transition-colors">Timeline (months)</label>
               <input id="goal-time" type="number" placeholder="120" class="input-field" />
             </div>
           </div>
         </div>
         <div class="flex gap-3 mt-6">
-          <button onclick="cancelOnboarding()" class="flex-1 py-3 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 text-sm font-medium hover:border-slate-400 dark:hover:border-slate-500 hover:text-slate-800 dark:hover:text-slate-300 transition-colors">
+          <button onclick="cancelOnboarding()" class="flex-1 py-3 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-white text-sm font-medium hover:border-slate-400 dark:hover:border-slate-500 hover:text-slate-800 dark:hover:text-yellow-400 transition-colors">
             Save & Exit
           </button>
-          <button onclick="nextStep()" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm">
+          <button onclick="nextStep()" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-red-600 to-red-700 dark:from-yellow-400 dark:to-yellow-500 text-white dark:text-black text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm">
             Next Step →
           </button>
         </div>
@@ -120,28 +120,28 @@
         <div class="space-y-4">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider transition-colors">Monthly Income (₹)</label>
+              <label class="block text-xs font-medium text-slate-500 dark:text-yellow-400 mb-1.5 uppercase tracking-wider transition-colors">Monthly Income (₹)</label>
               <input id="income" type="number" placeholder="75,000" class="input-field" />
             </div>
             <div>
-              <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider transition-colors">Monthly Expenses (₹)</label>
+              <label class="block text-xs font-medium text-slate-500 dark:text-yellow-400 mb-1.5 uppercase tracking-wider transition-colors">Monthly Expenses (₹)</label>
               <input id="expenses" type="number" placeholder="45,000" class="input-field" />
             </div>
           </div>
           <div>
-            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider transition-colors">Total Debt (₹)</label>
+            <label class="block text-xs font-medium text-slate-500 dark:text-yellow-400 mb-1.5 uppercase tracking-wider transition-colors">Total Debt (₹)</label>
             <input id="debt" type="number" placeholder="150,000" class="input-field" />
           </div>
           <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-white/10 cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500/40 transition-colors">
             <input type="checkbox" id="emergency" class="w-4 h-4 accent-indigo-500 rounded" />
-            <span class="text-slate-700 dark:text-slate-300 text-sm transition-colors">I have an emergency fund (3–6 months of expenses)</span>
+            <span class="text-slate-700 dark:text-white text-sm transition-colors">I have an emergency fund (3–6 months of expenses)</span>
           </label>
         </div>
         <div class="flex gap-3 mt-6">
           <button onclick="prevStep()" class="flex-1 py-3 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 text-sm font-medium hover:border-slate-400 dark:hover:border-slate-500 hover:text-slate-800 dark:hover:text-slate-300 transition-colors">
             ← Back
           </button>
-          <button onclick="cancelOnboarding()" class="py-3 px-4 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-500 text-sm hover:text-slate-700 dark:hover:text-slate-400 transition-colors">
+          <button onclick="cancelOnboarding()" class="py-3 px-4 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-500 dark:text-white text-sm hover:text-slate-700 dark:hover:text-yellow-400 transition-colors">
             Exit
           </button>
           <button onclick="nextStep()" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm">
@@ -164,7 +164,7 @@
         </div>
         <div class="space-y-4">
           <div>
-            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider transition-colors">Risk Appetite</label>
+            <label class="block text-xs font-medium text-slate-500 dark:text-yellow-400 mb-1.5 uppercase tracking-wider transition-colors">Risk Appetite</label>
             <select id="risk" class="select-field">
               <option value="Low">Low – Capital preservation</option>
               <option value="Medium">Medium – Balanced growth</option>
@@ -172,14 +172,14 @@
             </select>
           </div>
           <div>
-            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider transition-colors">Investment Mode</label>
+            <label class="block text-xs font-medium text-slate-500 dark:text-yellow-400 mb-1.5 uppercase tracking-wider transition-colors">Investment Mode</label>
             <select id="mode" class="select-field">
               <option value="SIP">SIP – Monthly systematic investment</option>
               <option value="Lumpsum">Lumpsum – One-time investment</option>
             </select>
           </div>
           <div>
-            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider transition-colors">Monthly Investment Amount (₹)</label>
+            <label class="block text-xs font-medium text-slate-500 dark:text-yellow-400 mb-1.5 uppercase tracking-wider transition-colors">Monthly Investment Amount (₹)</label>
             <input id="invest-amt" type="number" placeholder="15,000" class="input-field" />
           </div>
         </div>
@@ -208,14 +208,14 @@
             <h2 class="text-lg font-semibold text-slate-900 dark:text-white transition-colors">Review & Confirm</h2>
           </div>
         </div>
-        <div class="bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 rounded-xl p-5 mb-6 transition-colors">
+        <div class="bg-red-50 dark:bg-yellow-400/10 border border-red-100 dark:border-yellow-400/20 rounded-xl p-5 mb-6 transition-colors">
           <div class="flex items-start gap-3">
             <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400 mt-0.5 shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <div>
               <p class="text-indigo-900 dark:text-indigo-300 text-sm font-medium mb-1 transition-colors">All set!</p>
-              <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed transition-colors">
+              <p class="text-slate-600 dark:text-white text-sm leading-relaxed transition-colors">
                 We'll analyse your financial profile and build a personalised investment plan using AI-powered insights.
               </p>
             </div>

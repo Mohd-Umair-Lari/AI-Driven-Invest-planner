@@ -52,9 +52,9 @@ load_dotenv()
 
 try:
     initialize_groq()
-    print("✅ Groq AI initialized")
+    print("Groq AI initialized")
 except Exception as e:
-    print(f"⚠️  Groq AI skipped: {e}")
+    print(f"Groq AI skipped: {e}")
 
 MONGO_URI = os.getenv("MONGO_URI", "").strip()
 if not MONGO_URI:
@@ -87,11 +87,11 @@ def _seed_kb_async():
     try:
         n = seed_knowledge_base(_vector_store)
         if n > 0:
-            print(f"✅ Knowledge base seeded: {n} chunks")
+            print(f"Knowledge base seeded: {n} chunks")
         else:
-            print("ℹ️  Knowledge base already seeded or embedding unavailable")
+            print("Knowledge base already seeded or embedding unavailable")
     except Exception as e:
-        print(f"⚠️  Knowledge base seeding skipped: {e}")
+        print(f"Knowledge base seeding skipped: {e}")
 
 threading.Thread(target=_seed_kb_async, daemon=True).start()
 
@@ -103,7 +103,7 @@ def _trigger_user_indexing(email: str):
             if user:
                 index_user_profile(_vector_store, user)
         except Exception as e:
-            print(f"⚠️  User indexing failed for {email}: {e}")
+            print(f"User indexing failed for {email}: {e}")
     threading.Thread(target=_do_index, daemon=True).start()
 
 memory      = ConversationMemory(conversations_col)
@@ -187,66 +187,22 @@ async def test_connection():
         log.error(f"Database connection error: {str(e)}")
         raise HTTPException(500, f"Database error: {str(e)}")
 
-@api.post("/api/test-login", tags=["Health"])
-async def test_login(body: LoginRequest):
-
-    try:
-        log.info(f"🧪 Testing login for: {body.email}")
-
-        _mongo.admin.command("ping")
-        log.info("✅ MongoDB connected")
-
-        user = collection.find_one({"email": body.email})
-        log.info(f"📍 User lookup result: {'Found' if user else 'Not found'}")
-
-        if not user:
-            return {
-                "status": "failed",
-                "reason": "User not found",
-                "email": body.email,
-                "step": "user_lookup"
-            }
-
-        stored_hash = user.get("password", "")
-        log.info(f"🔐 Password hash type: {type(stored_hash).__name__}")
-        log.info(f"🔐 Password hash starts with: {str(stored_hash)[:20]}")
-
-        password_valid = verify_password(body.password, stored_hash)
-        log.info(f"✓ Password verification: {'SUCCESS' if password_valid else 'FAILED'}")
-
-        return {
-            "status": "success",
-            "email": body.email,
-            "user_found": True,
-            "password_valid": password_valid,
-            "hash_type": type(stored_hash).__name__,
-            "step": "complete"
-        }
-
-    except Exception as e:
-        log.error(f"Test login error: {str(e)}", exc_info=True)
-        return {
-            "status": "error",
-            "message": str(e),
-            "type": type(e).__name__
-        }
-
 @api.post("/api/login", tags=["Auth"])
 async def api_login(body: LoginRequest):
     try:
 
-        log.info(f"🔐 Login attempt for: {body.email}")
+        log.info(f"Login attempt for: {body.email}")
 
         user = collection.find_one({"email": body.email})
         if not user:
-            log.warning(f"❌ User not found: {body.email}")
+            log.warning(f"User not found: {body.email}")
             raise HTTPException(401, "Invalid credentials")
 
         if not verify_password(body.password, user.get("password", "")):
-            log.warning(f"❌ Invalid password for user: {body.email}")
+            log.warning(f"Invalid password for user: {body.email}")
             raise HTTPException(401, "Invalid credentials")
 
-        log.info(f"✅ Password verified for: {body.email}")
+        log.info(f"Password verified for: {body.email}")
 
         user = _ensure_onboarding(body.email, user)
 
@@ -259,7 +215,7 @@ async def api_login(body: LoginRequest):
                       "last_login": datetime.utcnow().isoformat()}}
         )
 
-        log.info(f"✅ Login successful for: {body.email}")
+        log.info(f"Login successful for: {body.email}")
         return {
             "status":        "success",
             "user":          _serialize(user),
@@ -272,16 +228,16 @@ async def api_login(body: LoginRequest):
 
         raise
     except Exception as e:
-        log.error(f"🔥 Login error for {body.email}: {str(e)}", exc_info=True)
+        log.error(f"Login error for {body.email}: {str(e)}", exc_info=True)
         raise HTTPException(500, f"Login failed: {str(e)}")
 
 @api.post("/api/signup", tags=["Auth"], status_code=201)
 async def api_signup(body: SignupRequest):
     try:
-        log.info(f"📝 Signup attempt for: {body.email}")
+        log.info(f"Signup attempt for: {body.email}")
 
         if collection.find_one({"email": body.email}):
-            log.warning(f"⚠️  Email already registered: {body.email}")
+            log.warning(f"Email already registered: {body.email}")
             raise HTTPException(409, "Email already registered")
 
         doc = {
@@ -304,7 +260,7 @@ async def api_signup(body: SignupRequest):
         }
 
         result = collection.insert_one(doc)
-        log.info(f"✅ User created: {body.email} (ID: {result.inserted_id})")
+        log.info(f"User created: {body.email} (ID: {result.inserted_id})")
 
         access  = create_access_token(body.email)
         refresh = create_refresh_token()
@@ -316,7 +272,7 @@ async def api_signup(body: SignupRequest):
 
         _trigger_user_indexing(body.email)
 
-        log.info(f"✅ Signup successful for: {body.email}")
+        log.info(f"Signup successful for: {body.email}")
 
         return {
             "status":        "success",
@@ -329,7 +285,7 @@ async def api_signup(body: SignupRequest):
     except HTTPException:
         raise
     except Exception as e:
-        log.error(f"🔥 Signup error for {body.email}: {str(e)}", exc_info=True)
+        log.error(f"Signup error for {body.email}: {str(e)}", exc_info=True)
         raise HTTPException(500, f"Signup failed: {str(e)}")
 
 @api.post("/api/auth/refresh", tags=["Auth"])
