@@ -278,9 +278,20 @@ body.wizard-mesh {
   transition: all 0.2s ease;
 }
 
+.dark .sidebar-item {
+  color: #FFD700;
+}
+
 .sidebar-item.active {
   background-color: #EF4444;
   color: white;
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.5);
+}
+
+.dark .sidebar-item.active {
+  background-color: #EF4444;
+  color: white;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
 }
 
 .sidebar-item.active svg {
@@ -294,7 +305,7 @@ body.wizard-mesh {
 
 .dark .sidebar-item:not(.active):hover {
   background-color: #334155;
-  color: #f8fafc;
+  color: #FFD700;
 }
 
 .stat-card {
