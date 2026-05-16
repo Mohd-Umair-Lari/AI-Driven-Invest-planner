@@ -130,7 +130,7 @@ function createCashFlowChart(debt, surplus, expenses, targetId = 'cashFlowChart'
       labels: ['Debt Repayment', 'Investable Surplus', 'Living Expenses'],
       datasets: [{
         data: [debt || 12000, surplus || 50000, expenses || 45000],
-        backgroundColor: ['#f59e0b', '#10b981', '#ef4444'],
+        backgroundColor: ['#EF4444', '#FFD700', '#1e293b'],
         borderWidth: 5,
         borderColor: '#ffffff',
         hoverOffset: 4
