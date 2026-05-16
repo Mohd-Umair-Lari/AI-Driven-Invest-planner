@@ -280,6 +280,7 @@ body.wizard-mesh {
 
 .dark .sidebar-item {
   color: #FFD700;
+  font-weight: 600;
 }
 
 .sidebar-item.active {
