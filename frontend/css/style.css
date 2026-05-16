@@ -125,7 +125,7 @@ body.wizard-mesh {
 .dark .input-field {
   background: rgba(255, 255, 255, 0.05);
   border-color: rgba(255, 255, 255, 0.1);
-  color: #f1f5f9;
+  color: #ffffff;
 }
 
 .input-field::placeholder {
@@ -162,7 +162,7 @@ body.wizard-mesh {
 .dark .select-field {
   background: rgba(255, 255, 255, 0.05);
   border-color: rgba(255, 255, 255, 0.1);
-  color: #f1f5f9;
+  color: #ffffff;
 }
 
 .select-field option {
@@ -172,7 +172,7 @@ body.wizard-mesh {
 
 .dark .select-field option {
   background: #1e293b;
-  color: #f1f5f9;
+  color: #ffffff;
 }
 
 .select-field:focus {
@@ -339,7 +339,7 @@ body.wizard-mesh {
 
 .dark .ai-panel {
   background: #0f0f0f;
-  color: #ffffff;
+  color: #FFD700;
   border-color: #222222;
 }
 
@@ -418,7 +418,7 @@ body.wizard-mesh {
 .dark .ai-chat-input-field {
   background: rgba(255, 255, 255, 0.04);
   border-color: rgba(255, 255, 255, 0.1);
-  color: #f1f5f9;
+  color: #ffffff;
 }
 
 .dark .ai-chat-input-field::placeholder {
@@ -558,11 +558,11 @@ body.wizard-mesh {
   --surface: rgba(0, 0, 0, 0.03);
   --border: rgba(0, 0, 0, 0.12);
   --text: #1e293b;
-  --muted: #64748b;
+  --muted: #1e293b;
   --primary: #EF4444;
   --secondary: #1e293b;
   --tertiary: #ffffff;
-  --section-body-color: #475569;
+  --section-body-color: #1e293b;
   --back-hover: rgba(0, 0, 0, 0.06);
 }
 
@@ -570,12 +570,12 @@ html.dark {
   --bg: #000000;
   --surface: rgba(255, 255, 255, 0.05);
   --border: rgba(255, 255, 255, 0.15);
-  --text: #ffffff;
-  --muted: #FFD700;
+  --text: #FFD700;
+  --muted: #ffffff;
   --primary: #EF4444;
   --secondary: #FFD700;
   --tertiary: #000000;
-  --section-body-color: #ffffff;
+  --section-body-color: #FFD700;
   --back-hover: rgba(255, 255, 255, 0.1);
 }
 
