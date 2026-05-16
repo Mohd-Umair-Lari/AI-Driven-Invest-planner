@@ -32,16 +32,16 @@
     <!-- Mobile overlay -->
     <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 hidden md:hidden transition-opacity duration-300 opacity-0" onclick="window.toggleSidebar()"></div>
 
-    <aside id="sidebar" class="w-[260px] bg-white dark:bg-[#1e293b] border-r border-slate-200 dark:border-slate-700 flex flex-col justify-between h-full flex-shrink-0 fixed md:relative z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
+    <aside id="sidebar" class="bg-white dark:bg-[#1e293b] border-r border-slate-200 dark:border-slate-700 flex flex-col justify-between h-full flex-shrink-0 fixed md:relative z-50 transform -translate-x-full md:translate-x-0 transition-all duration-300 overflow-hidden whitespace-nowrap">
         <div>
 
             <div class="p-6 flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-[#4f46e5] flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
+                <div class="w-10 h-10 rounded-xl bg-[#4f46e5] flex items-center justify-center text-white shadow-lg shadow-indigo-500/30 flex-shrink-0">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
-                <div>
+                <div class="sidebar-logo-text transition-opacity duration-300">
                     <h1 class="font-bold text-slate-900 dark:text-white leading-tight transition-colors">AI-Financial</h1>
                     <p class="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-semibold transition-colors">Advisor</p>
                 </div>
@@ -49,24 +49,24 @@
 
             <nav class="px-4 space-y-1 mt-2" id="sidebar-nav">
                 <a href="#" data-target="dashboard" class="sidebar-item active flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm">
-                    <svg class="w-5 h-5 opacity-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
-                    Dashboard
+                    <svg class="w-5 h-5 opacity-90 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+                    <span class="sidebar-text transition-opacity duration-300">Dashboard</span>
                 </a>
                 <a href="#" data-target="cashflow" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-600 dark:text-slate-300">
-                    <svg class="w-5 h-5 text-slate-400 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    Cash Flow
+                    <svg class="w-5 h-5 text-slate-400 dark:text-slate-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span class="sidebar-text transition-opacity duration-300">Cash Flow</span>
                 </a>
                 <a href="#" data-target="wealth" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-600 dark:text-slate-300">
-                    <svg class="w-5 h-5 text-slate-400 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    Wealth Reports
+                    <svg class="w-5 h-5 text-slate-400 dark:text-slate-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    <span class="sidebar-text transition-opacity duration-300">Wealth Reports</span>
                 </a>
                 <a href="#" data-target="profile" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-600 dark:text-slate-300 mt-4">
-                    <svg class="w-5 h-5 text-slate-400 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                    My Profile
+                    <svg class="w-5 h-5 text-slate-400 dark:text-slate-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                    <span class="sidebar-text transition-opacity duration-300">My Profile</span>
                 </a>
                 <a href="#" data-target="preferences" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-600 dark:text-slate-300">
-                    <svg class="w-5 h-5 text-slate-400 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    Preferences
+                    <svg class="w-5 h-5 text-slate-400 dark:text-slate-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <span class="sidebar-text transition-opacity duration-300">Preferences</span>
                 </a>
             </nav>
         </div>
@@ -74,12 +74,12 @@
         <div class="p-4 mx-4 mb-4 border border-slate-100 dark:border-slate-700 bg-[#f8fafc] dark:bg-[#0f172a] rounded-2xl flex items-center justify-between cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" onclick="window.logout()">
             <div class="flex items-center gap-3">
                 <div class="w-9 h-9 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-sm shrink-0" id="sidebar-avatar">A</div>
-                <div class="min-w-0">
+                <div class="sidebar-profile-text min-w-0 transition-opacity duration-300">
                     <p class="text-sm font-semibold text-slate-900 dark:text-white truncate transition-colors" id="sidebar-name">Aditya Sharma</p>
                     <p class="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate transition-colors" id="sidebar-email">ADITYA@EXAMPLE.COM</p>
                 </div>
             </div>
-            <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            <svg class="w-4 h-4 text-slate-400 shrink-0 sidebar-profile-text transition-opacity duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
         </div>
     </aside>
 

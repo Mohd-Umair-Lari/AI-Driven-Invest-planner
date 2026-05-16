@@ -1442,8 +1442,25 @@ html.dark .motive-banner p {
   }
 }
 
+#sidebar {
+  width: 260px;
+}
+
 @media(min-width: 768px) {
   #sidebar.desktop-collapsed {
-    margin-left: -260px;
+    width: 88px;
+  }
+
+  #sidebar.desktop-collapsed:hover {
+    width: 260px;
+    margin-right: -172px; /* Prevent pushing main content */
+    box-shadow: 4px 0 24px rgba(0,0,0,0.1);
+  }
+
+  #sidebar.desktop-collapsed:not(:hover) .sidebar-text,
+  #sidebar.desktop-collapsed:not(:hover) .sidebar-logo-text,
+  #sidebar.desktop-collapsed:not(:hover) .sidebar-profile-text {
+    opacity: 0;
+    pointer-events: none;
   }
 }
