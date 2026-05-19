@@ -1,12 +1,14 @@
 import os
-from resend import Resend
+import resend
 from typing import Tuple
 
 class ForgotPasswordService:
     """Service for handling forgot password email notifications"""
     
     def __init__(self):
-        self.resend = Resend(api_key=os.getenv("RESEND_API_KEY"))
+        api_key = os.getenv("RESEND_API_KEY")
+        if api_key:
+            resend.api_key = api_key
         self.sender_email = os.getenv("SENDER_EMAIL", "noreply@finpassai.com")
         self.app_url = os.getenv("APP_URL", "https://ai-driven-invest-planner.vercel.app")
     
@@ -69,7 +71,7 @@ class ForgotPasswordService:
                 </html>
                 """
             
-            response = self.resend.emails.send({
+            response = resend.Emails.send({
                 "from": self.sender_email,
                 "to": email,
                 "subject": "Reset Your FinPass AI Password",
@@ -130,7 +132,7 @@ class ForgotPasswordService:
                 </html>
                 """
             
-            response = self.resend.emails.send({
+            response = resend.Emails.send({
                 "from": self.sender_email,
                 "to": email,
                 "subject": "Your FinPass AI Password Has Been Changed",
