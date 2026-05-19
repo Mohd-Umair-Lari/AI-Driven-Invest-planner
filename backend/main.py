@@ -154,20 +154,20 @@ flask_app.register_blueprint(advisor_bp,      url_prefix="/api")
 def _flask_health():
     return {"status": "ok", "engine": "flask"}
 
-api = FastAPI(
-    title="FinPass AI – Financial Advisor API",
-    description="Pydantic-validated REST API. Swagger UI at **/docs**.",
-    version="2.0.0",
-)
+    api = FastAPI(
+        title="FinPass AI – Financial Advisor API",
+        description="Pydantic-validated REST API. Swagger UI at **/docs**.",
+        version="2.0.0",
+    )
 
-api.add_middleware(
-    CORSMiddleware,
-    allow_origins=_ORIGINS,
-    allow_origin_regex=r"https://.*\.vercel\.app",
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+    api.add_middleware(
+        CORSMiddleware,
+        allow_origins=_ORIGINS,
+        allow_origin_regex=r"https://.*\.vercel\.app",
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 @api.get("/", tags=["Health"])
 async def health():
