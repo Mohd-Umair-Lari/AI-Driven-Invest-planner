@@ -29,6 +29,9 @@ from api.schemas import (
     SignupRequest,
     UserUpdateRequest,
 )
+from auth.password_reset import ForgotPasswordRequest, ResetPasswordRequest, VerifyResetTokenRequest
+from auth.forgot_password import forgot_password_service
+from auth.token_manager import token_manager
 from analytics.financial_analytics import compute_financial_health
 from ml.goal_predictor import generate_plan, goal_probability
 from ml.goal_intelligence import compute_goal_intelligence
@@ -305,6 +308,116 @@ async def refresh_token(body: dict):
     collection.update_one({"email": email},
         {"$set": {"refresh_token_hash": hash_refresh_token(new_refresh)}})
     return {"access_token": new_access, "refresh_token": new_refresh, "token_type": "bearer"}
+
+@api.post("/api/auth/forgot-password", tags=["Auth"], status_code=200)
+async def forgot_password(body: ForgotPasswordRequest):
+    try:
+        log.info(f"Forgot password request for: {body.email}")
+        
+        user = collection.find_one({"email": body.email})
+        if not user:
+            log.warning(f"Forgot password: User not found: {body.email}")
+            return {
+                "success": True,
+                "message": "If an account exists with this email, you will receive a password reset link"
+            }
+        
+        reset_token = token_manager.generate_reset_token(body.email, expires_in_hours=24)
+        
+        success, message = forgot_password_service.send_reset_email(body.email, reset_token)
+        
+        if success:
+            log.info(f"Password reset email sent to: {body.email}")
+            return {
+                "success": True,
+                "message": "Password reset email sent successfully. Check your inbox for the reset link."
+            }
+        else:
+            log.error(f"Failed to send reset email to {body.email}: {message}")
+            raise HTTPException(500, f"Failed to send reset email: {message}")
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        log.error(f"Forgot password error for {body.email}: {str(e)}", exc_info=True)
+        raise HTTPException(500, f"Error processing request: {str(e)}")
+
+@api.post("/api/auth/verify-reset-token", tags=["Auth"])
+async def verify_reset_token(body: VerifyResetTokenRequest):
+    try:
+        log.info("Verifying reset token")
+        
+        is_valid, email = token_manager.validate_reset_token(body.token)
+        
+        if not is_valid:
+            log.warning("Invalid or expired reset token provided")
+            raise HTTPException(400, "Invalid or expired reset token")
+        
+        log.info(f"Reset token verified for: {email}")
+        return {
+            "success": True,
+            "email": email,
+            "message": "Token is valid. You can now reset your password."
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        log.error(f"Error verifying reset token: {str(e)}", exc_info=True)
+        raise HTTPException(500, f"Error verifying token: {str(e)}")
+
+@api.post("/api/auth/reset-password", tags=["Auth"])
+async def reset_password(body: ResetPasswordRequest):
+    try:
+        if body.new_password != body.confirm_password:
+            raise HTTPException(400, "Passwords do not match")
+        
+        if len(body.new_password) < 8:
+            raise HTTPException(400, "Password must be at least 8 characters long")
+        
+        log.info("Processing password reset")
+        
+        is_valid, email = token_manager.validate_reset_token(body.token)
+        
+        if not is_valid:
+            log.warning("Invalid or expired token for password reset")
+            raise HTTPException(400, "Invalid or expired reset token")
+        
+        user = collection.find_one({"email": email})
+        if not user:
+            log.warning(f"User not found for password reset: {email}")
+            raise HTTPException(404, "User not found")
+        
+        new_password_hash = hash_password(body.new_password)
+        
+        collection.update_one(
+            {"email": email},
+            {"$set": {
+                "password": new_password_hash,
+                "password_reset_at": datetime.utcnow().isoformat(),
+                "refresh_token_hash": None
+            }}
+        )
+        
+        token_manager.mark_token_as_used(body.token)
+        
+        success, message = forgot_password_service.send_password_changed_email(email)
+        
+        if success:
+            log.info(f"Password successfully reset for: {email}")
+        else:
+            log.warning(f"Confirmation email failed for {email}: {message}")
+        
+        return {
+            "success": True,
+            "message": "Password has been reset successfully. You can now log in with your new password."
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        log.error(f"Error resetting password: {str(e)}", exc_info=True)
+        raise HTTPException(500, f"Error resetting password: {str(e)}")
 
 @api.post("/api/onboarding/start", tags=["Onboarding"])
 async def onboarding_start(body: OnboardingStartRequest):
