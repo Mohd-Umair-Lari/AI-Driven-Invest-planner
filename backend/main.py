@@ -312,35 +312,48 @@ async def refresh_token(body: dict):
 @api.post("/api/auth/forgot-password", tags=["Auth"], status_code=200)
 async def forgot_password(body: ForgotPasswordRequest):
     try:
-        log.info(f"Forgot password request for: {body.email}")
+        email = body.email.strip().lower()
+        log.info(f"Forgot password request for: {email}")
         
-        user = collection.find_one({"email": body.email})
+        # Try to find user by email (case-insensitive)
+        user = collection.find_one({"email": {"$regex": f"^{email}$", "$options": "i"}})
+        
         if not user:
-            log.warning(f"Forgot password: User not found: {body.email}")
+            log.warning(f"Forgot password: User not found: {email}")
+            # For security, return same response regardless of whether user exists
             return {
                 "success": True,
-                "message": "If an account exists with this email, you will receive a password reset link"
+                "message": "If an account exists with this email, you will receive a password reset link shortly."
             }
         
-        reset_token = token_manager.generate_reset_token(body.email, expires_in_hours=24)
+        # Generate reset token
+        reset_token = token_manager.generate_reset_token(user["email"], expires_in_hours=24)
+        log.info(f"Reset token generated for: {email}")
         
-        success, message = forgot_password_service.send_reset_email(body.email, reset_token)
+        # Send email with reset link
+        success, message = forgot_password_service.send_reset_email(user["email"], reset_token)
         
         if success:
-            log.info(f"Password reset email sent to: {body.email}")
+            log.info(f"Password reset email sent successfully to: {email}")
             return {
                 "success": True,
-                "message": "Password reset email sent successfully. Check your inbox for the reset link."
+                "message": "Password reset email sent successfully. Check your email for the reset link."
             }
         else:
-            log.error(f"Failed to send reset email to {body.email}: {message}")
-            raise HTTPException(500, f"Failed to send reset email: {message}")
+            log.error(f"Failed to send reset email to {email}: {message}")
+            # Return user-friendly error
+            return {
+                "success": False,
+                "message": "We encountered an issue sending the reset email. Please try again later."
+            }
     
-    except HTTPException:
-        raise
     except Exception as e:
-        log.error(f"Forgot password error for {body.email}: {str(e)}", exc_info=True)
-        raise HTTPException(500, f"Error processing request: {str(e)}")
+        log.error(f"Forgot password error: {str(e)}", exc_info=True)
+        # Return generic error for security
+        return {
+            "success": False,
+            "message": "An error occurred processing your request. Please try again later."
+        }
 
 @api.post("/api/auth/verify-reset-token", tags=["Auth"])
 async def verify_reset_token(body: VerifyResetTokenRequest):
