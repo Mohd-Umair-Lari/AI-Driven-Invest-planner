@@ -26,7 +26,15 @@ def chat_advisor():
         debt = context.get("debt", 0)
         risk_appetite = context.get("risk_appetite", "Moderate")
 
-        enhanced_prompt = f
+        enhanced_prompt = f"""You are a financial advisor. The user has asked: '{user_question}'
+            Here is their financial context:
+            - Monthly Income: ₹{monthly_income}
+            - Monthly Expenses: ₹{monthly_expenses}
+            - Total Savings: ₹{total_savings}
+            - Current Debt: ₹{debt}
+            - Risk Appetite: {risk_appetite}
+
+            Please provide personalized financial advice based on their situation."""
 
         ai_response = generate_response(enhanced_prompt)
 
