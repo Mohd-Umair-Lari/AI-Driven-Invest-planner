@@ -1,4 +1,3 @@
-
 from typing import List, Tuple
 
 KNOWLEDGE_CHUNKS: List[Tuple[str, str]] = [
