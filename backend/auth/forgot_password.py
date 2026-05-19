@@ -9,7 +9,8 @@ class ForgotPasswordService:
         api_key = os.getenv("RESEND_API_KEY")
         if api_key:
             resend.api_key = api_key
-        self.sender_email = os.getenv("SENDER_EMAIL", "noreply@finpassai.com")
+        # Use verified Resend onboarding domain as fallback, or custom domain if provided
+        self.sender_email = os.getenv("SENDER_EMAIL", "onboarding@resend.dev")
         self.app_url = os.getenv("APP_URL", "https://ai-driven-invest-planner.vercel.app")
     
     def send_reset_email(self, email: str, reset_token: str) -> Tuple[bool, str]:
