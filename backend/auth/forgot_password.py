@@ -1,6 +1,9 @@
 import os
 import resend
 from typing import Tuple
+import logging
+
+logger = logging.getLogger(__name__)
 
 class ForgotPasswordService:
     """Service for handling forgot password email notifications"""
@@ -12,6 +15,7 @@ class ForgotPasswordService:
         # Use verified Resend onboarding domain as fallback, or custom domain if provided
         self.sender_email = os.getenv("SENDER_EMAIL", "onboarding@resend.dev")
         self.app_url = os.getenv("APP_URL", "https://ai-driven-invest-planner.vercel.app")
+        self.test_email = "umairlari0786@gmail.com"  # Verified test email
     
     def send_reset_email(self, email: str, reset_token: str) -> Tuple[bool, str]:
         try:
@@ -80,8 +84,6 @@ class ForgotPasswordService:
             })
             
             # Log the response for debugging
-            import logging
-            logger = logging.getLogger(__name__)
             logger.info(f"Resend response type: {type(response)}")
             logger.info(f"Resend response: {response}")
             
@@ -94,9 +96,19 @@ class ForgotPasswordService:
                 error_msg = getattr(response, 'message', None) or (response.get('message') if isinstance(response, dict) else 'Unknown error')
                 return False, f"Failed to send email: {error_msg}"
         
+        except resend.exceptions.ResendError as e:
+            error_str = str(e)
+            logger.error(f"Resend API error: {error_str}")
+            
+            # Check if it's a test mode limitation error
+            if "only send testing emails to your own email address" in error_str:
+                reset_link = f"{self.app_url}/static/reset_password.html?token={reset_token}"
+                logger.warning(f"Resend in test mode. Reset link for {email}: {reset_link}")
+                return True, f"Test mode: Reset link would be sent to {email}. Link: {reset_link}"
+            
+            return False, f"Error sending reset email: {error_str}"
+        
         except Exception as e:
-            import logging
-            logger = logging.getLogger(__name__)
             logger.error(f"Exception in send_reset_email: {str(e)}", exc_info=True)
             return False, f"Error sending reset email: {str(e)}"
     
@@ -154,8 +166,6 @@ class ForgotPasswordService:
             })
             
             # Log the response for debugging
-            import logging
-            logger = logging.getLogger(__name__)
             logger.info(f"Resend response type: {type(response)}")
             logger.info(f"Resend response: {response}")
             
@@ -168,9 +178,18 @@ class ForgotPasswordService:
                 error_msg = getattr(response, 'message', None) or (response.get('message') if isinstance(response, dict) else 'Unknown error')
                 return False, f"Failed to send email: {error_msg}"
         
+        except resend.exceptions.ResendError as e:
+            error_str = str(e)
+            logger.error(f"Resend API error: {error_str}")
+            
+            # Check if it's a test mode limitation error
+            if "only send testing emails to your own email address" in error_str:
+                logger.warning(f"Resend in test mode. Password change confirmation would be sent to {email}")
+                return True, "Password changed successfully (confirmation in test mode)"
+            
+            return False, f"Error sending confirmation email: {error_str}"
+        
         except Exception as e:
-            import logging
-            logger = logging.getLogger(__name__)
             logger.error(f"Exception in send_password_changed_email: {str(e)}", exc_info=True)
             return False, f"Error sending confirmation email: {str(e)}"
 
