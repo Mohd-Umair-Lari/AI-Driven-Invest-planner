@@ -78,12 +78,25 @@ class ForgotPasswordService:
                 "html": html_content,
             })
             
-            if response.get("id"):
+            # Log the response for debugging
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.info(f"Resend response type: {type(response)}")
+            logger.info(f"Resend response: {response}")
+            
+            # Check if response has id attribute or key
+            if hasattr(response, 'id') and response.id:
+                return True, "Password reset email sent successfully"
+            elif isinstance(response, dict) and response.get("id"):
                 return True, "Password reset email sent successfully"
             else:
-                return False, f"Failed to send email: {response.get('message', 'Unknown error')}"
+                error_msg = getattr(response, 'message', None) or (response.get('message') if isinstance(response, dict) else 'Unknown error')
+                return False, f"Failed to send email: {error_msg}"
         
         except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Exception in send_reset_email: {str(e)}", exc_info=True)
             return False, f"Error sending reset email: {str(e)}"
     
     def send_password_changed_email(self, email: str) -> Tuple[bool, str]:
@@ -139,12 +152,25 @@ class ForgotPasswordService:
                 "html": html_content,
             })
             
-            if response.get("id"):
+            # Log the response for debugging
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.info(f"Resend response type: {type(response)}")
+            logger.info(f"Resend response: {response}")
+            
+            # Check if response has id attribute or key
+            if hasattr(response, 'id') and response.id:
+                return True, "Confirmation email sent successfully"
+            elif isinstance(response, dict) and response.get("id"):
                 return True, "Confirmation email sent successfully"
             else:
-                return False, f"Failed to send email: {response.get('message', 'Unknown error')}"
+                error_msg = getattr(response, 'message', None) or (response.get('message') if isinstance(response, dict) else 'Unknown error')
+                return False, f"Failed to send email: {error_msg}"
         
         except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Exception in send_password_changed_email: {str(e)}", exc_info=True)
             return False, f"Error sending confirmation email: {str(e)}"
 
 
