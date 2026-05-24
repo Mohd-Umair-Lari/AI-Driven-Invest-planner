@@ -15,7 +15,7 @@ class ForgotPasswordService:
         # Use verified Resend onboarding domain as fallback, or custom domain if provided
         self.sender_email = os.getenv("SENDER_EMAIL", "onboarding@resend.dev")
         self.app_url = os.getenv("APP_URL", "https://ai-driven-invest-planner.vercel.app")
-        self.test_email = "umairlari0786@gmail.com"  # Verified test email
+        self.test_email = "tempmailumair@gmail.com"  # Verified test email
     
     def send_reset_email(self, email: str, reset_token: str) -> Tuple[bool, str]:
         try:
