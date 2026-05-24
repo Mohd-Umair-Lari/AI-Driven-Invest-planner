@@ -12,10 +12,9 @@ class ForgotPasswordService:
         api_key = os.getenv("RESEND_API_KEY")
         if api_key:
             resend.api_key = api_key
-        # Use verified Resend onboarding domain as fallback, or custom domain if provided
-        self.sender_email = os.getenv("SENDER_EMAIL", "onboarding@resend.dev")
+        # Use your verified domain, or fallback to Resend test domain
+        self.sender_email = os.getenv("SENDER_EMAIL", "noreply@finpassai.com")
         self.app_url = os.getenv("APP_URL", "https://ai-driven-invest-planner.vercel.app")
-        self.test_email = "tempmailumair@gmail.com"  # Verified test email
     
     def send_reset_email(self, email: str, reset_token: str) -> Tuple[bool, str]:
         try:
@@ -99,13 +98,6 @@ class ForgotPasswordService:
         except resend.exceptions.ResendError as e:
             error_str = str(e)
             logger.error(f"Resend API error: {error_str}")
-            
-            # Check if it's a test mode limitation error
-            if "only send testing emails to your own email address" in error_str:
-                reset_link = f"{self.app_url}/static/reset_password.html?token={reset_token}"
-                logger.warning(f"Resend in test mode. Reset link for {email}: {reset_link}")
-                return True, f"Test mode: Reset link would be sent to {email}. Link: {reset_link}"
-            
             return False, f"Error sending reset email: {error_str}"
         
         except Exception as e:
@@ -181,12 +173,6 @@ class ForgotPasswordService:
         except resend.exceptions.ResendError as e:
             error_str = str(e)
             logger.error(f"Resend API error: {error_str}")
-            
-            # Check if it's a test mode limitation error
-            if "only send testing emails to your own email address" in error_str:
-                logger.warning(f"Resend in test mode. Password change confirmation would be sent to {email}")
-                return True, "Password changed successfully (confirmation in test mode)"
-            
             return False, f"Error sending confirmation email: {error_str}"
         
         except Exception as e:
