@@ -464,9 +464,34 @@ async def onboarding_cancel(body: OnboardingCancelRequest):
 async def onboarding_complete(body: OnboardingCompleteRequest):
     user = collection.find_one({"email": body.email})
     if not user: raise HTTPException(404, "User not found")
-    collection.update_one({"email": body.email}, {"$set": {
-        "onboarding": {"status": "completed", "current_step": None,
-                       "last_updated": datetime.utcnow().isoformat()}}})
+    
+    ob_data = user.get("onboarding", {}).get("data", {})
+    
+    update_fields = {
+        "onboarding.status": "completed",
+        "onboarding.current_step": None,
+        "onboarding.last_updated": datetime.utcnow().isoformat(),
+        "onboarding.data": ob_data
+    }
+    
+    if ob_data.get("name"):
+        update_fields["Name"] = ob_data["name"]
+    if ob_data.get("age"):
+        update_fields["Age"] = str(ob_data["age"])
+    if ob_data.get("employment_status"):
+        update_fields["employment-status"] = ob_data["employment_status"]
+    if ob_data.get("monthly_income") or ob_data.get("monthly-income"):
+        income = ob_data.get("monthly_income") or ob_data.get("monthly-income")
+        if "financials" not in update_fields:
+            update_fields["financials"] = user.get("financials", {})
+        update_fields["financials"]["monthly-income"] = income
+    if ob_data.get("monthly_expenses") or ob_data.get("monthly-expenses"):
+        expenses = ob_data.get("monthly_expenses") or ob_data.get("monthly-expenses")
+        if "financials" not in update_fields:
+            update_fields["financials"] = user.get("financials", {})
+        update_fields["financials"]["monthly-expenses"] = expenses
+    
+    collection.update_one({"email": body.email}, {"$set": update_fields})
     return {"status": "completed"}
 
 @api.get("/api/onboarding/status/{email}", tags=["Onboarding"])
@@ -486,11 +511,25 @@ async def get_user(email: str = FPath(...)):
 
 @api.put("/api/user/{email}", tags=["User"])
 async def update_user(body: UserUpdateRequest, email: str = FPath(...)):
+    user = collection.find_one({"email": email})
+    if not user: raise HTTPException(404, "User not found")
+    
+    existing_financials = user.get("financials", {})
+    existing_investments = user.get("investments", {})
+    existing_progress = user.get("progress", {})
+    
+    updated_financials = {**existing_financials, **(body.financials or {})}
+    updated_investments = {**existing_investments, **(body.investments or {})}
+    updated_progress = {**existing_progress, **(body.progress or {})}
+    
     result = collection.update_one({"email": email}, {"$set": {
-        "Name": body.Name, "Age": str(body.Age or ""),
+        "Name": body.Name,
+        "Age": str(body.Age or ""),
         "employment-status": body.employment_status or "",
-        "Goal": body.Goal or {}, "financials": body.financials or {},
-        "investments": body.investments or {}, "progress": body.progress or {},
+        "Goal": body.Goal or {},
+        "financials": updated_financials,
+        "investments": updated_investments,
+        "progress": updated_progress,
     }})
     if result.matched_count == 0: raise HTTPException(404, "User not found")
 
