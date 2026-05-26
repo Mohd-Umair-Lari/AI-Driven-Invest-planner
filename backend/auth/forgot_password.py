@@ -12,11 +12,7 @@ class ForgotPasswordService:
         api_key = os.getenv("RESEND_API_KEY")
         if api_key:
             resend.api_key = api_key
-        # Use verified domain (lariumair.me)
-        primary_sender = os.getenv("SENDER_EMAIL", "noreply@lariumair.me")
-        # Fallback to a sender that works if primary domain has issues
-        self.sender_email = primary_sender
-        self.fallback_sender = "onboarding@resend.dev"  # Test domain fallback
+        self.sender_email = os.getenv("SENDER_EMAIL", "noreply@lariumair.me")
         self.app_url = os.getenv("APP_URL", "https://ai-driven-invest-planner.vercel.app")
     
     def send_reset_email(self, email: str, reset_token: str) -> Tuple[bool, str]:
@@ -78,43 +74,14 @@ class ForgotPasswordService:
                 </html>
                 """
             
-            response = None
-            sender_used = self.sender_email
+            response = resend.Emails.send({
+                "from": self.sender_email,
+                "to": email,
+                "subject": "Reset Your FinPass AI Password",
+                "html": html_content,
+            })
             
-            # Try primary sender first
-            try:
-                response = resend.Emails.send({
-                    "from": self.sender_email,
-                    "to": email,
-                    "subject": "Reset Your FinPass AI Password",
-                    "html": html_content,
-                })
-            except Exception as e:
-                error_str = str(e)
-                # If domain not verified, try fallback sender
-                if "domain is not verified" in error_str:
-                    logger.warning(f"Primary domain {self.sender_email} not verified yet. Using fallback sender: {self.fallback_sender}")
-                    try:
-                        response = resend.Emails.send({
-                            "from": self.fallback_sender,
-                            "to": email,
-                            "subject": "Reset Your FinPass AI Password",
-                            "html": html_content,
-                        })
-                        sender_used = self.fallback_sender
-                    except Exception as fallback_error:
-                        logger.error(f"Fallback sender also failed: {str(fallback_error)}")
-                        return False, f"Error sending reset email: {str(fallback_error)}"
-                else:
-                    raise
-            
-            if response is None:
-                return False, "Failed to send email"
-            
-            # Log the response for debugging
-            logger.info(f"Email sent from: {sender_used}")
-            logger.info(f"Resend response type: {type(response)}")
-            logger.info(f"Resend response: {response}")
+            logger.info(f"Password reset email sent to: {email}")
             
             # Check if response has id attribute or key
             if hasattr(response, 'id') and response.id:
@@ -180,43 +147,14 @@ class ForgotPasswordService:
                 </html>
                 """
             
-            response = None
-            sender_used = self.sender_email
+            response = resend.Emails.send({
+                "from": self.sender_email,
+                "to": email,
+                "subject": "Your FinPass AI Password Has Been Changed",
+                "html": html_content,
+            })
             
-            # Try primary sender first
-            try:
-                response = resend.Emails.send({
-                    "from": self.sender_email,
-                    "to": email,
-                    "subject": "Your FinPass AI Password Has Been Changed",
-                    "html": html_content,
-                })
-            except Exception as e:
-                error_str = str(e)
-                # If domain not verified, try fallback sender
-                if "domain is not verified" in error_str:
-                    logger.warning(f"Primary domain {self.sender_email} not verified yet. Using fallback sender: {self.fallback_sender}")
-                    try:
-                        response = resend.Emails.send({
-                            "from": self.fallback_sender,
-                            "to": email,
-                            "subject": "Your FinPass AI Password Has Been Changed",
-                            "html": html_content,
-                        })
-                        sender_used = self.fallback_sender
-                    except Exception as fallback_error:
-                        logger.error(f"Fallback sender also failed: {str(fallback_error)}")
-                        return False, f"Error sending confirmation email: {str(fallback_error)}"
-                else:
-                    raise
-            
-            if response is None:
-                return False, "Failed to send confirmation email"
-            
-            # Log the response for debugging
-            logger.info(f"Email sent from: {sender_used}")
-            logger.info(f"Resend response type: {type(response)}")
-            logger.info(f"Resend response: {response}")
+            logger.info(f"Password changed confirmation email sent to: {email}")
             
             # Check if response has id attribute or key
             if hasattr(response, 'id') and response.id:
