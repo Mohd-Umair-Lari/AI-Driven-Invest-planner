@@ -6,13 +6,10 @@ import logging
 logger = logging.getLogger(__name__)
 
 class ForgotPasswordService:
-    """Service for handling forgot password email notifications"""
-    
     def __init__(self):
         api_key = os.getenv("RESEND_API_KEY")
         if api_key:
             resend.api_key = api_key
-        # Use verified lariumair.me domain for all emails
         self.sender_email = "noreply@lariumair.me"
         self.app_url = os.getenv("APP_URL", "https://ai-driven-invest-planner.vercel.app")
     

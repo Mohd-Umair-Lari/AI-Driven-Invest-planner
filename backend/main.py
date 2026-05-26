@@ -315,22 +315,18 @@ async def forgot_password(body: ForgotPasswordRequest):
         email = body.email.strip().lower()
         log.info(f"Forgot password request for: {email}")
         
-        # Try to find user by email (case-insensitive)
         user = collection.find_one({"email": {"$regex": f"^{email}$", "$options": "i"}})
         
         if not user:
             log.warning(f"Forgot password: User not found: {email}")
-            # For security, return same response regardless of whether user exists
             return {
                 "success": True,
                 "message": "If an account exists with this email, you will receive a password reset link shortly."
             }
         
-        # Generate reset token
         reset_token = token_manager.generate_reset_token(user["email"], expires_in_hours=24)
         log.info(f"Reset token generated for: {email}")
         
-        # Send email with reset link
         success, message = forgot_password_service.send_reset_email(user["email"], reset_token)
         
         if success:
@@ -341,7 +337,6 @@ async def forgot_password(body: ForgotPasswordRequest):
             }
         else:
             log.error(f"Failed to send reset email to {email}: {message}")
-            # Return user-friendly error
             return {
                 "success": False,
                 "message": "We encountered an issue sending the reset email. Please try again later."
@@ -349,7 +344,6 @@ async def forgot_password(body: ForgotPasswordRequest):
     
     except Exception as e:
         log.error(f"Forgot password error: {str(e)}", exc_info=True)
-        # Return generic error for security
         return {
             "success": False,
             "message": "An error occurred processing your request. Please try again later."

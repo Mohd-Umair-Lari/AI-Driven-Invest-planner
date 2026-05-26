@@ -519,14 +519,11 @@ window.toggleSidebar = function() {
   const overlay = document.getElementById('sidebar-overlay');
   if (!sidebar || !overlay) return;
   
-  // Mobile mode
   if (sidebar.classList.contains('-translate-x-full')) {
-    // Open sidebar
     sidebar.classList.remove('-translate-x-full');
     overlay.classList.remove('hidden');
     setTimeout(() => { overlay.classList.remove('opacity-0'); }, 10);
   } else {
-    // Close sidebar
     sidebar.classList.add('-translate-x-full');
     overlay.classList.add('opacity-0');
     setTimeout(() => { overlay.classList.add('hidden'); }, 300);
