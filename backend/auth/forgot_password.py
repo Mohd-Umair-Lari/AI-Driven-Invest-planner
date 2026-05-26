@@ -12,11 +12,11 @@ class ForgotPasswordService:
         api_key = os.getenv("RESEND_API_KEY")
         if api_key:
             resend.api_key = api_key
-        # Try to use your verified domain, fallback to verified test domain
-        primary_sender = os.getenv("SENDER_EMAIL", "noreply@finpassai.com")
-        # Fallback to a sender that works if primary domain isn't verified
+        # Use verified domain (lariumair.me)
+        primary_sender = os.getenv("SENDER_EMAIL", "noreply@lariumair.me")
+        # Fallback to a sender that works if primary domain has issues
         self.sender_email = primary_sender
-        self.fallback_sender = "onboarding@resend.dev"  # Always works
+        self.fallback_sender = "onboarding@resend.dev"  # Test domain fallback
         self.app_url = os.getenv("APP_URL", "https://ai-driven-invest-planner.vercel.app")
     
     def send_reset_email(self, email: str, reset_token: str) -> Tuple[bool, str]:
