@@ -12,7 +12,8 @@ class ForgotPasswordService:
         api_key = os.getenv("RESEND_API_KEY")
         if api_key:
             resend.api_key = api_key
-        self.sender_email = os.getenv("SENDER_EMAIL", "noreply@lariumair.me")
+        # Use verified lariumair.me domain for all emails
+        self.sender_email = "noreply@lariumair.me"
         self.app_url = os.getenv("APP_URL", "https://ai-driven-invest-planner.vercel.app")
     
     def send_reset_email(self, email: str, reset_token: str) -> Tuple[bool, str]:
@@ -83,7 +84,6 @@ class ForgotPasswordService:
             
             logger.info(f"Password reset email sent to: {email}")
             
-            # Check if response has id attribute or key
             if hasattr(response, 'id') and response.id:
                 return True, "Password reset email sent successfully"
             elif isinstance(response, dict) and response.get("id"):
@@ -156,7 +156,6 @@ class ForgotPasswordService:
             
             logger.info(f"Password changed confirmation email sent to: {email}")
             
-            # Check if response has id attribute or key
             if hasattr(response, 'id') and response.id:
                 return True, "Confirmation email sent successfully"
             elif isinstance(response, dict) and response.get("id"):
