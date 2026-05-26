@@ -1,116 +1,181 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
-
+<html lang="en" class="scroll-smooth">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login | FinPass AI – Smart Financial Planning</title>
-  <meta name="description"
-    content="Sign in to FinPass AI – your intelligent, AI-powered financial advisor for long-term wealth planning." />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
-          colors: {
-            brand: { 50: '#eef2ff', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca' },
-          },
-          animation: {
-            'fade-in': 'fadeIn 0.5s ease-out',
-            'slide-up': 'slideUp 0.5s ease-out',
-          },
-          keyframes: {
-            fadeIn: { from: { opacity: '0' }, to: { opacity: '1' } },
-            slideUp: { from: { opacity: '0', transform: 'translateY(24px)' }, to: { opacity: '1', transform: 'translateY(0)' } },
-          }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | FinPass AI - Smart Financial Advisor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        h1, h2, h3 { font-family: 'Manrope', sans-serif; }
+        
+        body {
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
         }
-      }
-    }
-  </script>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/style.css" />
+        
+        .gradient-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        }
+        
+        .input-field {
+            @apply w-full px-4 py-3 rounded-xl border border-slate-300 
+                   bg-white text-slate-900 placeholder-slate-500 
+                   focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent 
+                   transition-all duration-300 shadow-sm;
+        }
+        
+        .btn-login {
+            @apply w-full py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl 
+                   transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105;
+        }
+        
+        .divider {
+            @apply flex items-center gap-4 my-6;
+        }
+        
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e2e8f0;
+        }
+        
+        .floating-shape {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.1;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(20px); }
+        }
+    </style>
 </head>
+<body class="min-h-screen flex items-center justify-center relative overflow-hidden">
+    
+    <!-- Decorative shapes -->
+    <div class="floating-shape w-96 h-96 bg-red-600" style="top: -50px; left: -50px; animation-delay: 0s;"></div>
+    <div class="floating-shape w-64 h-64 bg-yellow-400" style="bottom: -30px; right: -30px; animation-delay: 2s;"></div>
+    <div class="floating-shape w-48 h-48 bg-cyan-400" style="top: 50%; right: -50px; animation-delay: 4s;"></div>
 
-<body class="auth-page min-h-screen flex items-center justify-center p-4 transition-colors duration-300 relative">
-
-  <div class="fixed top-6 right-6 z-50">
-    <button id="theme-toggle" class="p-2.5 rounded-full bg-white/80 dark:bg-[#1a1a1a]/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-yellow-400 hover:bg-white dark:hover:bg-[#2a2a2a] transition-colors shadow-sm focus:outline-none">
-        <svg id="theme-icon" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-
-        </svg>
-    </button>
-  </div>
-
-  <div class="fixed inset-0 overflow-hidden pointer-events-none">
-    <div class="absolute -top-40 -left-40 w-96 h-96 bg-indigo-600 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-20 dark:opacity-10 animate-pulse">
-    </div>
-    <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-violet-600 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-20 dark:opacity-10 animate-pulse" style="animation-delay:2s"></div>
-  </div>
-
-  <div class="w-full max-w-md animate-slide-up relative z-10">
-
-    <div class="text-center mb-8">
-      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-red-500 to-black dark:from-cyan-400 dark:to-yellow-500 shadow-lg shadow-red-500/30 dark:shadow-cyan-400/30 mb-4">
-        <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      </div>
-      <h1 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight transition-colors">FinPass AI</h1>
-      <p class="text-slate-500 dark:text-white text-sm mt-1 transition-colors">Your intelligent financial advisor</p>
-    </div>
-
-    <div class="bg-white/70 dark:bg-white/5 backdrop-blur-xl border border-white/80 dark:border-white/10 rounded-2xl p-8 shadow-2xl transition-colors duration-200">
-      <h2 class="text-xl font-semibold text-slate-900 dark:text-white mb-1 transition-colors">Welcome back</h2>
-      <p class="text-slate-500 dark:text-white text-sm mb-6 transition-colors">Sign in to manage your finances</p>
-
-      <div class="space-y-4">
-        <div>
-          <label class="block text-xs font-medium text-slate-500 dark:text-yellow-400 mb-1.5 uppercase tracking-wider transition-colors">Email Address</label>
-          <input type="email" id="login-email" placeholder="you@example.com" class="input-field" />
+    <div class="w-full max-w-md relative z-10">
+        <!-- Logo Section -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-red-600 to-red-700 shadow-2xl mb-4">
+                <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <h1 class="text-4xl font-bold text-white mb-2">FinPass AI</h1>
+            <p class="text-gray-300 text-lg">Smart Financial Advisor</p>
         </div>
-        <div>
-          <div class="flex items-center justify-between mb-1.5">
-            <label class="block text-xs font-medium text-slate-500 dark:text-yellow-400 uppercase tracking-wider transition-colors">Password</label>
-            <a href="/static/forgot_password.html" class="text-xs font-medium text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors">Forgot password?</a>
-          </div>
-          <input type="password" id="login-password" placeholder="••••••••" class="input-field" />
+
+        <!-- Login Form -->
+        <div class="gradient-card rounded-2xl shadow-2xl p-8 backdrop-blur-sm">
+            <h2 class="text-2xl font-bold text-slate-900 mb-6">Welcome Back</h2>
+            
+            <form id="login-form" onsubmit="handleLogin(event)">
+                <!-- Email Field -->
+                <div class="mb-5">
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Email Address</label>
+                    <input type="email" id="email" class="input-field" placeholder="you@example.com" required>
+                </div>
+
+                <!-- Password Field -->
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-sm font-semibold text-slate-700">Password</label>
+                        <a href="/static/forgot_password.html" class="text-xs text-red-600 hover:text-red-700 font-semibold transition-colors">Forgot?</a>
+                    </div>
+                    <input type="password" id="password" class="input-field" placeholder="••••••••" required>
+                </div>
+
+                <!-- Remember Me -->
+                <div class="flex items-center mb-6">
+                    <input type="checkbox" id="remember" class="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500">
+                    <label for="remember" class="ml-2 text-sm text-slate-700">Remember me</label>
+                </div>
+
+                <!-- Error Message -->
+                <div id="error-message" class="hidden mb-4 p-4 rounded-lg bg-red-50 border border-red-200">
+                    <p class="text-sm text-red-700" id="error-text"></p>
+                </div>
+
+                <!-- Login Button -->
+                <button type="submit" class="btn-login">Sign In</button>
+            </form>
+
+            <!-- Divider -->
+            <div class="divider">
+                <span class="text-sm text-slate-500">or continue with</span>
+            </div>
+
+            <!-- Social Login -->
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <button class="p-3 rounded-xl border border-slate-300 hover:bg-slate-50 transition-colors flex items-center justify-center gap-2 font-medium text-slate-700">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
+                    Google
+                </button>
+                <button class="p-3 rounded-xl border border-slate-300 hover:bg-slate-50 transition-colors flex items-center justify-center gap-2 font-medium text-slate-700">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                    Facebook
+                </button>
+            </div>
+
+            <!-- Sign Up Link -->
+            <p class="text-center text-slate-700">
+                Don't have an account? 
+                <a href="/static/register.html" class="text-red-600 hover:text-red-700 font-bold transition-colors">Sign up</a>
+            </p>
         </div>
-      </div>
 
-      <button id="login-btn" class="btn-primary mt-6">
-        Sign In
-      </button>
-
-      <div class="mt-6 flex items-center">
-        <div class="flex-grow border-t border-slate-200 dark:border-slate-700 transition-colors"></div>
-        <span class="mx-4 text-xs text-slate-400 dark:text-gray-500 uppercase transition-colors">Or</span>
-        <div class="flex-grow border-t border-slate-200 dark:border-slate-700 transition-colors"></div>
-      </div>
-
-      <button id="oauth-btn" class="w-full mt-6 py-3 px-4 bg-white text-slate-900 border border-slate-200 dark:border-transparent rounded-xl font-semibold text-sm flex items-center justify-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-200 transition-colors shadow-sm">
-        <svg class="w-5 h-5" viewBox="0 0 24 24">
-          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-        </svg>
-        Sign in with Google
-      </button>
-
-      <p class="text-center text-slate-500 dark:text-white text-sm mt-5 transition-colors">
-        Don't have an account?
-        <a href="./register.html" class="text-indigo-600 dark:text-indigo-400 font-medium hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors">Create one</a>
-      </p>
+        <!-- Footer -->
+        <div class="text-center mt-8 text-gray-400 text-sm">
+            <p>© 2026 FinPass AI. All rights reserved.</p>
+        </div>
     </div>
 
-    <p class="text-center text-xs text-slate-500 dark:text-gray-400 mt-6 transition-colors">© 2025 FinPass AI · For educational use only</p>
-  </div>
+    <script src="../js/config.js" type="module"></script>
+    <script>
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('error-message');
 
-  <script src="../js/theme.js"></script>
-  <script type="module" src="../js/login.js"></script>
+            try {
+                const response = await fetch(BACKEND_URL + '/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('access_token', data.access_token);
+                    localStorage.setItem('user_email', email);
+                    window.location.href = '/static/dashboard.html';
+                } else {
+                    const error = await response.json();
+                    document.getElementById('error-text').textContent = error.detail || 'Login failed. Please try again.';
+                    errorDiv.classList.remove('hidden');
+                }
+            } catch (err) {
+                document.getElementById('error-text').textContent = 'Connection error. Please try again.';
+                errorDiv.classList.remove('hidden');
+            }
+        }
+
+        const { BACKEND_URL } = await import('../js/config.js');
+    </script>
 </body>
-
 </html>
