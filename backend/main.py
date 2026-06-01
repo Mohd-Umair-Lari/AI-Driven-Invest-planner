@@ -11,6 +11,8 @@ import certifi
 from bson import ObjectId
 from dotenv import load_dotenv
 
+load_dotenv()
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -49,8 +51,6 @@ from services.security_utils import rate_limiter, SecurityHeaders, SecurityValid
 from config.logging_config import setup_logging
 
 log = setup_logging()
-
-load_dotenv()
 
 try:
     initialize_groq()
