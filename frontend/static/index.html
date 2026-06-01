@@ -1,128 +1,371 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en" class="scroll-smooth h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinPass AI - Smart Financial Advisor | Control Your Finances</title>
+    <title>FinPass AI – The Future of Smart Financial Planning</title>
+    <meta name="description" content="AI-powered financial advisor for long-term wealth planning, predictive analytics, and goal tracking.">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        * { font-family: 'Inter', sans-serif; }
-        h1, h2, h3 { font-family: 'Manrope', sans-serif; }
-        
-        .hero-gradient {
-            background: linear-gradient(135deg, #EF4444 0%, #DC2626 50%, #000000 100%);
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+                    colors: {
+                        brand: { 50: '#eef2ff', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca' },
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.8s ease-out',
+                        'slide-up': 'slideUp 0.8s ease-out',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        fadeIn: { from: { opacity: '0' }, to: { opacity: '1' } },
+                        slideUp: { from: { opacity: '0', transform: 'translateY(40px)' }, to: { opacity: '1', transform: 'translateY(0)' } },
+                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-20px)' } },
+                    }
+                }
+            }
         }
-        
-        .floating-shape {
-            animation: float 6s ease-in-out infinite;
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(20px); }
-        }
-        
-        .nav-link {
-            @apply text-slate-700 hover:text-red-600 font-medium transition-colors;
-        }
-        
-        .nav-link-light {
-            @apply text-white hover:text-yellow-400 font-medium transition-colors;
-        }
-        
-        .feature-card {
-            @apply bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105;
-        }
-        
-        .btn-primary {
-            @apply px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl 
-                   transition-all duration-300 shadow-lg hover:shadow-xl inline-block;
-        }
-        
-        .btn-secondary {
-            @apply px-8 py-4 bg-white hover:bg-slate-50 text-red-600 font-bold rounded-xl 
-                   transition-all duration-300 shadow-lg hover:shadow-xl inline-block border-2 border-white;
-        }
-        
-        .btn-secondary-dark {
-            @apply px-8 py-4 bg-white text-black font-bold rounded-xl 
-                   transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 inline-block;
-        }
-        
-        .stat-box {
-            @apply text-center;
-        }
-        
-        .stat-number {
-            @apply text-5xl font-bold text-red-600 mb-2;
-        }
-        
-        .stat-label {
-            @apply text-lg text-slate-700 font-medium;
-        }
-    </style>
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css" />
 </head>
-<body class="bg-white">
-    
-    <!-- Navigation -->
-    <nav class="fixed top-0 w-full z-40 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
+
+<body class="mesh-bg min-h-screen flex flex-col overflow-x-hidden text-slate-800 dark:text-f8fafc transition-colors duration-200">
+
+    <nav class="fixed w-full z-50 glass-nav transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <!-- Logo -->
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-red-600 to-red-700 flex items-center justify-center text-white font-bold">
-                        ₹
+            <div class="flex justify-between items-center h-20">
+                <div class="flex items-center gap-3 cursor-pointer">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-black shadow-lg shadow-red-500/30 dark:from-cyan-400 dark:to-yellow-500 dark:shadow-cyan-500/30 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
                     </div>
-                    <span class="text-2xl font-bold text-slate-900">FinPass AI</span>
+                    <span class="text-xl font-bold tracking-tight text-slate-900 dark:text-white transition-colors">FinPass AI</span>
                 </div>
-
-                <!-- Desktop Menu -->
                 <div class="hidden md:flex items-center gap-8">
-                    <a href="#features" class="nav-link">Features</a>
-                    <a href="#how-it-works" class="nav-link">How It Works</a>
-                    <a href="#benefits" class="nav-link">Benefits</a>
-                    <a href="#testimonials" class="nav-link">Testimonials</a>
-                </div>
+                    <a href="#features" class="text-slate-600 dark:text-white hover:text-red-600 dark:hover:text-yellow-400 transition-colors text-sm font-medium">Features</a>
+                    <a href="#how-it-works" class="text-slate-600 dark:text-white hover:text-red-600 dark:hover:text-yellow-400 transition-colors text-sm font-medium">How it works</a>
+                    <div class="flex items-center gap-4 ml-4">
+                        <a href="./login.html" class="text-slate-800 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 font-medium text-sm transition-colors">Sign In</a>
+                        <a href="./register.html" class="btn-primary text-white px-5 py-2.5 rounded-lg font-medium text-sm">Get Started</a>
 
-                <!-- Auth Buttons -->
-                <div class="flex items-center gap-4">
-                    <a href="/static/login.html" class="hidden md:inline text-slate-700 hover:text-red-600 font-semibold transition-colors">Sign In</a>
-                    <a href="/static/register.html" class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition-all duration-300">Get Started</a>
+                        <button id="theme-toggle" class="ml-2 p-2 rounded-full bg-slate-100 dark:bg-[#1a1a1a] text-slate-500 dark:text-yellow-400 hover:bg-slate-200 dark:hover:bg-[#2a2a2a] transition-colors focus:outline-none">
+                            <svg id="theme-icon" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section class="hero-gradient text-white pt-32 pb-20 px-4">
-        <div class="max-w-7xl mx-auto">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-                <!-- Left Content -->
-                <div>
-                    <h1 class="text-5xl md:text-6xl font-black mb-6 leading-tight">
-                        Take Control of Your <span class="text-yellow-400">Financial Future</span>
-                    </h1>
-                    <p class="text-xl text-gray-100 mb-8 leading-relaxed">
-                        FinPass AI is your intelligent financial advisor. Get personalized guidance, track your finances, and achieve your goals with AI-powered insights.
-                    </p>
-                    <div class="flex flex-col sm:flex-row gap-4">
-                        <a href="/static/register.html" class="btn-primary text-center">Start Free Today</a>
-                        <a href="#how-it-works" class="btn-secondary text-center">Learn More</a>
+    <main class="flex-grow pt-32 pb-16 flex flex-col justify-center relative">
+
+        <div class="absolute top-20 left-10 w-72 h-72 bg-indigo-600 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-[100px] opacity-20 animate-pulse"></div>
+        <div class="absolute bottom-10 right-20 w-96 h-96 bg-violet-600 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-[120px] opacity-20 animate-pulse" style="animation-delay: 2s;"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full text-center mt-10">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card mb-8 animate-fade-in border border-red-500/20 dark:border-cyan-400/30">
+                <span class="flex h-2 w-2 rounded-full bg-red-500 dark:bg-cyan-400"></span>
+                <span class="text-xs font-medium text-red-700 dark:text-cyan-300 uppercase tracking-wider transition-colors">Introducing FinPass AI</span>
+            </div>
+
+            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 animate-slide-up leading-tight text-slate-900 dark:text-white transition-colors">
+                Master your wealth with <br class="hidden md:block" />
+                <span class="text-gradient">Intelligent Planning</span>
+            </h1>
+
+            <p class="mt-6 text-lg md:text-xl text-slate-600 dark:text-white max-w-3xl mx-auto mb-10 animate-slide-up transition-colors" style="animation-delay: 0.1s;">
+                Unlock financial freedom with personalized AI insights, smart goal tracking, and predictive analytics
+                that adapt to your lifestyle.
+            </p>
+
+            <div class="flex flex-col sm:flex-row justify-center gap-4 animate-slide-up" style="animation-delay: 0.2s;">
+                <a href="./register.html" class="btn-primary text-white px-6 py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/25 inline-block w-auto">
+                    Start Your Journey
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </a>
+                <a href="./login.html" class="px-6 py-2.5 rounded-lg font-semibold text-sm border border-slate-300 dark:border-slate-600 bg-white/70 dark:bg-[#1a1a1a]/60 hover:bg-slate-50 dark:hover:bg-[#2a2a2a]/80 text-slate-800 dark:text-white transition-all flex items-center justify-center inline-block w-auto">
+                    Dashboard Login
+                </a>
+            </div>
+
+            <div class="mt-20 mx-auto max-w-5xl animate-slide-up animate-float" style="animation-delay: 0.4s;">
+                <div class="relative rounded-2xl p-2 bg-gradient-to-b from-red-500/10 dark:from-cyan-400/20 to-transparent border border-red-500/10 dark:border-cyan-400/10 shadow-xl dark:shadow-2xl">
+                    <div class="rounded-xl overflow-hidden bg-white dark:bg-[#0f1423] border border-slate-200 dark:border-white/5 aspect-video relative flex flex-col transition-colors">
+
+                        <div class="h-8 border-b border-slate-200 dark:border-white/10 flex items-center px-4 gap-2 bg-slate-100 dark:bg-black/20 transition-colors">
+                            <div class="w-3 h-3 rounded-full bg-rose-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-amber-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-emerald-500"></div>
+                        </div>
+
+                        <div class="p-8 flex-1 flex flex-col overflow-hidden bg-gradient-to-br from-slate-50 dark:from-slate-900/30 to-slate-100 dark:to-slate-900/50">
+
+                            <div class="flex justify-between items-start mb-6">
+                                <div>
+                                    <p class="text-xs font-semibold text-slate-500 dark:text-yellow-400 uppercase tracking-wider">Portfolio Value</p>
+                                    <p class="text-3xl font-bold text-slate-900 dark:text-white mt-1">₹4,52,890</p>
+                                    <p class="text-sm text-emerald-600 dark:text-emerald-400 font-medium mt-1">↑ 12.5% this month</p>
+                                </div>
+                                <div class="flex gap-2">
+                                    <div class="px-3 py-1.5 rounded-lg bg-red-100 dark:bg-cyan-500/20 text-red-700 dark:text-cyan-300 text-xs font-semibold">Dashboard</div>
+                                    <div class="px-3 py-1.5 rounded-lg bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-white text-xs font-semibold">Insights</div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4 flex-1">
+
+                                <div class="space-y-4">
+
+                                    <div class="h-32 rounded-lg bg-gradient-to-tr from-red-400/20 dark:from-cyan-400/30 to-black/20 dark:to-yellow-500/30 border border-red-200 dark:border-cyan-400/30 p-4 flex flex-col justify-between transition-colors">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span class="text-xs font-semibold text-slate-700 dark:text-white">Growth Trend</span>
+                                            <span class="text-xs text-emerald-600 dark:text-emerald-400">+18.2%</span>
+                                        </div>
+                                        <div class="flex items-end gap-1.5 flex-1">
+                                            <div class="h-3/4 w-1.5 rounded-sm bg-red-400 dark:bg-cyan-400/60"></div>
+                                            <div class="h-1/2 w-1.5 rounded-sm bg-red-400 dark:bg-cyan-400/60"></div>
+                                            <div class="h-full w-1.5 rounded-sm bg-red-500 dark:bg-cyan-400/60"></div>
+                                            <div class="h-2/3 w-1.5 rounded-sm bg-red-400 dark:bg-cyan-400/60"></div>
+                                            <div class="h-5/6 w-1.5 rounded-sm bg-emerald-500/70"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="rounded-lg bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-white/10 p-4 transition-colors">
+                                        <p class="text-xs font-semibold text-slate-600 dark:text-yellow-400 uppercase mb-3">Financial Goals</p>
+                                        <div class="space-y-2">
+                                            <div>
+                                                <div class="flex justify-between mb-1">
+                                                    <span class="text-xs text-slate-700 dark:text-white">Retirement Fund</span>
+                                                    <span class="text-xs font-semibold text-slate-700 dark:text-white">65%</span>
+                                                </div>
+                                                <div class="w-full bg-slate-200 dark:bg-white/10 h-1.5 rounded-full overflow-hidden">
+                                                    <div class="bg-emerald-500 h-full rounded-full" style="width: 65%"></div>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div class="flex justify-between mb-1">
+                                                    <span class="text-xs text-slate-700 dark:text-white">Home Purchase</span>
+                                                    <span class="text-xs font-semibold text-slate-700 dark:text-white">42%</span>
+                                                </div>
+                                                <div class="w-full bg-slate-200 dark:bg-white/10 h-1.5 rounded-full overflow-hidden">
+                                                    <div class="bg-indigo-500 h-full rounded-full" style="width: 42%"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-4">
+
+                                    <div class="rounded-lg bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-white/10 p-3 transition-colors">
+                                        <p class="text-xs text-slate-600 dark:text-white">Total Investments</p>
+                                        <p class="text-xl font-bold text-slate-900 dark:text-white mt-1">₹3,45,600</p>
+                                        <p class="text-xs text-emerald-600 dark:text-emerald-400 mt-1">+8.3% this year</p>
+                                    </div>
+
+                                    <div class="rounded-lg bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-white/10 p-3 transition-colors">
+                                        <p class="text-xs text-slate-600 dark:text-white">Monthly Savings</p>
+                                        <p class="text-xl font-bold text-slate-900 dark:text-white mt-1">₹12,450</p>
+                                        <p class="text-xs text-indigo-600 dark:text-indigo-400 mt-1">On track this month</p>
+                                    </div>
+
+                                    <div class="rounded-lg bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-white/10 p-3 transition-colors">
+                                        <p class="text-xs font-semibold text-slate-600 dark:text-yellow-400 uppercase mb-3">Asset Mix</p>
+                                        <div class="space-y-2">
+                                            <div class="flex items-center justify-between">
+                                                <div class="flex items-center gap-2">
+                                                    <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+                                                    <span class="text-xs text-slate-700 dark:text-white">Equity</span>
+                                                </div>
+                                                <span class="text-xs font-semibold text-slate-700 dark:text-white">55%</span>
+                                            </div>
+                                            <div class="flex items-center justify-between">
+                                                <div class="flex items-center gap-2">
+                                                    <div class="w-2 h-2 rounded-full bg-indigo-500"></div>
+                                                    <span class="text-xs text-slate-700 dark:text-white">Bonds</span>
+                                                </div>
+                                                <span class="text-xs font-semibold text-slate-700 dark:text-white">30%</span>
+                                            </div>
+                                            <div class="flex items-center justify-between">
+                                                <div class="flex items-center gap-2">
+                                                    <div class="w-2 h-2 rounded-full bg-violet-500"></div>
+                                                    <span class="text-xs text-slate-700 dark:text-white">Cash</span>
+                                                </div>
+                                                <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">15%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <p class="text-sm text-gray-200 mt-6">✓ No credit card required • ✓ 100% Free • ✓ Takes 2 minutes</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <section id="features" class="py-24 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4 transition-colors">Why choose FinPass AI?</h2>
+                <p class="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto transition-colors">Everything you need to plan, track, and grow your wealth in
+                    one intuitive platform.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+                <div class="glass-card p-8 rounded-2xl">
+                    <div class="w-12 h-12 bg-indigo-100 dark:bg-indigo-500/20 rounded-xl flex items-center justify-center mb-6 text-indigo-600 dark:text-indigo-400 transition-colors">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-3 transition-colors">AI-Powered Insights</h3>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed transition-colors">Our advanced models analyze your income, expenses,
+                        and market conditions to give you real-time, actionable financial advice.</p>
                 </div>
 
-                <!-- Right Illustration -->
-                <div class="relative h-96">
-                    <div class="absolute inset-0 bg-gradient-to-br from-yellow-400/20 to-red-600/20 rounded-3xl blur-3xl"></div>
-                    <div class="relative h-full flex items-center justify-center">
-                        <div class="text-center">
-                            <div class="inline-block">
-                                <div class="w-32 h-32 rounded-2xl bg-white/10 backdrop-blur flex items-center justify-center mb-6 floating-shape">
-                                    <svg class="w-16 h-16 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/>
-                                    </svg>
+                <div class="glass-card p-8 rounded-2xl">
+                    <div class="w-12 h-12 bg-emerald-100 dark:bg-emerald-500/20 rounded-xl flex items-center justify-center mb-6 text-emerald-600 dark:text-emerald-400 transition-colors">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-3 transition-colors">Predictive Goal Tracking</h3>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed transition-colors">Set your financial goals and let our intelligence
+                        engine forecast your success probability based on your current trajectory.</p>
+                </div>
+
+                <div class="glass-card p-8 rounded-2xl">
+                    <div class="w-12 h-12 bg-violet-100 dark:bg-violet-500/20 rounded-xl flex items-center justify-center mb-6 text-violet-600 dark:text-violet-400 transition-colors">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-3 transition-colors">Bank-Grade Security</h3>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed transition-colors">Your financial data is encrypted and secure. We
+                        use industry-standard protocols to ensure your privacy is never compromised.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="savings" class="py-24 relative z-10 bg-gradient-to-b from-transparent to-indigo-50/30 dark:to-indigo-950/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+
+                <div>
+                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card mb-6 border border-red-500/20 dark:border-cyan-400/30">
+                        <span class="flex h-2 w-2 rounded-full bg-emerald-500 dark:bg-emerald-400"></span>
+                        <span class="text-xs font-medium text-emerald-700 dark:text-emerald-300 uppercase tracking-wider transition-colors">Financial Freedom</span>
+                    </div>
+
+                    <h2 class="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-6 leading-tight transition-colors">
+                        Build Wealth Through <span class="text-gradient">Smart Saving</span>
+                    </h2>
+
+                    <p class="text-lg text-slate-600 dark:text-slate-400 mb-8 leading-relaxed transition-colors">
+                        Our AI-driven platform helps you optimize your savings strategy with intelligent recommendations tailored to your lifestyle. Stop guessing about your financial future.
+                    </p>
+
+                    <div class="space-y-4">
+                        <div class="flex gap-4 items-start">
+                            <div class="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-1">
+                                <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-slate-900 dark:text-white mb-1 transition-colors">Automated Savings Plans</h3>
+                                <p class="text-slate-600 dark:text-slate-400 text-sm transition-colors">Set it and forget it. Our system automatically allocates funds based on your goals.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-4 items-start">
+                            <div class="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center flex-shrink-0 mt-1">
+                                <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-slate-900 dark:text-white mb-1 transition-colors">Investment Growth Tracking</h3>
+                                <p class="text-slate-600 dark:text-slate-400 text-sm transition-colors">Monitor your wealth accumulation in real-time with detailed insights and projections.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-4 items-start">
+                            <div class="w-8 h-8 rounded-lg bg-violet-100 dark:bg-violet-500/20 flex items-center justify-center flex-shrink-0 mt-1">
+                                <svg class="w-5 h-5 text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-slate-900 dark:text-white mb-1 transition-colors">Smart Asset Allocation</h3>
+                                <p class="text-slate-600 dark:text-slate-400 text-sm transition-colors">Get personalized recommendations on diversifying your portfolio for maximum returns.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-10">
+                        <a href="./register.html" class="btn-primary text-white px-8 py-3 rounded-lg font-semibold inline-flex items-center gap-2 shadow-lg shadow-emerald-500/25">
+                            Start Saving Today
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="relative">
+                    <div class="absolute -top-8 -right-8 w-64 h-64 bg-emerald-200 dark:bg-emerald-500/10 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-[100px] opacity-30"></div>
+                    <div class="relative rounded-2xl bg-gradient-to-br from-emerald-50 dark:from-emerald-500/10 to-indigo-50 dark:to-indigo-500/10 p-8 border border-slate-200 dark:border-white/10 shadow-xl dark:shadow-2xl transition-colors">
+
+                        <div class="space-y-4">
+                            <div class="glass-card p-6 rounded-xl">
+                                <div class="flex justify-between items-start mb-4">
+                                    <div>
+                                        <p class="text-slate-600 dark:text-slate-400 text-sm transition-colors">Total Savings</p>
+                                        <p class="text-3xl font-bold text-slate-900 dark:text-white mt-2 transition-colors">₹45,23,000</p>
+                                    </div>
+                                    <span class="text-emerald-600 dark:text-emerald-400 text-sm font-semibold">↑ 12.5%</span>
+                                </div>
+                                <div class="w-full bg-slate-200 dark:bg-white/10 h-2 rounded-full overflow-hidden">
+                                    <div class="bg-gradient-to-r from-emerald-400 to-emerald-600 h-full rounded-full" style="width: 65%"></div>
+                                </div>
+                            </div>
+
+                            <div class="glass-card p-6 rounded-xl">
+                                <div class="flex justify-between items-start mb-4">
+                                    <div>
+                                        <p class="text-slate-600 dark:text-slate-400 text-sm transition-colors">Monthly Growth</p>
+                                        <p class="text-3xl font-bold text-slate-900 dark:text-white mt-2 transition-colors">₹2,45,000</p>
+                                    </div>
+                                    <span class="text-indigo-600 dark:text-indigo-400 text-sm font-semibold">↑ 8.3%</span>
+                                </div>
+                                <div class="w-full bg-slate-200 dark:bg-white/10 h-2 rounded-full overflow-hidden">
+                                    <div class="bg-gradient-to-r from-red-400 to-red-600 dark:from-cyan-400 dark:to-yellow-500 h-full rounded-full" style="width: 72%"></div>
+                                </div>
+                            </div>
+
+                            <div class="glass-card p-6 rounded-xl">
+                                <div class="flex justify-between items-start mb-4">
+                                    <div>
+                                        <p class="text-slate-600 dark:text-slate-400 text-sm transition-colors">Investment Returns</p>
+                                        <p class="text-3xl font-bold text-slate-900 dark:text-white mt-2 transition-colors">₹8,92,000</p>
+                                    </div>
+                                    <span class="text-violet-600 dark:text-violet-400 text-sm font-semibold">↑ 15.2%</span>
+                                </div>
+                                <div class="w-full bg-slate-200 dark:bg-white/10 h-2 rounded-full overflow-hidden">
+                                    <div class="bg-gradient-to-r from-violet-400 to-violet-600 h-full rounded-full" style="width: 58%"></div>
                                 </div>
                             </div>
                         </div>
@@ -132,190 +375,232 @@
         </div>
     </section>
 
-    <!-- Stats Section -->
-    <section class="bg-slate-900 text-white py-16 px-4">
-        <div class="max-w-7xl mx-auto">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div class="stat-box">
-                    <div class="stat-number text-yellow-400">50K+</div>
-                    <div class="stat-label text-gray-300">Active Users</div>
+    <section id="partners" class="py-24 pb-32 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-20">
+                <h2 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-6 transition-colors">Trusted by Financial Leaders</h2>
+                <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto transition-colors">Integrating with India's most trusted financial institutions and investment platforms</p>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 items-center justify-items-center mb-24">
+
+                <div class="glass-card p-8 rounded-xl hover:shadow-lg transition-all duration-300 flex items-center justify-center h-24">
+                    <img src="https://zerodha.com/static/images/logo.svg" alt="Zerodha" class="h-12 object-contain dark:invert"/>
                 </div>
-                <div class="stat-box">
-                    <div class="stat-number text-yellow-400">₹100Cr+</div>
-                    <div class="stat-label text-gray-300">Assets Managed</div>
+
+                <div class="glass-card p-8 rounded-xl hover:shadow-lg transition-all duration-300 flex items-center justify-center h-24">
+                    <img src="https://licindia.in/documents/d/guest/lic_log_updated" alt="LIC" class="h-12 object-contain"/>
                 </div>
-                <div class="stat-box">
-                    <div class="stat-number text-yellow-400">98%</div>
-                    <div class="stat-label text-gray-300">Satisfaction Rate</div>
+
+                <div class="glass-card p-8 rounded-xl hover:shadow-lg transition-all duration-300 flex items-center justify-center h-24">
+                    <img src="https://resources.groww.in/web-assets/img/website-logo/groww_logo.webp" alt="Groww" class="h-12 object-contain dark:invert"/>
                 </div>
-                <div class="stat-box">
-                    <div class="stat-number text-yellow-400">24/7</div>
-                    <div class="stat-label text-gray-300">AI Support</div>
+
+                <div class="glass-card p-8 rounded-xl hover:shadow-lg transition-all duration-300 flex items-center justify-center h-24">
+                    <img src="https://www.nseindia.com/next-assets/images/NSE_Logo.svg" alt="NSE" class="h-12 object-contain"/>
                 </div>
+
+                <div class="glass-card p-8 rounded-xl hover:shadow-lg transition-all duration-300 flex items-center justify-center h-24">
+                    <img src="https://w3assets.angelone.in/wp-content/uploads/1773754004919-angel-one-logo.png" alt="Angel One" class="h-12 object-contain dark:invert"/>
+                </div>
+
+                <div class="glass-card p-8 rounded-xl hover:shadow-lg transition-all duration-300 flex items-center justify-center h-24">
+                    <img src="https://assets.upstox.com/website/images/upstox-new-logo.svg" alt="Upstox" class="h-12 object-contain dark:invert"/>
+                </div>
+            </div>
+
+            <div class="text-center py-8 border-t border-slate-200 dark:border-white/10">
+                <p class="text-lg text-slate-600 dark:text-slate-400 transition-colors">FinPass AI works seamlessly with India's leading financial institutions to provide you the best experience.</p>
             </div>
         </div>
     </section>
 
-    <!-- Features Section -->
-    <section id="features" class="py-20 px-4 bg-slate-50">
-        <div class="max-w-7xl mx-auto">
+    <section id="how-it-works" class="py-24 relative z-10 bg-gradient-to-b from-transparent via-slate-50 dark:via-slate-900/20 to-transparent">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-4xl md:text-5xl font-black mb-4">Powerful Features</h2>
-                <p class="text-xl text-slate-600">Everything you need to manage your finances smartly</p>
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card mb-6 border border-red-500/20 dark:border-cyan-400/30">
+                    <span class="flex h-2 w-2 rounded-full bg-red-500 dark:bg-yellow-400"></span>
+                    <span class="text-xs font-medium text-red-700 dark:text-yellow-400 uppercase tracking-wider transition-colors">Getting Started</span>
+                </div>
+                <h2 class="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4 transition-colors">How FinPass AI Works</h2>
+                <p class="text-lg text-slate-600 dark:text-slate-400 max-w-3xl mx-auto transition-colors">Four simple steps to take control of your financial future</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- Feature 1 -->
-                <div class="feature-card">
-                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-red-600 to-red-700 flex items-center justify-center text-white mb-6">
-                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                        </svg>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                <!-- Step 1 -->
+                <div class="glass-card p-8 rounded-2xl cursor-pointer transition-all hover:shadow-lg hover:scale-105 duration-300 step-card group" data-step="1">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-red-500 to-red-600 dark:from-yellow-400 dark:to-yellow-600 flex items-center justify-center text-white font-bold text-xl group-hover:scale-110 transition-transform">1</div>
+                        <h3 class="text-2xl font-bold text-slate-900 dark:text-white transition-colors">Sign Up & Profile</h3>
                     </div>
-                    <h3 class="text-2xl font-bold mb-3">AI Financial Advisor</h3>
-                    <p class="text-slate-600">Get personalized financial advice powered by advanced AI. Ask anything about your finances and investments.</p>
+                    <p class="text-slate-600 dark:text-slate-400 mb-4 transition-colors">Create your account and provide basic financial information. Takes just 5 minutes!</p>
+                    <svg class="w-5 h-5 text-slate-400 dark:text-yellow-400 group-hover:translate-x-2 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                    <div class="mt-4 p-4 rounded-lg bg-blue-50 dark:bg-blue-500/10 hidden step-details">
+                        <h4 class="font-semibold text-slate-900 dark:text-white mb-3">Step 1 Instructions:</h4>
+                        <ul class="space-y-2 text-sm text-slate-700 dark:text-slate-300">
+                            <li class="flex gap-2">
+                                <span class="text-red-600 dark:text-yellow-400 font-bold">•</span>
+                                <span>Click "Get Started" on the landing page</span>
+                            </li>
+                            <li class="flex gap-2">
+                                <span class="text-red-600 dark:text-yellow-400 font-bold">•</span>
+                                <span>Enter your name, email, and create a secure password</span>
+                            </li>
+                            <li class="flex gap-2">
+                                <span class="text-red-600 dark:text-yellow-400 font-bold">•</span>
+                                <span>Fill in your age and employment status</span>
+                            </li>
+                            <li class="flex gap-2">
+                                <span class="text-red-600 dark:text-yellow-400 font-bold">•</span>
+                                <span>Click "Create Account" and verify your email</span>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
 
-                <!-- Feature 2 -->
-                <div class="feature-card">
-                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-red-600 to-red-700 flex items-center justify-center text-white mb-6">
-                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                        </svg>
+                <!-- Step 2 -->
+                <div class="glass-card p-8 rounded-2xl cursor-pointer transition-all hover:shadow-lg hover:scale-105 duration-300 step-card group" data-step="2">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 dark:from-yellow-400 dark:to-yellow-600 flex items-center justify-center text-white font-bold text-xl group-hover:scale-110 transition-transform">2</div>
+                        <h3 class="text-2xl font-bold text-slate-900 dark:text-white transition-colors">Financial Setup</h3>
                     </div>
-                    <h3 class="text-2xl font-bold mb-3">Smart Analytics</h3>
-                    <p class="text-slate-600">Track your income, expenses, and savings with beautiful visualizations and actionable insights.</p>
+                    <p class="text-slate-600 dark:text-slate-400 mb-4 transition-colors">Enter your income, expenses, and investment details to establish your financial baseline.</p>
+                    <svg class="w-5 h-5 text-slate-400 dark:text-yellow-400 group-hover:translate-x-2 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                    <div class="mt-4 p-4 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 hidden step-details">
+                        <h4 class="font-semibold text-slate-900 dark:text-white mb-3">Step 2 Instructions:</h4>
+                        <ul class="space-y-2 text-sm text-slate-700 dark:text-slate-300">
+                            <li class="flex gap-2">
+                                <span class="text-emerald-600 dark:text-yellow-400 font-bold">•</span>
+                                <span>Go to the Wizard/Onboarding section</span>
+                            </li>
+                            <li class="flex gap-2">
+                                <span class="text-emerald-600 dark:text-yellow-400 font-bold">•</span>
+                                <span>Input your monthly income and fixed expenses</span>
+                            </li>
+                            <li class="flex gap-2">
+                                <span class="text-emerald-600 dark:text-yellow-400 font-bold">•</span>
+                                <span>Add details about your current investments and savings</span>
+                            </li>
+                            <li class="flex gap-2">
+                                <span class="text-emerald-600 dark:text-yellow-400 font-bold">•</span>
+                                <span>Complete the financial health assessment</span>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
 
-                <!-- Feature 3 -->
-                <div class="feature-card">
-                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-red-600 to-red-700 flex items-center justify-center text-white mb-6">
-                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
+                <!-- Step 3 -->
+                <div class="glass-card p-8 rounded-2xl cursor-pointer transition-all hover:shadow-lg hover:scale-105 duration-300 step-card group" data-step="3">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 dark:from-yellow-400 dark:to-yellow-600 flex items-center justify-center text-white font-bold text-xl group-hover:scale-110 transition-transform">3</div>
+                        <h3 class="text-2xl font-bold text-slate-900 dark:text-white transition-colors">Set Goals</h3>
                     </div>
-                    <h3 class="text-2xl font-bold mb-3">Goal Planning</h3>
-                    <p class="text-slate-600">Set financial goals and get AI-powered strategies to achieve them faster with your budget.</p>
+                    <p class="text-slate-600 dark:text-slate-400 mb-4 transition-colors">Define your financial goals with timelines and amounts. AI will predict your success probability.</p>
+                    <svg class="w-5 h-5 text-slate-400 dark:text-yellow-400 group-hover:translate-x-2 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                    <div class="mt-4 p-4 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 hidden step-details">
+                        <h4 class="font-semibold text-slate-900 dark:text-white mb-3">Step 3 Instructions:</h4>
+                        <ul class="space-y-2 text-sm text-slate-700 dark:text-slate-300">
+                            <li class="flex gap-2">
+                                <span class="text-indigo-600 dark:text-yellow-400 font-bold">•</span>
+                                <span>Navigate to "My Goals" in your dashboard</span>
+                            </li>
+                            <li class="flex gap-2">
+                                <span class="text-indigo-600 dark:text-yellow-400 font-bold">•</span>
+                                <span>Click "Add New Goal" and select category (retirement, home, education, etc.)</span>
+                            </li>
+                            <li class="flex gap-2">
+                                <span class="text-indigo-600 dark:text-yellow-400 font-bold">•</span>
+                                <span>Set target amount and desired timeline</span>
+                            </li>
+                            <li class="flex gap-2">
+                                <span class="text-indigo-600 dark:text-yellow-400 font-bold">•</span>
+                                <span>Review AI prediction for success rate and recommendations</span>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
 
-                <!-- Feature 4 -->
-                <div class="feature-card">
-                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-red-600 to-red-700 flex items-center justify-center text-white mb-6">
-                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
+                <!-- Step 4 -->
+                <div class="glass-card p-8 rounded-2xl cursor-pointer transition-all hover:shadow-lg hover:scale-105 duration-300 step-card group" data-step="4">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-violet-500 to-violet-600 dark:from-yellow-400 dark:to-yellow-600 flex items-center justify-center text-white font-bold text-xl group-hover:scale-110 transition-transform">4</div>
+                        <h3 class="text-2xl font-bold text-slate-900 dark:text-white transition-colors">Track & Optimize</h3>
                     </div>
-                    <h3 class="text-2xl font-bold mb-3">Secure & Private</h3>
-                    <p class="text-slate-600">Bank-level encryption protects your financial data. Your privacy is our top priority.</p>
+                    <p class="text-slate-600 dark:text-slate-400 mb-4 transition-colors">Monitor progress in real-time and get AI-powered recommendations to optimize your wealth.</p>
+                    <svg class="w-5 h-5 text-slate-400 dark:text-yellow-400 group-hover:translate-x-2 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                    <div class="mt-4 p-4 rounded-lg bg-violet-50 dark:bg-violet-500/10 hidden step-details">
+                        <h4 class="font-semibold text-slate-900 dark:text-white mb-3">Step 4 Instructions:</h4>
+                        <ul class="space-y-2 text-sm text-slate-700 dark:text-slate-300">
+                            <li class="flex gap-2">
+                                <span class="text-violet-600 dark:text-yellow-400 font-bold">•</span>
+                                <span>Visit your Dashboard regularly to check progress</span>
+                            </li>
+                            <li class="flex gap-2">
+                                <span class="text-violet-600 dark:text-yellow-400 font-bold">•</span>
+                                <span>Review recommended actions from the AI Advisor</span>
+                            </li>
+                            <li class="flex gap-2">
+                                <span class="text-violet-600 dark:text-yellow-400 font-bold">•</span>
+                                <span>Chat with the AI Financial Advisor for personalized guidance</span>
+                            </li>
+                            <li class="flex gap-2">
+                                <span class="text-violet-600 dark:text-yellow-400 font-bold">•</span>
+                                <span>Update financial data quarterly to keep predictions accurate</span>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
+            </div>
 
-                <!-- Feature 5 -->
-                <div class="feature-card">
-                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-red-600 to-red-700 flex items-center justify-center text-white mb-6">
-                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                    </div>
-                    <h3 class="text-2xl font-bold mb-3">Real-time Updates</h3>
-                    <p class="text-slate-600">Monitor your finances in real-time with instant notifications and updates.</p>
-                </div>
-
-                <!-- Feature 6 -->
-                <div class="feature-card">
-                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-red-600 to-red-700 flex items-center justify-center text-white mb-6">
-                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
-                        </svg>
-                    </div>
-                    <h3 class="text-2xl font-bold mb-3">Customizable</h3>
-                    <p class="text-slate-600">Personalize your dashboard and set preferences that match your financial style.</p>
-                </div>
+            <div class="text-center pt-8">
+                <p class="text-slate-600 dark:text-slate-400 mb-6 transition-colors">Click any step above to see detailed instructions</p>
+                <a href="./register.html" class="btn-primary text-white px-8 py-3 rounded-lg font-semibold inline-flex items-center gap-2 shadow-lg shadow-red-500/25 dark:shadow-yellow-400/25">
+                    Start Your Journey Now
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </a>
             </div>
         </div>
     </section>
 
-    <!-- How It Works -->
-    <section id="how-it-works" class="py-20 px-4">
-        <div class="max-w-7xl mx-auto">
-            <div class="text-center mb-16">
-                <h2 class="text-4xl md:text-5xl font-black mb-4">How It Works</h2>
-                <p class="text-xl text-slate-600">Get started in 3 simple steps</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="text-center">
-                    <div class="w-16 h-16 rounded-full bg-red-600 text-white flex items-center justify-center text-3xl font-bold mx-auto mb-6">1</div>
-                    <h3 class="text-2xl font-bold mb-3">Sign Up</h3>
-                    <p class="text-slate-600">Create your account in 2 minutes. No credit card required.</p>
+    <footer class="border-t border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-black/20 pt-12 pb-8 mt-auto relative z-10 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="flex items-center gap-2 mb-4 md:mb-0">
+                    <svg class="w-6 h-6 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="text-lg font-bold text-slate-900 dark:text-white tracking-tight transition-colors">FinPass AI</span>
                 </div>
-
-                <div class="text-center">
-                    <div class="w-16 h-16 rounded-full bg-red-600 text-white flex items-center justify-center text-3xl font-bold mx-auto mb-6">2</div>
-                    <h3 class="text-2xl font-bold mb-3">Set Up Profile</h3>
-                    <p class="text-slate-600">Tell us about your financial goals and we'll personalize your experience.</p>
-                </div>
-
-                <div class="text-center">
-                    <div class="w-16 h-16 rounded-full bg-red-600 text-white flex items-center justify-center text-3xl font-bold mx-auto mb-6">3</div>
-                    <h3 class="text-2xl font-bold mb-3">Start Analyzing</h3>
-                    <p class="text-slate-600">Get insights, chat with your AI advisor, and take control of your finances.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA Section -->
-    <section class="hero-gradient text-white py-16 px-4">
-        <div class="max-w-4xl mx-auto text-center">
-            <h2 class="text-4xl md:text-5xl font-black mb-6">Ready to Transform Your Finances?</h2>
-            <p class="text-xl text-gray-100 mb-8">Join thousands of users taking control of their financial future today.</p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="/static/register.html" class="btn-primary text-center">Get Started Free</a>
-                <a href="/static/login.html" class="btn-secondary text-center">Sign In</a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="bg-slate-900 text-white py-12 px-4">
-        <div class="max-w-7xl mx-auto">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-                <div>
-                    <div class="flex items-center gap-2 mb-4">
-                        <div class="w-10 h-10 rounded-lg bg-red-600 flex items-center justify-center font-bold">₹</div>
-                        <span class="text-2xl font-bold">FinPass AI</span>
-                    </div>
-                    <p class="text-gray-400">Your intelligent financial advisor for smarter decisions.</p>
-                </div>
-                <div>
-                    <h4 class="font-bold mb-4">Product</h4>
-                    <ul class="space-y-2 text-gray-400">
-                        <li><a href="#features" class="hover:text-white transition">Features</a></li>
-                        <li><a href="#how-it-works" class="hover:text-white transition">Pricing</a></li>
-                        <li><a href="#" class="hover:text-white transition">Security</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-bold mb-4">Company</h4>
-                    <ul class="space-y-2 text-gray-400">
-                        <li><a href="#" class="hover:text-white transition">About</a></li>
-                        <li><a href="#" class="hover:text-white transition">Blog</a></li>
-                        <li><a href="#" class="hover:text-white transition">Contact</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-bold mb-4">Legal</h4>
-                    <ul class="space-y-2 text-gray-400">
-                        <li><a href="#" class="hover:text-white transition">Privacy</a></li>
-                        <li><a href="#" class="hover:text-white transition">Terms</a></li>
-                        <li><a href="#" class="hover:text-white transition">Disclaimer</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="border-t border-slate-700 pt-8 text-center text-gray-400">
-                <p>© 2026 FinPass AI. All rights reserved.</p>
+                <p class="text-slate-500 dark:text-slate-400 text-sm transition-colors">© 2026 FinPass AI. Built for the future of finance.</p>
             </div>
         </div>
     </footer>
+
+    <script src="../js/theme.js"></script>
+    <script>
+        document.querySelectorAll('.step-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const stepDetails = this.querySelector('.step-details');
+                const isHidden = stepDetails.classList.contains('hidden');
+                document.querySelectorAll('.step-details').forEach(detail => {
+                    detail.classList.add('hidden');
+                });
+                if (isHidden) {
+                    stepDetails.classList.remove('hidden');
+                    this.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            });
+        });
+    </script>
 </body>
 </html>

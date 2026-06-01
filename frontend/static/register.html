@@ -1,248 +1,107 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en" class="h-full">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up | FinPass AI - Smart Financial Advisor</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        * { font-family: 'Inter', sans-serif; }
-        h1, h2, h3 { font-family: 'Manrope', sans-serif; }
-        
-        body {
-            background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register | FinPass AI – Create Your Account</title>
+  <meta name="description" content="Create your FinPass AI account and start your intelligent financial planning journey." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          animation: {
+            'slide-up': 'slideUp 0.5s ease-out',
+          },
+          keyframes: {
+            slideUp: { from: { opacity: '0', transform: 'translateY(24px)' }, to: { opacity: '1', transform: 'translateY(0)' } },
+          }
         }
-        
-        .gradient-card {
-            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-        }
-        
-        .input-field {
-            @apply w-full px-4 py-3 rounded-xl border border-slate-300 
-                   bg-white text-slate-900 placeholder-slate-500 
-                   focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent 
-                   transition-all duration-300 shadow-sm;
-        }
-        
-        .btn-register {
-            @apply w-full py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl 
-                   transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105;
-        }
-        
-        .strength-meter {
-            @apply h-2 rounded-full overflow-hidden bg-slate-200;
-        }
-        
-        .strength-bar {
-            @apply h-full transition-all duration-300;
-        }
-        
-        .floating-shape {
-            position: absolute;
-            border-radius: 50%;
-            opacity: 0.08;
-            animation: float 8s ease-in-out infinite;
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(30px); }
-        }
-    </style>
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/style.css" />
 </head>
-<body class="min-h-screen flex items-center justify-center py-12 px-4 relative overflow-hidden">
-    
-    <!-- Decorative shapes -->
-    <div class="floating-shape w-96 h-96 bg-red-600" style="top: -100px; right: -100px; animation-delay: 0s;"></div>
-    <div class="floating-shape w-64 h-64 bg-yellow-400" style="bottom: -50px; left: -50px; animation-delay: 3s;"></div>
-    <div class="floating-shape w-48 h-48 bg-cyan-400" style="top: 50%; left: 10%; animation-delay: 6s;"></div>
+<body class="auth-page min-h-screen flex items-center justify-center p-4 transition-colors duration-300 relative">
 
-    <div class="w-full max-w-md relative z-10">
-        <!-- Logo Section -->
-        <div class="text-center mb-8">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-red-600 to-red-700 shadow-2xl mb-4">
-                <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-            </div>
-            <h1 class="text-4xl font-bold text-white mb-2">FinPass AI</h1>
-            <p class="text-gray-300 text-lg">Smart Financial Advisor</p>
-        </div>
+  <div class="fixed top-6 right-6 z-50">
+    <button id="theme-toggle" class="p-2.5 rounded-full bg-white/80 dark:bg-[#1a1a1a]/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-yellow-400 hover:bg-white dark:hover:bg-[#2a2a2a] transition-colors shadow-sm focus:outline-none">
+        <svg id="theme-icon" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 
-        <!-- Register Form -->
-        <div class="gradient-card rounded-2xl shadow-2xl p-8 backdrop-blur-sm">
-            <h2 class="text-2xl font-bold text-slate-900 mb-2">Create Account</h2>
-            <p class="text-slate-600 text-sm mb-6">Join thousands taking control of their finances</p>
-            
-            <form id="register-form" onsubmit="handleRegister(event)">
-                <!-- Full Name -->
-                <div class="mb-4">
-                    <label class="block text-sm font-semibold text-slate-700 mb-2">Full Name</label>
-                    <input type="text" id="name" class="input-field" placeholder="John Doe" required>
-                </div>
+        </svg>
+    </button>
+  </div>
 
-                <!-- Email -->
-                <div class="mb-4">
-                    <label class="block text-sm font-semibold text-slate-700 mb-2">Email Address</label>
-                    <input type="email" id="email" class="input-field" placeholder="you@example.com" required>
-                    <p class="text-xs text-slate-500 mt-1">We'll never share your email with anyone else</p>
-                </div>
+  <div class="fixed inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute -top-40 -right-40 w-96 h-96 bg-violet-600 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-20 dark:opacity-10 animate-pulse"></div>
+    <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-indigo-600 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-20 dark:opacity-10 animate-pulse" style="animation-delay:1.5s"></div>
+  </div>
 
-                <!-- Password -->
-                <div class="mb-4">
-                    <label class="block text-sm font-semibold text-slate-700 mb-2">Password</label>
-                    <input type="password" id="password" class="input-field" placeholder="••••••••" required oninput="checkPasswordStrength()">
-                    
-                    <!-- Password Strength Meter -->
-                    <div class="mt-2">
-                        <div class="strength-meter">
-                            <div id="strength-bar" class="strength-bar bg-slate-300 w-0"></div>
-                        </div>
-                        <p class="text-xs text-slate-500 mt-1">
-                            <span id="strength-text">Weak</span> • Include uppercase, numbers & symbols for a stronger password
-                        </p>
-                    </div>
-                </div>
+  <div class="w-full max-w-md animate-slide-up relative z-10">
 
-                <!-- Confirm Password -->
-                <div class="mb-4">
-                    <label class="block text-sm font-semibold text-slate-700 mb-2">Confirm Password</label>
-                    <div class="relative">
-                        <input type="password" id="confirm-password" class="input-field" placeholder="••••••••" required>
-                        <span id="match-indicator" class="absolute right-4 top-3.5 text-lg"></span>
-                    </div>
-                </div>
-
-                <!-- Terms & Conditions -->
-                <div class="flex items-start mb-6">
-                    <input type="checkbox" id="terms" class="w-4 h-4 mt-1 rounded border-slate-300 text-red-600 focus:ring-red-500" required>
-                    <label for="terms" class="ml-2 text-sm text-slate-700">
-                        I agree to the <a href="#" class="text-red-600 hover:underline">Terms & Conditions</a> and <a href="#" class="text-red-600 hover:underline">Privacy Policy</a>
-                    </label>
-                </div>
-
-                <!-- Error Message -->
-                <div id="error-message" class="hidden mb-4 p-4 rounded-lg bg-red-50 border border-red-200">
-                    <p class="text-sm text-red-700" id="error-text"></p>
-                </div>
-
-                <!-- Register Button -->
-                <button type="submit" class="btn-register">Create Account</button>
-            </form>
-
-            <!-- Benefits -->
-            <div class="mt-8 pt-6 border-t border-slate-200 space-y-3">
-                <div class="flex items-start gap-3">
-                    <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                    </svg>
-                    <span class="text-sm text-slate-700"><span class="font-semibold">AI-Powered Advisor</span> • Get personalized financial guidance</span>
-                </div>
-                <div class="flex items-start gap-3">
-                    <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                    </svg>
-                    <span class="text-sm text-slate-700"><span class="font-semibold">Smart Analytics</span> • Track income, expenses & savings</span>
-                </div>
-                <div class="flex items-start gap-3">
-                    <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                    </svg>
-                    <span class="text-sm text-slate-700"><span class="font-semibold">100% Secure</span> • Your financial data is encrypted</span>
-                </div>
-            </div>
-
-            <!-- Sign In Link -->
-            <p class="text-center text-slate-700 mt-6">
-                Already have an account? 
-                <a href="/static/login.html" class="text-red-600 hover:text-red-700 font-bold transition-colors">Sign in</a>
-            </p>
-        </div>
-
-        <!-- Footer -->
-        <div class="text-center mt-8 text-gray-400 text-sm">
-            <p>© 2026 FinPass AI. All rights reserved.</p>
-        </div>
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-red-500 to-black dark:from-cyan-400 dark:to-yellow-500 shadow-lg shadow-red-500/30 dark:shadow-cyan-400/30 mb-3">
+        <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <h1 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight transition-colors">FinPass AI</h1>
+      <p class="text-slate-500 dark:text-white text-sm mt-1 transition-colors">Start your financial journey today</p>
     </div>
 
-    <script src="../js/config.js" type="module"></script>
-    <script>
-        function checkPasswordStrength() {
-            const password = document.getElementById('password').value;
-            let strength = 0;
+    <div class="bg-white/70 dark:bg-white/5 backdrop-blur-xl border border-white/80 dark:border-white/10 rounded-2xl p-8 shadow-2xl transition-colors duration-200">
+      <h2 class="text-xl font-semibold text-slate-900 dark:text-white mb-1 transition-colors">Create account</h2>
+      <p class="text-slate-500 dark:text-white text-sm mb-6 transition-colors">Fill in your details to get started</p>
 
-            if (password.length >= 8) strength++;
-            if (/[A-Z]/.test(password)) strength++;
-            if (/[0-9]/.test(password)) strength++;
-            if (/[^A-Za-z0-9]/.test(password)) strength++;
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider transition-colors">Full Name</label>
+          <input id="name" type="text" placeholder="John Doe" class="input-field" />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider transition-colors">Email Address</label>
+          <input id="email" type="email" placeholder="you@example.com" class="input-field" />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider transition-colors">Password</label>
+          <input id="password" type="password" placeholder="Min. 8 characters" class="input-field" />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider transition-colors">Age</label>
+            <input id="age" type="number" placeholder="25" class="input-field" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider transition-colors">Employment</label>
+            <select id="status" class="select-field">
+              <option value="">Select status</option>
+              <option value="Salaried">Salaried</option>
+              <option value="Self-Employed">Self-Employed</option>
+              <option value="Freelancer">Freelancer</option>
+              <option value="Unemployed">Unemployed</option>
+            </select>
+          </div>
+        </div>
+      </div>
 
-            const bar = document.getElementById('strength-bar');
-            const text = document.getElementById('strength-text');
-            const widths = ['0%', '25%', '50%', '75%', '100%'];
-            const texts = ['Weak', 'Fair', 'Good', 'Strong', 'Very Strong'];
-            const colors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-blue-500', 'bg-green-500'];
+      <button id="register-btn" class="btn-primary mt-6">
+        Create Account
+      </button>
 
-            bar.className = 'strength-bar transition-all duration-300 ' + colors[strength];
-            bar.style.width = widths[strength];
-            text.textContent = texts[strength];
+      <p class="text-center text-slate-500 dark:text-slate-400 text-sm mt-5 transition-colors">
+        Already have an account?
+        <a href="./login.html" class="text-indigo-600 dark:text-indigo-400 font-medium hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors">Sign in</a>
+      </p>
+    </div>
 
-            checkPasswordMatch();
-        }
+    <p class="text-center text-xs text-slate-500 dark:text-slate-600 mt-6 transition-colors">© 2025 FinPass AI · For educational use only</p>
+  </div>
 
-        function checkPasswordMatch() {
-            const password = document.getElementById('password').value;
-            const confirm = document.getElementById('confirm-password').value;
-            const indicator = document.getElementById('match-indicator');
-
-            if (confirm === '') {
-                indicator.textContent = '';
-            } else if (password === confirm) {
-                indicator.textContent = '✓';
-                indicator.className = 'absolute right-4 top-3.5 text-lg text-green-600 font-bold';
-            } else {
-                indicator.textContent = '✗';
-                indicator.className = 'absolute right-4 top-3.5 text-lg text-red-600 font-bold';
-            }
-        }
-
-        document.getElementById('confirm-password').addEventListener('input', checkPasswordMatch);
-
-        async function handleRegister(e) {
-            e.preventDefault();
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const confirm = document.getElementById('confirm-password').value;
-            const errorDiv = document.getElementById('error-message');
-
-            if (password !== confirm) {
-                document.getElementById('error-text').textContent = 'Passwords do not match!';
-                errorDiv.classList.remove('hidden');
-                return;
-            }
-
-            try {
-                const response = await fetch(BACKEND_URL + '/api/auth/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, email, password })
-                });
-
-                if (response.ok) {
-                    window.location.href = '/static/wizard.html';
-                } else {
-                    const error = await response.json();
-                    document.getElementById('error-text').textContent = error.detail || 'Registration failed.';
-                    errorDiv.classList.remove('hidden');
-                }
-            } catch (err) {
-                document.getElementById('error-text').textContent = 'Connection error. Please try again.';
-                errorDiv.classList.remove('hidden');
-            }
-        }
-
-        const { BACKEND_URL } = await import('../js/config.js');
-    </script>
+  <script src="../js/theme.js"></script>
+  <script type="module" src="../js/register.js"></script>
 </body>
 </html>

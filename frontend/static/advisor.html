@@ -1,290 +1,341 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Financial Advisor | FinPass AI</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        * { font-family: 'Inter', sans-serif; }
-        h1, h2, h3 { font-family: 'Manrope', sans-serif; }
-        
-        :root {
-            --primary: #EF4444;
-            --secondary: #FFD700;
-        }
-        
-        .message-user {
-            @apply flex justify-end mb-4;
-        }
-        
-        .message-bot {
-            @apply flex justify-start mb-4;
-        }
-        
-        .message-bubble-user {
-            @apply bg-gradient-to-br from-red-600 to-red-700 text-white rounded-3xl rounded-tr-lg 
-                   px-6 py-3 max-w-xs shadow-lg;
-        }
-        
-        .message-bubble-bot {
-            @apply bg-slate-100 dark:bg-[#2a2a2a] text-slate-900 dark:text-white rounded-3xl rounded-tl-lg 
-                   px-6 py-3 max-w-md shadow-md border border-slate-200 dark:border-slate-700;
-        }
-        
-        .typing-indicator {
-            @apply flex gap-1;
-        }
-        
-        .typing-dot {
-            @apply w-2 h-2 bg-slate-400 rounded-full animate-bounce;
-        }
-        
-        .input-field {
-            @apply w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 
-                   bg-white dark:bg-[#2a2a2a] text-slate-900 dark:text-white placeholder-slate-500 
-                   focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent 
-                   transition-all duration-300 shadow-sm;
-        }
-        
-        .btn-send {
-            @apply p-3 bg-red-600 hover:bg-red-700 text-white rounded-xl 
-                   transition-all duration-300 shadow-lg hover:shadow-xl;
-        }
-        
-        .suggestion-chip {
-            @apply px-4 py-2 bg-slate-100 dark:bg-[#2a2a2a] hover:bg-slate-200 dark:hover:bg-[#3a3a3a] 
-                   text-slate-700 dark:text-slate-300 rounded-full text-sm font-medium 
-                   cursor-pointer transition-all duration-300 border border-slate-200 dark:border-slate-700;
-        }
-        
-        .sidebar-nav-item {
-            @apply flex items-center px-4 py-3 rounded-xl font-medium text-sm 
-                   transition-all duration-300 cursor-pointer;
-        }
-        
-        .sidebar-nav-item.active {
-            @apply bg-red-600 text-white shadow-lg;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FinPass AI | AI Advisor</title>
+  <meta name="description"
+    content="Your personalised AI-powered financial plan — income analysis, investment schemes, and wealth-building tactics tailored to you." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="../css/style.css" />
 </head>
-<body class="bg-white dark:bg-[#000000] text-slate-900 dark:text-white transition-colors duration-300">
-    
-    <!-- Mobile Menu Overlay -->
-    <div id="sidebar-overlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 hidden md:hidden transition-opacity" onclick="toggleSidebar()"></div>
 
-    <!-- Sidebar -->
-    <aside id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-white dark:bg-[#0f0f0f] border-r border-slate-200 dark:border-slate-800 z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 overflow-y-auto">
-        <div class="p-6">
-            <div class="flex items-center gap-3 mb-8">
-                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-red-600 to-red-700 flex items-center justify-center text-white shadow-lg">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                </div>
-                <div>
-                    <h1 class="font-bold text-lg text-slate-900 dark:text-white">FinPass</h1>
-                    <p class="text-xs font-semibold text-red-600 dark:text-yellow-400">AI Advisor</p>
-                </div>
-            </div>
+<body class="advisor-page">
+  <div class="page">
 
-            <nav class="space-y-2 mb-8">
-                <div class="sidebar-nav-item" onclick="navigateTo('dashboard')">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-3m0 0l7-4 7 4M5 9v10a1 1 0 001 1h12a1 1 0 001-1V9m-9 9l3-3m0 0l3 3m-3-3v6"/></svg>
-                    <span class="ml-3">Dashboard</span>
-                </div>
-                <div class="sidebar-nav-item active">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                    <span class="ml-3">AI Advisor</span>
-                </div>
-                <div class="sidebar-nav-item" onclick="startNewChat()">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                    <span class="ml-3">New Chat</span>
-                </div>
-            </nav>
+    <button class="back-btn" id="btn-back">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+      </svg>
+      Back to Dashboard
+    </button>
 
-            <!-- Chat History -->
-            <div class="border-t border-slate-200 dark:border-slate-800 pt-4">
-                <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-3">Recent Chats</p>
-                <div id="chat-history" class="space-y-2">
-                    <!-- Chat history items will be populated here -->
-                </div>
-            </div>
-
-            <div class="border-t border-slate-200 dark:border-slate-800 pt-6 mt-6">
-                <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 font-semibold transition-colors">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                    Sign Out
-                </button>
-            </div>
+    <div class="hero">
+      <div class="hero-left">
+        <div class="hero-badge">
+          <span></span>
+          Groq LLaMA-3 · Live AI
         </div>
-    </aside>
+        <h1>Your <em>AI Financial Plan</em></h1>
+        <p class="hero-sub" id="hero-sub">Personalised advice based on your real income, expenses &amp; goals.</p>
+      </div>
 
-    <!-- Main Content -->
-    <main class="md:ml-64 h-screen flex flex-col">
-        <!-- Header -->
-        <header class="sticky top-0 z-30 bg-white dark:bg-[#0f0f0f]/95 backdrop-blur border-b border-slate-200 dark:border-slate-800">
-            <div class="px-4 md:px-8 py-4 flex items-center justify-between">
-                <button onclick="toggleSidebar()" class="md:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-[#2a2a2a]">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                </button>
-                
-                <div class="flex-1 ml-4 md:ml-0">
-                    <h2 class="text-2xl font-bold">AI Financial Advisor</h2>
-                    <p class="text-sm text-slate-500 dark:text-slate-400">Get personalized financial guidance</p>
-                </div>
+      <button class="theme-btn" id="btn-theme" title="Toggle light/dark mode">
+        <span id="theme-icon">☀️</span>
+        <span id="theme-label">Light</span>
+      </button>
+    </div>
 
-                <button onclick="toggleDarkMode()" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-[#2a2a2a] transition-colors">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
-                </button>
-            </div>
-        </header>
+    <div class="profile-strip" id="profile-strip" style="display:none">
+      <div class="pstat">
+        <span class="pstat-label">Monthly Income</span>
+        <span class="pstat-value green" id="ps-income">—</span>
+      </div>
+      <div class="pstat">
+        <span class="pstat-label">Monthly Expenses</span>
+        <span class="pstat-value amber" id="ps-expenses">—</span>
+      </div>
+      <div class="pstat">
+        <span class="pstat-label">Monthly Savings</span>
+        <span class="pstat-value green" id="ps-savings">—</span>
+      </div>
+      <div class="pstat">
+        <span class="pstat-label">Savings Rate</span>
+        <span class="pstat-value yellow" id="ps-rate">—</span>
+      </div>
+      <div class="pstat">
+        <span class="pstat-label">Goal</span>
+        <span class="pstat-value" id="ps-goal">—</span>
+      </div>
+      <div class="pstat">
+        <span class="pstat-label">Risk Level</span>
+        <span class="pstat-value" id="ps-risk">—</span>
+      </div>
+    </div>
 
-        <!-- Chat Container -->
-        <div class="flex-1 overflow-y-auto px-4 md:px-8 py-6 bg-gradient-to-b from-slate-50 to-slate-100 dark:from-[#000000] dark:to-[#1a1a1a]">
-            <div id="messages-container" class="max-w-4xl mx-auto">
-                <!-- Initial Message -->
-                <div class="text-center mb-12 mt-12">
-                    <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-red-600 to-red-700 shadow-xl mb-4">
-                        <svg class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                        </svg>
-                    </div>
-                    <h1 class="text-4xl font-bold mb-2">Welcome to Your AI Advisor</h1>
-                    <p class="text-slate-600 dark:text-slate-400 mb-8">Ask me anything about your finances, investments, or financial goals</p>
-                    
-                    <!-- Suggestion Chips -->
-                    <div class="flex flex-wrap justify-center gap-3">
-                        <div class="suggestion-chip" onclick="sendSuggestion('How can I improve my monthly savings?')">💰 Improve savings</div>
-                        <div class="suggestion-chip" onclick="sendSuggestion('What is a good investment strategy for me?')">📈 Investment strategy</div>
-                        <div class="suggestion-chip" onclick="sendSuggestion('How should I budget my expenses?')">📊 Budget tips</div>
-                        <div class="suggestion-chip" onclick="sendSuggestion('What are my financial goals?')">🎯 My goals</div>
-                    </div>
-                </div>
-
-                <!-- Messages will appear here -->
-            </div>
+    <div id="alloc-section">
+      <div class="alloc-card">
+        <div class="alloc-title">Recommended Portfolio Allocation</div>
+        <div class="alloc-bar-wrap">
+          <div class="alloc-bar" id="bar-equity" style="width:0%;background:#6366f1;"></div>
+          <div class="alloc-bar" id="bar-debt" style="width:0%;background:#8b5cf6;"></div>
+          <div class="alloc-bar" id="bar-cash" style="width:0%;background:#f59e0b;"></div>
         </div>
-
-        <!-- Input Area -->
-        <div class="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0f0f0f] p-4 md:p-8">
-            <div class="max-w-4xl mx-auto">
-                <form onsubmit="handleSendMessage(event)" class="flex gap-3">
-                    <input type="text" id="message-input" class="input-field flex-1" placeholder="Ask me about your finances...">
-                    <button type="submit" class="btn-send">
-                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
-                        </svg>
-                    </button>
-                </form>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mt-3 text-center">Powered by advanced AI • Your data is encrypted</p>
-            </div>
+        <div class="alloc-legends">
+          <div class="alloc-legend">
+            <div class="alloc-dot" style="background:#6366f1"></div><span id="leg-equity">Equity 30%</span>
+          </div>
+          <div class="alloc-legend">
+            <div class="alloc-dot" style="background:#8b5cf6"></div><span id="leg-debt">Debt 50%</span>
+          </div>
+          <div class="alloc-legend">
+            <div class="alloc-dot" style="background:#f59e0b"></div><span id="leg-cash">Cash 20%</span>
+          </div>
         </div>
-    </main>
+      </div>
+    </div>
 
-    <script src="../js/config.js" type="module"></script>
-    <script>
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebar-overlay');
-            sidebar.classList.toggle('-translate-x-full');
-            overlay.classList.toggle('hidden');
-        }
+    <div id="loading-state">
+      <div class="spinner-ring"></div>
+      <h3>Analysing your finances…</h3>
+      <p>Our AI is reading your income, expenses, savings rate and goals to craft a personalised plan.</p>
+      <div class="loading-steps">
+        <div class="loading-step" id="step-1">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" />
+          </svg>
+          Reading your financial profile
+        </div>
+        <div class="loading-step" id="step-2">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" />
+          </svg>
+          Computing savings rate &amp; risk tier
+        </div>
+        <div class="loading-step" id="step-3">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" />
+          </svg>
+          Generating 7-section financial plan via Groq AI
+        </div>
+      </div>
+    </div>
 
-        function toggleDarkMode() {
-            document.documentElement.classList.toggle('dark');
-            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-        }
+    <div id="error-state">
+      <div class="err-icon">⚠️</div>
+      <h3>Could not load AI insight</h3>
+      <p id="error-msg">Something went wrong while generating your plan. Please try again.</p>
+      <button class="retry-btn" id="btn-retry">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+        Retry
+      </button>
+    </div>
 
-        async function handleSendMessage(e) {
-            e.preventDefault();
-            const input = document.getElementById('message-input');
-            const message = input.value.trim();
-            
-            if (!message) return;
+    <div id="insight-sections"></div>
 
-            addMessage(message, 'user');
-            input.value = '';
+    <div class="motive-banner" id="motive-banner">
+      <p id="motive-text">💡 The best time to start investing was yesterday. The second best time is right now.</p>
+    </div>
 
-            try {
-                const token = localStorage.getItem('access_token');
-                const response = await fetch(BACKEND_URL + '/api/advisor/chat', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ message })
-                });
+    <div class="refresh-row" id="refresh-row">
+      <button class="action-btn primary" id="btn-regenerate">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+        Regenerate Plan
+      </button>
+      <button class="action-btn secondary" id="btn-back2">
+        ← Back to Dashboard
+      </button>
+    </div>
 
-                if (response.ok) {
-                    const data = await response.json();
-                    addMessage(data.response, 'bot');
-                } else {
-                    addMessage('Sorry, I could not process your request. Please try again.', 'bot');
-                }
-            } catch (err) {
-                addMessage('Connection error. Please try again.', 'bot');
-            }
-        }
+  </div>
 
-        function addMessage(text, sender) {
-            const container = document.getElementById('messages-container');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = sender === 'user' ? 'message-user' : 'message-bot';
-            
-            const bubble = document.createElement('div');
-            bubble.className = sender === 'user' ? 'message-bubble-user' : 'message-bubble-bot';
-            
-            // Parse markdown-like formatting
-            let formattedText = text
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                .replace(/\n/g, '<br>');
-            
-            bubble.innerHTML = formattedText;
-            messageDiv.appendChild(bubble);
-            container.appendChild(messageDiv);
-            
-            // Scroll to bottom
-            container.parentElement.scrollTop = container.parentElement.scrollHeight;
-        }
+  <script type="module">
+    import { apiFetch } from './js/api.js';
 
-        function sendSuggestion(text) {
-            document.getElementById('message-input').value = text;
-            handleSendMessage(new Event('submit'));
-        }
+    // ── Config ────────────────────────────────────────────────────────────────
+    const SECTION_META = [
+      { icon: '🩺', color: 'rgba(16,185,129,0.12)', label: 'SECTION 1', title: 'Financial Health Diagnosis' },
+      { icon: '⚖️', color: 'rgba(99,102,241,0.12)', label: 'SECTION 2', title: 'Why This Allocation Suits You' },
+      { icon: '📅', color: 'rgba(139,92,246,0.12)', label: 'SECTION 3', title: 'Monthly Investment Plan' },
+      { icon: '🔄', color: 'rgba(245,158,11,0.12)', label: 'SECTION 4', title: 'Quarterly Actions' },
+      { icon: '🎯', color: 'rgba(16,185,129,0.12)', label: 'SECTION 5', title: 'Annual Milestones' },
+      { icon: '🚀', color: 'rgba(99,102,241,0.12)', label: 'SECTION 6', title: 'Wealth-Building Tactics' },
+      { icon: '🛡️', color: 'rgba(239,68,68,0.10)', label: 'SECTION 7', title: 'Top Risks to Watch' },
+    ];
 
-        function startNewChat() {
-            document.getElementById('messages-container').innerHTML = `
-                <div class="text-center mb-12 mt-12">
-                    <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-red-600 to-red-700 shadow-xl mb-4">
-                        <svg class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                        </svg>
-                    </div>
-                    <h1 class="text-4xl font-bold mb-2">New Chat</h1>
-                    <p class="text-slate-600 dark:text-slate-400">Ask me anything about your finances</p>
-                </div>
-            `;
-        }
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    const fmt = (n) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n || 0);
 
-        function navigateTo(page) {
-            window.location.href = `/static/${page}.html`;
-        }
+    function show(id) { document.getElementById(id).style.display = 'flex'; }
+    function hide(id) { document.getElementById(id).style.display = 'none'; }
+    function block(id) { document.getElementById(id).style.display = 'block'; }
 
-        function logout() {
-            window.location.href = '/static/login.html';
-        }
+    function animateLoadingSteps() {
+      [1, 2, 3].forEach((n, i) => {
+        setTimeout(() => {
+          const el = document.getElementById(`step-${n}`);
+          if (el) el.classList.add('visible');
+        }, i * 1200);
+      });
+    }
 
-        window.addEventListener('load', () => {
-            if (localStorage.getItem('theme') === 'dark') {
-                document.documentElement.classList.add('dark');
-            }
-        });
+    // ── Parse AI text into sections ───────────────────────────────────────────
+    function parseInsightIntoSections(text) {
+      const sections = [];
+      const sectionRegex = /SECTION\s+\d+\s*[—–-]+?\s*[^\n]+/gi;
+      const parts = text.split(/(?=SECTION\s+\d+)/i);
 
-        const { BACKEND_URL } = await import('../js/config.js');
-    </script>
+      parts.forEach((part, idx) => {
+        if (!part.trim()) return;
+        // Remove the "SECTION N — Title" header line; keep the body
+        const lines = part.split('\n');
+        const body = lines.slice(1).join('\n').trim();
+        if (body) sections.push(body);
+      });
+
+      // Fallback: if no SECTION markers found, show as a single block
+      if (sections.length === 0) sections.push(text.trim());
+      return sections;
+    }
+
+    // ── Render sections ───────────────────────────────────────────────────────
+    function renderSections(sectionTexts) {
+      const container = document.getElementById('insight-sections');
+      container.innerHTML = '';
+
+      sectionTexts.forEach((text, idx) => {
+        const meta = SECTION_META[idx] || { icon: '📌', color: 'rgba(255,255,255,0.05)', label: `SECTION ${idx + 1}`, title: 'Insight' };
+        const card = document.createElement('div');
+        card.className = 'section-card';
+
+        // Format body: bold lines starting with - or *
+        const formattedText = text
+          .replace(/\*\*(.+?)\*\*/g, '<strong class="highlight">$1</strong>')
+          .replace(/^[-•]\s+(.+)/gm, '<span class="bullet">$1</span>');
+
+        card.innerHTML = `
+        <div class="section-header">
+          <div class="section-icon" style="background:${meta.color}">${meta.icon}</div>
+          <div class="section-meta">
+            <div class="section-num">${meta.label}</div>
+            <div class="section-title">${meta.title}</div>
+          </div>
+        </div>
+        <div class="section-body">${formattedText}</div>
+      `;
+        container.appendChild(card);
+      });
+
+      block('insight-sections');
+    }
+
+    // ── Extract motivational line ─────────────────────────────────────────────
+    function extractMotivation(text) {
+      const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+      const last = lines[lines.length - 1];
+      if (last && last.length < 200) return last;
+      return '💡 The best time to start investing was yesterday. The second best time is right now.';
+    }
+
+    // ── Main fetch ────────────────────────────────────────────────────────────
+    async function loadAdvisor() {
+      const user = JSON.parse(localStorage.getItem('user') || 'null');
+      if (!user) { window.location.href = './login.html'; return; }
+
+      // Update hero subtitle
+      document.getElementById('hero-sub').textContent =
+        `Personalised plan for ${user.Name || user.email} based on your real income, expenses & goals.`;
+
+      show('loading-state');
+      hide('error-state');
+      document.getElementById('insight-sections').style.display = 'none';
+      document.getElementById('alloc-section').style.display = 'none';
+      document.getElementById('profile-strip').style.display = 'none';
+      document.getElementById('motive-banner').style.display = 'none';
+      document.getElementById('refresh-row').style.display = 'none';
+
+      animateLoadingSteps();
+
+      try {
+        const data = await apiFetch(`/api/ai/investment-insight/${user.email}`);
+
+        // Profile strip
+        const income = data.user_profile?.income || 0;
+        const expenses = data.user_profile?.expenses || 0;
+        const savings = Math.max(0, income - expenses);
+        const rate = income > 0 ? ((savings / income) * 100).toFixed(1) : 0;
+        const goal = data.user_profile?.goal || '—';
+        const risk = data.user_profile?.risk || '—';
+
+        document.getElementById('ps-income').textContent = fmt(income);
+        document.getElementById('ps-expenses').textContent = fmt(expenses);
+        document.getElementById('ps-savings').textContent = fmt(savings);
+        document.getElementById('ps-rate').textContent = `${rate}%`;
+        document.getElementById('ps-goal').textContent = goal;
+        document.getElementById('ps-risk').textContent = risk.charAt(0).toUpperCase() + risk.slice(1);
+
+        // Allocation bar
+        const alloc = data.allocation || { equity: 30, debt: 50, cash: 20 };
+        setTimeout(() => {
+          document.getElementById('bar-equity').style.width = alloc.equity + '%';
+          document.getElementById('bar-debt').style.width = alloc.debt + '%';
+          document.getElementById('bar-cash').style.width = alloc.cash + '%';
+        }, 100);
+        document.getElementById('leg-equity').textContent = `Equity ${alloc.equity}%`;
+        document.getElementById('leg-debt').textContent = `Debt ${alloc.debt}%`;
+        document.getElementById('leg-cash').textContent = `Cash ${alloc.cash}%`;
+
+        // Sections
+        const sections = parseInsightIntoSections(data.insight || '');
+        renderSections(sections);
+
+        // Motivation
+        const motive = extractMotivation(data.insight || '');
+        document.getElementById('motive-text').textContent = motive;
+
+        // Show everything, hide loading
+        hide('loading-state');
+        document.getElementById('profile-strip').style.display = 'flex';
+        document.getElementById('alloc-section').style.display = 'block';
+        document.getElementById('motive-banner').style.display = 'block';
+        document.getElementById('refresh-row').style.display = 'flex';
+
+      } catch (err) {
+        hide('loading-state');
+        document.getElementById('error-msg').textContent = err.message || 'Something went wrong.';
+        show('error-state');
+        document.getElementById('refresh-row').style.display = 'flex';
+      }
+    }
+
+    // ── Wire buttons ──────────────────────────────────────────────────────────
+    document.getElementById('btn-back').addEventListener('click', () => window.location.href = './dashboard.html');
+    document.getElementById('btn-back2').addEventListener('click', () => window.location.href = './dashboard.html');
+    document.getElementById('btn-retry').addEventListener('click', loadAdvisor);
+    document.getElementById('btn-regenerate').addEventListener('click', loadAdvisor);
+
+    // ── Theme toggle ──────────────────────────────────────────────────────────
+    function applyTheme(theme) {
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+        document.getElementById('theme-icon').textContent = '☀️';
+        document.getElementById('theme-label').textContent = 'Light';
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.getElementById('theme-icon').textContent = '🌙';
+        document.getElementById('theme-label').textContent = 'Dark';
+      }
+      localStorage.setItem('theme', theme);
+    }
+    // Apply saved preference on load
+    applyTheme(localStorage.getItem('theme') || 'light');
+    document.getElementById('btn-theme').addEventListener('click', () => {
+      const isDark = document.documentElement.classList.contains('dark');
+      applyTheme(isDark ? 'light' : 'dark');
+    });
+
+    // ── Boot ──────────────────────────────────────────────────────────────────
+    loadAdvisor();
+  </script>
 </body>
+
 </html>

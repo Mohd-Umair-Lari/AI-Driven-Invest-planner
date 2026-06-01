@@ -1,489 +1,243 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en" class="h-full">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Onboarding | FinPass AI - Setup Your Profile</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        * { font-family: 'Inter', sans-serif; }
-        h1, h2, h3 { font-family: 'Manrope', sans-serif; }
-        
-        .step-indicator {
-            @apply flex items-center justify-between mb-12;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FinPass AI | Onboarding</title>
+  <meta name="description" content="Set up your financial profile to receive personalized investment advice." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          animation: {
+            'fade-in': 'fadeIn 0.4s ease-out',
+            'slide-up': 'slideUp 0.4s ease-out',
+          },
+          keyframes: {
+            fadeIn: { from: { opacity: '0' }, to: { opacity: '1' } },
+            slideUp: { from: { opacity: '0', transform: 'translateY(20px)' }, to: { opacity: '1', transform: 'translateY(0)' } },
+          }
         }
-        
-        .step {
-            @apply flex flex-col items-center;
-        }
-        
-        .step-circle {
-            @apply w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg 
-                   transition-all duration-300 border-2;
-        }
-        
-        .step-circle.active {
-            @apply bg-red-600 text-white border-red-600 shadow-lg scale-110;
-        }
-        
-        .step-circle.completed {
-            @apply bg-green-600 text-white border-green-600;
-        }
-        
-        .step-circle.inactive {
-            @apply bg-slate-200 text-slate-600 border-slate-200;
-        }
-        
-        .step-label {
-            @apply mt-2 text-sm font-semibold text-slate-700;
-        }
-        
-        .step-connector {
-            @apply flex-1 h-1 mx-2 mt-0 transition-all duration-300;
-        }
-        
-        .step-connector.active {
-            @apply bg-red-600;
-        }
-        
-        .step-connector.inactive {
-            @apply bg-slate-200;
-        }
-        
-        .input-field {
-            @apply w-full px-4 py-3 rounded-xl border border-slate-300 
-                   bg-white text-slate-900 placeholder-slate-500 
-                   focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent 
-                   transition-all duration-300 shadow-sm;
-        }
-        
-        .select-field {
-            @apply w-full px-4 py-3 rounded-xl border border-slate-300 
-                   bg-white text-slate-900 focus:outline-none focus:ring-2 
-                   focus:ring-red-500 focus:border-transparent transition-all duration-300 shadow-sm;
-        }
-        
-        .btn-primary {
-            @apply px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold 
-                   rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl;
-        }
-        
-        .btn-secondary {
-            @apply px-6 py-3 bg-slate-200 hover:bg-slate-300 text-slate-900 font-semibold 
-                   rounded-xl transition-all duration-300;
-        }
-        
-        .form-group {
-            @apply mb-6;
-        }
-        
-        .label {
-            @apply block text-sm font-semibold text-slate-700 mb-2;
-        }
-        
-        .form-step {
-            @apply hidden;
-        }
-        
-        .form-step.active {
-            @apply block animate-fadeIn;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-    </style>
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/style.css" />
 </head>
-<body class="bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen py-12 px-4">
-    
-    <div class="w-full max-w-2xl mx-auto">
-        <!-- Header -->
-        <div class="text-center mb-12">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-red-600 to-red-700 shadow-xl mb-4">
-                <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                </svg>
-            </div>
-            <h1 class="text-4xl font-bold text-slate-900 mb-2">Let's Get Started</h1>
-            <p class="text-slate-600">Set up your financial profile in just 5 steps</p>
-        </div>
+<body class="mesh-bg min-h-screen flex items-center justify-center p-4 transition-colors duration-200">
 
-        <!-- Step Indicator -->
-        <div class="step-indicator mb-12 px-4">
-            <div class="step">
-                <div class="step-circle active" id="circle-1">1</div>
-                <div class="step-label">Basic Info</div>
-            </div>
-            <div class="step-connector active" id="connector-1"></div>
-            <div class="step">
-                <div class="step-circle inactive" id="circle-2">2</div>
-                <div class="step-label">Employment</div>
-            </div>
-            <div class="step-connector inactive" id="connector-2"></div>
-            <div class="step">
-                <div class="step-circle inactive" id="circle-3">3</div>
-                <div class="step-label">Financials</div>
-            </div>
-            <div class="step-connector inactive" id="connector-3"></div>
-            <div class="step">
-                <div class="step-circle inactive" id="circle-4">4</div>
-                <div class="step-label">Goals</div>
-            </div>
-            <div class="step-connector inactive" id="connector-4"></div>
-            <div class="step">
-                <div class="step-circle inactive" id="circle-5">5</div>
-                <div class="step-label">Review</div>
-            </div>
-        </div>
+  <div class="fixed top-6 right-6 z-50">
+    <button id="theme-toggle" class="p-2.5 rounded-full bg-white/80 dark:bg-[#1a1a1a]/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-yellow-400 hover:bg-white dark:hover:bg-[#2a2a2a] transition-colors shadow-sm focus:outline-none">
+        <svg id="theme-icon" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 
-        <!-- Form Container -->
-        <div class="bg-white rounded-2xl shadow-2xl p-8 md:p-12">
-            <form id="wizard-form">
-                <!-- Step 1: Basic Info -->
-                <div class="form-step active" id="step-1">
-                    <h2 class="text-2xl font-bold mb-6">Basic Information</h2>
-                    
-                    <div class="form-group">
-                        <label class="label">Full Name</label>
-                        <input type="text" class="input-field" id="name" placeholder="John Doe" required>
-                    </div>
+        </svg>
+    </button>
+  </div>
 
-                    <div class="form-group">
-                        <label class="label">Age</label>
-                        <input type="number" class="input-field" id="age" min="18" max="120" placeholder="30" required>
-                    </div>
+  <div class="fixed inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute top-10 left-10 w-72 h-72 bg-indigo-600 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-10 dark:opacity-8 animate-pulse"></div>
+    <div class="absolute bottom-10 right-10 w-72 h-72 bg-violet-600 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-10 dark:opacity-8 animate-pulse" style="animation-delay:2s"></div>
+  </div>
 
-                    <div class="form-group">
-                        <label class="label">Date of Birth</label>
-                        <input type="date" class="input-field" id="dob" required>
-                    </div>
+  <div class="w-full max-w-lg relative z-10">
 
-                    <div class="form-group">
-                        <label class="label">Phone Number</label>
-                        <input type="tel" class="input-field" id="phone" placeholder="+91 XXXXX XXXXX">
-                    </div>
-
-                    <div class="form-group">
-                        <label class="label">Country</label>
-                        <select class="select-field" id="country" required>
-                            <option value="">Select Country</option>
-                            <option value="India">India</option>
-                            <option value="USA">United States</option>
-                            <option value="UK">United Kingdom</option>
-                            <option value="Canada">Canada</option>
-                            <option value="Australia">Australia</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Step 2: Employment -->
-                <div class="form-step" id="step-2">
-                    <h2 class="text-2xl font-bold mb-6">Employment Details</h2>
-                    
-                    <div class="form-group">
-                        <label class="label">Employment Status</label>
-                        <select class="select-field" id="employment-status" required>
-                            <option value="">Select Status</option>
-                            <option value="employed">Employed</option>
-                            <option value="self-employed">Self-Employed</option>
-                            <option value="entrepreneur">Entrepreneur</option>
-                            <option value="student">Student</option>
-                            <option value="retired">Retired</option>
-                            <option value="unemployed">Unemployed</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="label">Job Title</label>
-                        <input type="text" class="input-field" id="job-title" placeholder="Software Engineer">
-                    </div>
-
-                    <div class="form-group">
-                        <label class="label">Company Name</label>
-                        <input type="text" class="input-field" id="company" placeholder="Your Company">
-                    </div>
-
-                    <div class="form-group">
-                        <label class="label">Industry</label>
-                        <select class="select-field" id="industry">
-                            <option value="">Select Industry</option>
-                            <option value="technology">Technology</option>
-                            <option value="finance">Finance</option>
-                            <option value="healthcare">Healthcare</option>
-                            <option value="retail">Retail</option>
-                            <option value="manufacturing">Manufacturing</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="label">Years of Experience</label>
-                        <input type="number" class="input-field" id="experience" min="0" placeholder="5">
-                    </div>
-                </div>
-
-                <!-- Step 3: Financials -->
-                <div class="form-step" id="step-3">
-                    <h2 class="text-2xl font-bold mb-6">Financial Information</h2>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="form-group">
-                            <label class="label">Monthly Income (₹)</label>
-                            <input type="number" class="input-field" id="monthly-income" placeholder="50000" min="0" step="1000" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="label">Monthly Expenses (₹)</label>
-                            <input type="number" class="input-field" id="monthly-expenses" placeholder="30000" min="0" step="1000" required>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="label">Annual Income (₹)</label>
-                        <input type="number" class="input-field" id="annual-income" placeholder="600000" min="0" step="10000">
-                    </div>
-
-                    <div class="form-group">
-                        <label class="label">Current Savings (₹)</label>
-                        <input type="number" class="input-field" id="savings" placeholder="100000" min="0" step="1000">
-                    </div>
-
-                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                        <p class="text-sm text-blue-900">
-                            <span class="font-semibold">Monthly Savings:</span>
-                            <span class="text-lg font-bold">₹<span id="calculated-savings">0</span></span>
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Step 4: Goals -->
-                <div class="form-step" id="step-4">
-                    <h2 class="text-2xl font-bold mb-6">Financial Goals</h2>
-                    
-                    <div class="form-group">
-                        <label class="label">Primary Financial Goal</label>
-                        <select class="select-field" id="primary-goal" required>
-                            <option value="">Select Goal</option>
-                            <option value="wealth-building">Build Wealth</option>
-                            <option value="retirement">Plan for Retirement</option>
-                            <option value="education">Education Planning</option>
-                            <option value="home">Buy a Home</option>
-                            <option value="emergency">Emergency Fund</option>
-                            <option value="debt">Pay Off Debt</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="label">Target Amount (₹)</label>
-                        <input type="number" class="input-field" id="target-amount" placeholder="1000000" min="0" step="50000">
-                    </div>
-
-                    <div class="form-group">
-                        <label class="label">Timeline (Years)</label>
-                        <input type="number" class="input-field" id="timeline" min="1" max="50" placeholder="5">
-                    </div>
-
-                    <div class="form-group">
-                        <label class="label">Risk Tolerance</label>
-                        <select class="select-field" id="risk-tolerance" required>
-                            <option value="">Select Risk Level</option>
-                            <option value="low">Conservative (Low Risk)</option>
-                            <option value="medium">Moderate (Medium Risk)</option>
-                            <option value="high">Aggressive (High Risk)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Step 5: Review -->
-                <div class="form-step" id="step-5">
-                    <h2 class="text-2xl font-bold mb-6">Review Your Profile</h2>
-                    
-                    <div id="review-content" class="space-y-6">
-                        <!-- Review will be populated by JavaScript -->
-                    </div>
-
-                    <div class="mt-8 p-6 bg-green-50 border border-green-200 rounded-xl">
-                        <div class="flex gap-3">
-                            <svg class="w-6 h-6 text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                            </svg>
-                            <div>
-                                <p class="font-semibold text-green-900">You're all set!</p>
-                                <p class="text-sm text-green-800">Click "Complete" to access your personalized financial dashboard</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="flex justify-between items-center mt-8 pt-8 border-t border-slate-200">
-                    <button type="button" class="btn-secondary" id="prev-btn" onclick="previousStep()" style="display: none;">← Previous</button>
-                    <div></div>
-                    <button type="button" class="btn-primary" id="next-btn" onclick="nextStep()">Next →</button>
-                    <button type="submit" class="btn-primary hidden" id="submit-btn" onclick="completeOnboarding()">Complete ✓</button>
-                </div>
-            </form>
-        </div>
-
-        <!-- Progress Bar -->
-        <div class="mt-6 mx-auto max-w-2xl bg-white rounded-lg p-4">
-            <div class="h-2 bg-slate-200 rounded-full overflow-hidden">
-                <div id="progress-bar" class="h-full bg-gradient-to-r from-red-600 to-red-700 rounded-full transition-all duration-300" style="width: 20%;"></div>
-            </div>
-            <p class="text-sm text-slate-600 mt-2">Step <span id="current-step">1</span> of 5</p>
-        </div>
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-red-500 to-black dark:from-cyan-400 dark:to-yellow-500 shadow-lg shadow-red-500/30 dark:shadow-cyan-400/30 mb-3">
+        <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+      </div>
+      <h1 class="text-2xl font-bold text-slate-900 dark:text-white transition-colors">Set Up Your Profile</h1>
+      <p class="text-slate-500 dark:text-white text-sm mt-1 transition-colors">Complete these steps to get personalised advice</p>
     </div>
 
-    <script src="../js/config.js" type="module"></script>
-    <script>
-        let currentStep = 1;
-        const totalSteps = 5;
+    <div class="flex items-center justify-center gap-2 mb-8">
+      <span class="dot w-3 h-3 rounded-full bg-indigo-500 active"></span>
+      <span class="w-8 h-px bg-slate-300 dark:bg-slate-700 transition-colors"></span>
+      <span class="dot w-3 h-3 rounded-full bg-slate-300 dark:bg-slate-700 transition-colors"></span>
+      <span class="w-8 h-px bg-slate-300 dark:bg-slate-700 transition-colors"></span>
+      <span class="dot w-3 h-3 rounded-full bg-slate-300 dark:bg-slate-700 transition-colors"></span>
+      <span class="w-8 h-px bg-slate-300 dark:bg-slate-700 transition-colors"></span>
+      <span class="dot w-3 h-3 rounded-full bg-slate-300 dark:bg-slate-700 transition-colors"></span>
+    </div>
 
-        function updateStepIndicator() {
-            for (let i = 1; i <= totalSteps; i++) {
-                const circle = document.getElementById(`circle-${i}`);
-                const connector = document.getElementById(`connector-${i}`);
-                
-                if (i < currentStep) {
-                    circle.className = 'step-circle completed';
-                    circle.textContent = '✓';
-                } else if (i === currentStep) {
-                    circle.className = 'step-circle active';
-                    circle.textContent = i;
-                } else {
-                    circle.className = 'step-circle inactive';
-                    circle.textContent = i;
-                }
-                
-                if (connector && i < currentStep) {
-                    connector.className = 'step-connector active';
-                } else if (connector) {
-                    connector.className = 'step-connector inactive';
-                }
-            }
+    <div class="glass rounded-2xl p-8 shadow-2xl transition-colors duration-200">
 
-            document.getElementById('current-step').textContent = currentStep;
-            document.getElementById('progress-bar').style.width = (currentStep / totalSteps) * 100 + '%';
-        }
+      <div class="step active">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center transition-colors">
+            <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <div>
+            <p class="text-xs text-slate-500 uppercase tracking-wider transition-colors">Step 1 of 4</p>
+            <h2 class="text-lg font-semibold text-slate-900 dark:text-white transition-colors">Goal Setup</h2>
+          </div>
+        </div>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-medium text-slate-500 dark:text-yellow-400 mb-1.5 uppercase tracking-wider transition-colors">Financial Goal</label>
+            <input id="goal-name" type="text" placeholder="e.g. Early Retirement, Car Purchase" class="input-field" />
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-500 dark:text-yellow-400 mb-1.5 uppercase tracking-wider transition-colors">Target Amount (₹)</label>
+              <input id="goal-amount" type="number" placeholder="5,000,000" class="input-field" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-500 dark:text-yellow-400 mb-1.5 uppercase tracking-wider transition-colors">Timeline (months)</label>
+              <input id="goal-time" type="number" placeholder="120" class="input-field" />
+            </div>
+          </div>
+        </div>
+        <div class="flex gap-3 mt-6">
+          <button onclick="cancelOnboarding()" class="flex-1 py-3 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-white text-sm font-medium hover:border-slate-400 dark:hover:border-slate-500 hover:text-slate-800 dark:hover:text-yellow-400 transition-colors">
+            Save & Exit
+          </button>
+          <button onclick="nextStep()" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-red-600 to-red-700 dark:from-yellow-400 dark:to-yellow-500 text-white dark:text-black text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm">
+            Next Step →
+          </button>
+        </div>
+      </div>
 
-        function showStep(step) {
-            document.querySelectorAll('.form-step').forEach(el => el.classList.remove('active'));
-            document.getElementById(`step-${step}`).classList.add('active');
-            
-            document.getElementById('prev-btn').style.display = step === 1 ? 'none' : 'block';
-            document.getElementById('next-btn').style.display = step === totalSteps ? 'none' : 'block';
-            document.getElementById('submit-btn').classList.toggle('hidden', step !== totalSteps);
-            
-            if (step === 5) populateReview();
-            
-            updateStepIndicator();
-        }
+      <div class="step">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center transition-colors">
+            <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+            </svg>
+          </div>
+          <div>
+            <p class="text-xs text-slate-500 uppercase tracking-wider transition-colors">Step 2 of 4</p>
+            <h2 class="text-lg font-semibold text-slate-900 dark:text-white transition-colors">Your Financials</h2>
+          </div>
+        </div>
+        <div class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-500 dark:text-yellow-400 mb-1.5 uppercase tracking-wider transition-colors">Monthly Income (₹)</label>
+              <input id="income" type="number" placeholder="75,000" class="input-field" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-500 dark:text-yellow-400 mb-1.5 uppercase tracking-wider transition-colors">Monthly Expenses (₹)</label>
+              <input id="expenses" type="number" placeholder="45,000" class="input-field" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-500 dark:text-yellow-400 mb-1.5 uppercase tracking-wider transition-colors">Total Debt (₹)</label>
+            <input id="debt" type="number" placeholder="150,000" class="input-field" />
+          </div>
+          <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-white/10 cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500/40 transition-colors">
+            <input type="checkbox" id="emergency" class="w-4 h-4 accent-indigo-500 rounded" />
+            <span class="text-slate-700 dark:text-white text-sm transition-colors">I have an emergency fund (3–6 months of expenses)</span>
+          </label>
+        </div>
+        <div class="flex gap-3 mt-6">
+          <button onclick="prevStep()" class="flex-1 py-3 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 text-sm font-medium hover:border-slate-400 dark:hover:border-slate-500 hover:text-slate-800 dark:hover:text-slate-300 transition-colors">
+            ← Back
+          </button>
+          <button onclick="cancelOnboarding()" class="py-3 px-4 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-500 dark:text-white text-sm hover:text-slate-700 dark:hover:text-yellow-400 transition-colors">
+            Exit
+          </button>
+          <button onclick="nextStep()" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm">
+            Next Step →
+          </button>
+        </div>
+      </div>
 
-        function nextStep() {
-            if (validateStep(currentStep)) {
-                currentStep = Math.min(currentStep + 1, totalSteps);
-                showStep(currentStep);
-            }
-        }
+      <div class="step">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center transition-colors">
+            <svg class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+            </svg>
+          </div>
+          <div>
+            <p class="text-xs text-slate-500 uppercase tracking-wider transition-colors">Step 3 of 4</p>
+            <h2 class="text-lg font-semibold text-slate-900 dark:text-white transition-colors">Investment Preferences</h2>
+          </div>
+        </div>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-medium text-slate-500 dark:text-yellow-400 mb-1.5 uppercase tracking-wider transition-colors">Risk Appetite</label>
+            <select id="risk" class="select-field">
+              <option value="Low">Low – Capital preservation</option>
+              <option value="Medium">Medium – Balanced growth</option>
+              <option value="High">High – Aggressive growth</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-500 dark:text-yellow-400 mb-1.5 uppercase tracking-wider transition-colors">Investment Mode</label>
+            <select id="mode" class="select-field">
+              <option value="SIP">SIP – Monthly systematic investment</option>
+              <option value="Lumpsum">Lumpsum – One-time investment</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-500 dark:text-yellow-400 mb-1.5 uppercase tracking-wider transition-colors">Monthly Investment Amount (₹)</label>
+            <input id="invest-amt" type="number" placeholder="15,000" class="input-field" />
+          </div>
+        </div>
+        <div class="flex gap-3 mt-6">
+          <button onclick="prevStep()" class="flex-1 py-3 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 text-sm font-medium hover:border-slate-400 dark:hover:border-slate-500 hover:text-slate-800 dark:hover:text-slate-300 transition-colors">
+            ← Back
+          </button>
+          <button onclick="cancelOnboarding()" class="py-3 px-4 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-500 text-sm hover:text-slate-700 dark:hover:text-slate-400 transition-colors">
+            Exit
+          </button>
+          <button onclick="nextStep()" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm">
+            Next Step →
+          </button>
+        </div>
+      </div>
 
-        function previousStep() {
-            currentStep = Math.max(currentStep - 1, 1);
-            showStep(currentStep);
-        }
+      <div class="step">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-8 h-8 rounded-lg bg-violet-100 dark:bg-violet-500/20 flex items-center justify-center transition-colors">
+            <svg class="w-4 h-4 text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div>
+            <p class="text-xs text-slate-500 uppercase tracking-wider transition-colors">Step 4 of 4</p>
+            <h2 class="text-lg font-semibold text-slate-900 dark:text-white transition-colors">Review & Confirm</h2>
+          </div>
+        </div>
+        <div class="bg-red-50 dark:bg-yellow-400/10 border border-red-100 dark:border-yellow-400/20 rounded-xl p-5 mb-6 transition-colors">
+          <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400 mt-0.5 shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div>
+              <p class="text-indigo-900 dark:text-indigo-300 text-sm font-medium mb-1 transition-colors">All set!</p>
+              <p class="text-slate-600 dark:text-white text-sm leading-relaxed transition-colors">
+                We'll analyse your financial profile and build a personalised investment plan using AI-powered insights.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="flex gap-3">
+          <button onclick="prevStep()" class="flex-1 py-3 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 text-sm font-medium hover:border-slate-400 dark:hover:border-slate-500 hover:text-slate-800 dark:hover:text-slate-300 transition-colors">
+            ← Back
+          </button>
+          <button onclick="cancelOnboarding()" class="py-3 px-4 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-500 text-sm hover:text-slate-700 dark:hover:text-slate-400 transition-colors">
+            Exit
+          </button>
+          <button onclick="submitWizard()" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm">
+            🚀 Finish Setup
+          </button>
+        </div>
+      </div>
 
-        function validateStep(step) {
-            if (step === 1) {
-                return document.getElementById('name').value && document.getElementById('age').value && document.getElementById('country').value;
-            } else if (step === 2) {
-                return document.getElementById('employment-status').value;
-            } else if (step === 3) {
-                return document.getElementById('monthly-income').value && document.getElementById('monthly-expenses').value;
-            } else if (step === 4) {
-                return document.getElementById('primary-goal').value && document.getElementById('risk-tolerance').value;
-            }
-            return true;
-        }
+    </div>
+  </div>
 
-        function populateReview() {
-            const review = `
-                <div class="bg-slate-50 rounded-xl p-6 space-y-4">
-                    <h3 class="font-bold text-lg">Basic Information</h3>
-                    <div class="grid grid-cols-2 gap-4 text-sm">
-                        <div><span class="text-slate-600">Name:</span> <span class="font-semibold">${document.getElementById('name').value}</span></div>
-                        <div><span class="text-slate-600">Age:</span> <span class="font-semibold">${document.getElementById('age').value}</span></div>
-                        <div><span class="text-slate-600">Employment:</span> <span class="font-semibold">${document.getElementById('employment-status').value}</span></div>
-                        <div><span class="text-slate-600">Primary Goal:</span> <span class="font-semibold">${document.getElementById('primary-goal').value}</span></div>
-                    </div>
-                </div>
-                <div class="bg-slate-50 rounded-xl p-6 space-y-4">
-                    <h3 class="font-bold text-lg">Financial Summary</h3>
-                    <div class="grid grid-cols-2 gap-4 text-sm">
-                        <div><span class="text-slate-600">Monthly Income:</span> <span class="font-semibold">₹${parseInt(document.getElementById('monthly-income').value).toLocaleString('en-IN')}</span></div>
-                        <div><span class="text-slate-600">Monthly Expenses:</span> <span class="font-semibold">₹${parseInt(document.getElementById('monthly-expenses').value).toLocaleString('en-IN')}</span></div>
-                        <div><span class="text-slate-600">Target Amount:</span> <span class="font-semibold">₹${parseInt(document.getElementById('target-amount').value).toLocaleString('en-IN')}</span></div>
-                        <div><span class="text-slate-600">Risk Tolerance:</span> <span class="font-semibold">${document.getElementById('risk-tolerance').value}</span></div>
-                    </div>
-                </div>
-            `;
-            document.getElementById('review-content').innerHTML = review;
-        }
-
-        document.getElementById('monthly-income').addEventListener('input', () => {
-            const income = parseInt(document.getElementById('monthly-income').value) || 0;
-            const expenses = parseInt(document.getElementById('monthly-expenses').value) || 0;
-            document.getElementById('calculated-savings').textContent = (income - expenses).toLocaleString('en-IN');
-        });
-
-        document.getElementById('monthly-expenses').addEventListener('input', () => {
-            const income = parseInt(document.getElementById('monthly-income').value) || 0;
-            const expenses = parseInt(document.getElementById('monthly-expenses').value) || 0;
-            document.getElementById('calculated-savings').textContent = (income - expenses).toLocaleString('en-IN');
-        });
-
-        async function completeOnboarding() {
-            try {
-                const token = localStorage.getItem('access_token');
-                const data = {
-                    name: document.getElementById('name').value,
-                    age: parseInt(document.getElementById('age').value),
-                    'employment-status': document.getElementById('employment-status').value,
-                    'monthly_income': parseInt(document.getElementById('monthly-income').value),
-                    'monthly_expenses': parseInt(document.getElementById('monthly-expenses').value),
-                    onboarding: {
-                        completed: true,
-                        data: {
-                            'job-title': document.getElementById('job-title').value,
-                            company: document.getElementById('company').value,
-                            industry: document.getElementById('industry').value,
-                            'primary-goal': document.getElementById('primary-goal').value,
-                            'target-amount': document.getElementById('target-amount').value,
-                            timeline: document.getElementById('timeline').value,
-                            'risk-tolerance': document.getElementById('risk-tolerance').value
-                        }
-                    }
-                };
-
-                const response = await fetch(BACKEND_URL + '/api/auth/onboarding-complete', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                if (response.ok) {
-                    window.location.href = '/static/dashboard.html';
-                }
-            } catch (err) {
-                alert('Error completing onboarding');
-            }
-        }
-
-        const { BACKEND_URL } = await import('../js/config.js');
-        showStep(1);
-    </script>
+  <script src="../js/theme.js"></script>
+  <script type="module" src="../js/wizard.js"></script>
 </body>
 </html>
