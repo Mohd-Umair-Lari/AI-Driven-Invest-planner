@@ -2,7 +2,9 @@ import uuid
 import json
 import os
 import re
-from datetime import datetime
+import secrets
+import hashlib
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 
 import certifi
@@ -31,7 +33,6 @@ from api.schemas import (
 )
 from auth.password_reset import ForgotPasswordRequest, ResetPasswordRequest, VerifyResetTokenRequest
 from auth.forgot_password import forgot_password_service
-from auth.token_manager import token_manager
 from analytics.financial_analytics import compute_financial_health
 from ml.goal_predictor import generate_plan, goal_probability
 from ml.goal_intelligence import compute_goal_intelligence
@@ -42,11 +43,9 @@ from ai.groq_service import initialize_groq
 from rag.rag_chain import run_rag_chain
 from orchestrator.ai_orchestrator import AIOrchestrator
 from memory.conversation_memory import ConversationMemory
-from services.auth_service import (
-    hash_password, verify_password,
-    create_access_token, create_refresh_token,
-    decode_access_token, hash_refresh_token, verify_refresh_token,
-)
+from services.jwt_handler import JWTHandler, TokenValidator, PasswordHasher
+from services.session_store import session_store, token_blacklist, password_reset_token_store
+from services.security_utils import rate_limiter, SecurityHeaders, SecurityValidator
 from config.logging_config import setup_logging
 
 log = setup_logging()
@@ -120,10 +119,21 @@ async def _require_auth(authorization: str = Header(default="")) -> str:
     if not authorization.startswith("Bearer "):
         raise HTTPException(401, "Missing or invalid Authorization header")
     token = authorization.removeprefix("Bearer ").strip()
-    email = decode_access_token(token)
-    if not email:
+    
+    # Validate token format and claims
+    claims = TokenValidator.validate_access_token(token)
+    if not claims:
         raise HTTPException(401, "Token expired or invalid")
-    return email
+    
+    # Check if token is blacklisted
+    if token_blacklist.is_blacklisted(claims["jti"]):
+        raise HTTPException(401, "Token has been revoked")
+    
+    # Verify session still exists and is valid
+    if not session_store.is_session_valid(claims["jti"]):
+        raise HTTPException(401, "Session expired or invalidated")
+    
+    return claims["sub"]  # Return email
 
 _ORIGINS = [
     "http://localhost:3000", "http://localhost:5173", "http://localhost:8080",
@@ -169,6 +179,13 @@ api.add_middleware(
     allow_headers=["*"],
 )
 
+@api.middleware("http")
+async def add_security_headers(request, call_next):
+    """Add security headers to all responses."""
+    response = await call_next(request)
+    response = SecurityHeaders.apply_headers(response)
+    return response
+
 @api.get("/", tags=["Health"])
 async def health():
     return {"status": "ok", "service": "FinPass Backend", "version": "v2 (FastAPI+Flask)"}
@@ -193,42 +210,82 @@ async def test_connection():
 @api.post("/api/login", tags=["Auth"])
 async def api_login(body: LoginRequest):
     try:
+        email_lower = body.email.lower()
+        
+        log.info(f"Login attempt for: {email_lower}")
 
-        log.info(f"Login attempt for: {body.email}")
+        # Rate limiting (5 attempts per 5 minutes)
+        rate_check = rate_limiter.check_rate_limit(
+            identifier=email_lower,
+            action="login",
+            max_attempts=5,
+            window_seconds=300
+        )
+        
+        if not rate_check["allowed"]:
+            log.warning(f"Rate limit exceeded for login: {email_lower} ({rate_check['attempt_count']}/5)")
+            raise HTTPException(429, f"Too many login attempts. Try again in {rate_check['reset_at']}")
 
-        user = collection.find_one({"email": body.email})
+        user = collection.find_one({"email": email_lower})
         if not user:
-            log.warning(f"User not found: {body.email}")
+            log.warning(f"User not found: {email_lower}")
             raise HTTPException(401, "Invalid credentials")
 
-        if not verify_password(body.password, user.get("password", "")):
-            log.warning(f"Invalid password for user: {body.email}")
+        if not PasswordHasher.verify(body.password, user.get("password", "")):
+            log.warning(f"Invalid password for user: {email_lower}")
             raise HTTPException(401, "Invalid credentials")
 
-        log.info(f"Password verified for: {body.email}")
+        log.info(f"Password verified for: {email_lower}")
 
-        user = _ensure_onboarding(body.email, user)
+        user = _ensure_onboarding(email_lower, user)
 
-        access  = create_access_token(body.email)
-        refresh = create_refresh_token()
+        # Create tokens with new JWT handler
+        access_token = JWTHandler.create_access_token(email_lower, str(user["_id"]))
+        refresh_token = JWTHandler.create_refresh_token(email_lower, str(user["_id"]))
 
+        # Extract claims to get JTI for session tracking
+        access_claims = TokenValidator.validate_access_token(access_token)
+        refresh_claims = TokenValidator.validate_refresh_token(refresh_token)
+
+        # Track sessions in MongoDB
+        if access_claims:
+            session_store.create_session(
+                email=email_lower,
+                user_id=str(user["_id"]),
+                jti=access_claims["jti"],
+                token_type="access",
+                expires_at=datetime.fromtimestamp(access_claims["exp"], timezone.utc)
+            )
+        
+        if refresh_claims:
+            session_store.create_session(
+                email=email_lower,
+                user_id=str(user["_id"]),
+                jti=refresh_claims["jti"],
+                token_type="refresh",
+                expires_at=datetime.fromtimestamp(refresh_claims["exp"], timezone.utc)
+            )
+
+        # Update user's last login
         collection.update_one(
-            {"email": body.email},
-            {"$set": {"refresh_token_hash": hash_refresh_token(refresh),
-                      "last_login": datetime.utcnow().isoformat()}}
+            {"email": email_lower},
+            {"$set": {"last_login": datetime.now(timezone.utc).isoformat()}}
         )
 
-        log.info(f"Login successful for: {body.email}")
+        # Reset rate limit on successful login
+        rate_limiter.reset_limit(email_lower, "login")
+
+        log.info(f"Login successful for: {email_lower}")
         return {
             "status":        "success",
             "user":          _serialize(user),
-            "access_token":  access,
-            "refresh_token": refresh,
+            "access_token":  access_token,
+            "refresh_token": refresh_token,
             "token_type":    "bearer",
+            "expires_in":    900  # 15 minutes in seconds
         }
 
     except HTTPException:
-
         raise
     except Exception as e:
         log.error(f"Login error for {body.email}: {str(e)}", exc_info=True)
@@ -237,17 +294,39 @@ async def api_login(body: LoginRequest):
 @api.post("/api/signup", tags=["Auth"], status_code=201)
 async def api_signup(body: SignupRequest):
     try:
-        log.info(f"Signup attempt for: {body.email}")
+        email_lower = body.email.lower()
+        log.info(f"Signup attempt for: {email_lower}")
 
-        if collection.find_one({"email": body.email}):
-            log.warning(f"Email already registered: {body.email}")
+        # Rate limiting (3 registrations per 10 minutes per email)
+        rate_check = rate_limiter.check_rate_limit(
+            identifier=email_lower,
+            action="register",
+            max_attempts=3,
+            window_seconds=600
+        )
+        
+        if not rate_check["allowed"]:
+            log.warning(f"Rate limit exceeded for registration: {email_lower}")
+            raise HTTPException(429, "Too many registration attempts. Try again later.")
+
+        if collection.find_one({"email": email_lower}):
+            log.warning(f"Email already registered: {email_lower}")
             raise HTTPException(409, "Email already registered")
+
+        # Validate password strength
+        pwd_validation = SecurityValidator.validate_password_strength(body.password)
+        if not pwd_validation["is_strong"]:
+            log.warning(f"Weak password for registration: {email_lower}")
+            raise HTTPException(400, {
+                "error": "Password is not strong enough",
+                "issues": pwd_validation["issues"]
+            })
 
         doc = {
             "_id": ObjectId(),
             "Name": body.Name,
-            "email": body.email,
-            "password": hash_password(body.password),
+            "email": email_lower,
+            "password": PasswordHasher.hash(body.password),
             "Age": body.Age or "",
             "employment-status": body.employment_status or "Salaried",
             "Goal": body.Goal or {},
@@ -257,32 +336,53 @@ async def api_signup(body: SignupRequest):
             "onboarding": {
                 "status": "in_progress",
                 "current_step": 0,
-                "last_updated": datetime.utcnow().isoformat()
+                "last_updated": datetime.now(timezone.utc).isoformat()
             },
-            "created_at": datetime.utcnow().isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "security_version": 1  # For future security updates
         }
 
         result = collection.insert_one(doc)
-        log.info(f"User created: {body.email} (ID: {result.inserted_id})")
+        log.info(f"User created: {email_lower} (ID: {result.inserted_id})")
 
-        access  = create_access_token(body.email)
-        refresh = create_refresh_token()
+        # Create tokens with new JWT handler
+        access_token = JWTHandler.create_access_token(email_lower, str(result.inserted_id))
+        refresh_token = JWTHandler.create_refresh_token(email_lower, str(result.inserted_id))
 
-        collection.update_one(
-            {"email": body.email},
-            {"$set": {"refresh_token_hash": hash_refresh_token(refresh)}}
-        )
+        # Extract claims to get JTI for session tracking
+        access_claims = TokenValidator.validate_access_token(access_token)
+        refresh_claims = TokenValidator.validate_refresh_token(refresh_token)
 
-        _trigger_user_indexing(body.email)
+        # Track sessions in MongoDB
+        if access_claims:
+            session_store.create_session(
+                email=email_lower,
+                user_id=str(result.inserted_id),
+                jti=access_claims["jti"],
+                token_type="access",
+                expires_at=datetime.fromtimestamp(access_claims["exp"], timezone.utc)
+            )
+        
+        if refresh_claims:
+            session_store.create_session(
+                email=email_lower,
+                user_id=str(result.inserted_id),
+                jti=refresh_claims["jti"],
+                token_type="refresh",
+                expires_at=datetime.fromtimestamp(refresh_claims["exp"], timezone.utc)
+            )
 
-        log.info(f"Signup successful for: {body.email}")
+        _trigger_user_indexing(email_lower)
+
+        log.info(f"Signup successful for: {email_lower}")
 
         return {
             "status":        "success",
             "user":          _serialize(doc),
-            "access_token":  access,
-            "refresh_token": refresh,
+            "access_token":  access_token,
+            "refresh_token": refresh_token,
             "token_type":    "bearer",
+            "expires_in":    900  # 15 minutes in seconds
         }
 
     except HTTPException:
@@ -293,54 +393,185 @@ async def api_signup(body: SignupRequest):
 
 @api.post("/api/auth/refresh", tags=["Auth"])
 async def refresh_token(body: dict):
+    try:
+        email = body.get("email", "").lower()
+        refresh = body.get("refresh_token", "")
+        
+        if not email or not refresh:
+            raise HTTPException(400, "email and refresh_token required")
+        
+        # Validate refresh token
+        claims = TokenValidator.validate_refresh_token(refresh)
+        if not claims:
+            raise HTTPException(401, "Invalid or expired refresh token")
+        
+        # Check if token is blacklisted
+        if token_blacklist.is_blacklisted(claims["jti"]):
+            raise HTTPException(401, "Refresh token has been revoked")
+        
+        # Check if session still valid
+        if not session_store.is_session_valid(claims["jti"]):
+            raise HTTPException(401, "Session expired or invalidated")
+        
+        # Verify email matches
+        if claims["sub"] != email:
+            log.warning(f"Email mismatch in refresh token: {email} vs {claims['sub']}")
+            raise HTTPException(401, "Invalid refresh token")
+        
+        user = collection.find_one({"email": email})
+        if not user:
+            raise HTTPException(401, "User not found")
+        
+        # Create new access token
+        new_access_token = JWTHandler.create_access_token(email, claims["user_id"])
+        new_access_claims = TokenValidator.validate_access_token(new_access_token)
+        
+        # Track new session
+        if new_access_claims:
+            session_store.create_session(
+                email=email,
+                user_id=claims["user_id"],
+                jti=new_access_claims["jti"],
+                token_type="access",
+                expires_at=datetime.fromtimestamp(new_access_claims["exp"], timezone.utc)
+            )
+        
+        log.info(f"Token refreshed for: {email}")
+        return {
+            "access_token": new_access_token,
+            "refresh_token": refresh,  # Keep same refresh token
+            "token_type": "bearer",
+            "expires_in": 900  # 15 minutes
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        log.error(f"Token refresh error: {str(e)}", exc_info=True)
+        raise HTTPException(500, f"Token refresh failed: {str(e)}")
 
-    email   = body.get("email", "")
-    refresh = body.get("refresh_token", "")
-    if not email or not refresh:
-        raise HTTPException(400, "email and refresh_token required")
-    user = collection.find_one({"email": email})
-    if not user or not user.get("refresh_token_hash"):
-        raise HTTPException(401, "Invalid refresh token")
-    if not verify_refresh_token(refresh, user["refresh_token_hash"]):
-        raise HTTPException(401, "Invalid refresh token")
-    new_access  = create_access_token(email)
-    new_refresh = create_refresh_token()
-    collection.update_one({"email": email},
-        {"$set": {"refresh_token_hash": hash_refresh_token(new_refresh)}})
-    return {"access_token": new_access, "refresh_token": new_refresh, "token_type": "bearer"}
+@api.post("/api/auth/logout", tags=["Auth"])
+async def logout(authorization: str = Header(None)):
+    """Logout user and revoke current session."""
+    try:
+        if not authorization:
+            raise HTTPException(401, "Authorization header missing")
+        
+        token = authorization.removeprefix("Bearer ").strip()
+        claims = TokenValidator.validate_access_token(token)
+        
+        if not claims:
+            raise HTTPException(401, "Invalid token")
+        
+        jti = claims["jti"]
+        user_id = claims.get("user_id")
+        email = claims["sub"]
+        
+        # Invalidate session
+        session_store.invalidate_session(jti)
+        
+        # Add to blacklist
+        token_blacklist.add_to_blacklist(
+            jti=jti,
+            user_id=user_id,
+            reason="logout",
+            expires_at=datetime.fromtimestamp(claims["exp"], timezone.utc)
+        )
+        
+        log.info(f"User logged out: {email}")
+        
+        return {"message": "Logged out successfully"}
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        log.error(f"Logout error: {str(e)}", exc_info=True)
+        raise HTTPException(500, f"Logout failed: {str(e)}")
+
+@api.post("/api/auth/logout-all", tags=["Auth"])
+async def logout_all(authorization: str = Header(None)):
+    """Logout user from all devices."""
+    try:
+        if not authorization:
+            raise HTTPException(401, "Authorization header missing")
+        
+        token = authorization.removeprefix("Bearer ").strip()
+        claims = TokenValidator.validate_access_token(token)
+        
+        if not claims:
+            raise HTTPException(401, "Invalid token")
+        
+        user_id = claims.get("user_id")
+        email = claims["sub"]
+        
+        # Invalidate all sessions for this user
+        count = session_store.invalidate_all_user_sessions(user_id)
+        
+        log.warning(f"All sessions invalidated for user: {email} ({count} sessions)")
+        
+        return {
+            "message": "Logged out from all devices",
+            "sessions_invalidated": count
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        log.error(f"Logout-all error: {str(e)}", exc_info=True)
+        raise HTTPException(500, f"Logout failed: {str(e)}")
 
 @api.post("/api/auth/forgot-password", tags=["Auth"], status_code=200)
 async def forgot_password(body: ForgotPasswordRequest):
     try:
-        email = body.email.strip().lower()
-        log.info(f"Forgot password request for: {email}")
+        email_lower = body.email.strip().lower()
+        log.info(f"Forgot password request for: {email_lower}")
         
-        user = collection.find_one({"email": {"$regex": f"^{email}$", "$options": "i"}})
+        # Rate limiting (3 attempts per 15 minutes)
+        rate_check = rate_limiter.check_rate_limit(
+            identifier=email_lower,
+            action="forgot_password",
+            max_attempts=3,
+            window_seconds=900
+        )
         
-        if not user:
-            log.warning(f"Forgot password: User not found: {email}")
+        if not rate_check["allowed"]:
+            log.warning(f"Rate limit exceeded for password reset: {email_lower}")
+            # Don't reveal if email exists - always return success
             return {
                 "success": True,
                 "message": "If an account exists with this email, you will receive a password reset link shortly."
             }
         
-        reset_token = token_manager.generate_reset_token(user["email"], expires_in_hours=24)
-        log.info(f"Reset token generated for: {email}")
+        user = collection.find_one({"email": {"$regex": f"^{email_lower}$", "$options": "i"}})
         
-        success, message = forgot_password_service.send_reset_email(user["email"], reset_token)
+        # Don't reveal if email exists for security
+        if user:
+            # Generate secure reset token
+            reset_token = secrets.token_urlsafe(32)
+            token_hash = hashlib.sha256(reset_token.encode()).hexdigest()
+            
+            # Store in MongoDB (persistent, not in-memory)
+            password_reset_token_store.create_reset_token(
+                email=user["email"],
+                token_hash=token_hash,
+                expires_in_hours=24
+            )
+            
+            log.info(f"Reset token created for: {email_lower}")
+            
+            # Send email with reset link
+            success, message = forgot_password_service.send_reset_email(user["email"], reset_token)
+            
+            if success:
+                log.info(f"Password reset email sent successfully to: {email_lower}")
+            else:
+                log.error(f"Failed to send reset email to {email_lower}: {message}")
         
-        if success:
-            log.info(f"Password reset email sent successfully to: {email}")
-            return {
-                "success": True,
-                "message": "Password reset email sent successfully. Check your email for the reset link."
-            }
-        else:
-            log.error(f"Failed to send reset email to {email}: {message}")
-            return {
-                "success": False,
-                "message": "We encountered an issue sending the reset email. Please try again later."
-            }
+        # Always return success for security
+        return {
+            "success": True,
+            "message": "If an account exists with this email, you will receive a password reset link shortly."
+        }
     
     except Exception as e:
         log.error(f"Forgot password error: {str(e)}", exc_info=True)
@@ -354,12 +585,17 @@ async def verify_reset_token(body: VerifyResetTokenRequest):
     try:
         log.info("Verifying reset token")
         
-        is_valid, email = token_manager.validate_reset_token(body.token)
+        # Hash the token
+        token_hash = hashlib.sha256(body.token.encode()).hexdigest()
         
-        if not is_valid:
+        # Validate reset token (from MongoDB, not in-memory)
+        token_record = password_reset_token_store.validate_reset_token(token_hash)
+        
+        if not token_record:
             log.warning("Invalid or expired reset token provided")
             raise HTTPException(400, "Invalid or expired reset token")
         
+        email = token_record["email"]
         log.info(f"Reset token verified for: {email}")
         return {
             "success": True,
@@ -379,41 +615,55 @@ async def reset_password(body: ResetPasswordRequest):
         if body.new_password != body.confirm_password:
             raise HTTPException(400, "Passwords do not match")
         
-        if len(body.new_password) < 8:
-            raise HTTPException(400, "Password must be at least 8 characters long")
+        # Validate password strength
+        pwd_validation = SecurityValidator.validate_password_strength(body.new_password)
+        if not pwd_validation["is_strong"]:
+            raise HTTPException(400, {
+                "error": "Password is not strong enough",
+                "issues": pwd_validation["issues"]
+            })
         
         log.info("Processing password reset")
         
-        is_valid, email = token_manager.validate_reset_token(body.token)
+        # Hash the token
+        token_hash = hashlib.sha256(body.token.encode()).hexdigest()
         
-        if not is_valid:
+        # Validate reset token (from MongoDB, not in-memory)
+        token_record = password_reset_token_store.validate_reset_token(token_hash)
+        
+        if not token_record:
             log.warning("Invalid or expired token for password reset")
             raise HTTPException(400, "Invalid or expired reset token")
         
+        email = token_record["email"]
         user = collection.find_one({"email": email})
+        
         if not user:
             log.warning(f"User not found for password reset: {email}")
             raise HTTPException(404, "User not found")
         
-        new_password_hash = hash_password(body.new_password)
-        
+        # Update password
         collection.update_one(
             {"email": email},
             {"$set": {
-                "password": new_password_hash,
-                "password_reset_at": datetime.utcnow().isoformat(),
-                "refresh_token_hash": None
+                "password": PasswordHasher.hash(body.new_password),
+                "password_reset_at": datetime.now(timezone.utc).isoformat(),
             }}
         )
         
-        token_manager.mark_token_as_used(body.token)
+        # Mark token as used (prevent reuse)
+        password_reset_token_store.mark_token_as_used(token_hash)
         
+        # Invalidate all sessions (user must login again with new password)
+        count = session_store.invalidate_all_user_sessions(str(user["_id"]))
+        
+        # Send confirmation email
         success, message = forgot_password_service.send_password_changed_email(email)
         
         if success:
-            log.info(f"Password successfully reset for: {email}")
+            log.warning(f"Password reset and all sessions invalidated: {email} ({count} sessions)")
         else:
-            log.warning(f"Confirmation email failed for {email}: {message}")
+            log.warning(f"Password reset but confirmation email failed for {email}: {message}")
         
         return {
             "success": True,
