@@ -6,16 +6,20 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional, Dict, Any
 import jwt as _pyjwt
 
-JWT_SECRET = os.getenv("JWT_SECRET")
-if not JWT_SECRET:
-    raise ValueError(
-        "CRITICAL: JWT_SECRET not set! Set JWT_SECRET environment variable. "
-        "Generate one with: python -c 'import secrets; print(secrets.token_hex(32))'"
-    )
-
 JWT_ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MIN = 15
 REFRESH_TOKEN_EXPIRE_DAYS = 7
+
+
+def _get_jwt_secret() -> str:
+    secret = os.getenv("JWT_SECRET", "").strip()
+    if not secret:
+        raise ValueError(
+            "CRITICAL: JWT_SECRET not set! Set JWT_SECRET in the deployment environment. "
+            "Generating it in git or a local push does not provision the secret on the server. "
+            "Generate one with: python -c 'import secrets; print(secrets.token_hex(32))'"
+        )
+    return secret
 
 class JWTHandler:
     
@@ -23,6 +27,7 @@ class JWTHandler:
     def create_access_token(email: str, user_id: str = None) -> str:
         """Create a short-lived JWT access token with standard claims."""
         expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MIN)
+        jwt_secret = _get_jwt_secret()
         payload = {
             "sub": email,
             "user_id": user_id,
@@ -31,12 +36,13 @@ class JWTHandler:
             "iat": datetime.now(timezone.utc),
             "jti": secrets.token_hex(8)
         }
-        return _pyjwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+        return _pyjwt.encode(payload, jwt_secret, algorithm=JWT_ALGORITHM)
     
     @staticmethod
     def create_refresh_token(email: str, user_id: str = None) -> str:
         """Create a longer-lived JWT refresh token."""
         expire = datetime.now(timezone.utc) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+        jwt_secret = _get_jwt_secret()
         payload = {
             "sub": email,
             "user_id": user_id,
@@ -45,13 +51,13 @@ class JWTHandler:
             "iat": datetime.now(timezone.utc),
             "jti": secrets.token_hex(8)
         }
-        return _pyjwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+        return _pyjwt.encode(payload, jwt_secret, algorithm=JWT_ALGORITHM)
     
     @staticmethod
     def decode_token(token: str, token_type: str = "access") -> Optional[Dict[str, Any]]:
         """Decode and validate JWT token with type checking."""
         try:
-            payload = _pyjwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+            payload = _pyjwt.decode(token, _get_jwt_secret(), algorithms=[JWT_ALGORITHM])
             if payload.get("type") != token_type:
                 return None
             return payload
@@ -66,7 +72,7 @@ class JWTHandler:
     def get_token_claims(token: str) -> Optional[Dict[str, Any]]:
         """Get claims from a token without type validation."""
         try:
-            return _pyjwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+            return _pyjwt.decode(token, _get_jwt_secret(), algorithms=[JWT_ALGORITHM])
         except Exception:
             return None
 
