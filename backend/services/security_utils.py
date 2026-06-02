@@ -6,13 +6,15 @@ import os
 import certifi
 
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
+DB_NAME = os.getenv("DB_NAME", "mockDB").strip()
+
 
 class RateLimiter:
     """Rate limiting to prevent brute force attacks."""
     
     def __init__(self):
         self.client = MongoClient(MONGO_URI, tlsCAFile=certifi.where())
-        self.db = self.client.get_database()
+        self.db = self.client[DB_NAME]
         self._ensure_indexes()
     
     def _ensure_indexes(self):

@@ -7,13 +7,19 @@ import certifi
 from bson import ObjectId
 
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
+DB_NAME = os.getenv("DB_NAME", "mockDB").strip()
+
+
+def _get_db(client: MongoClient):
+    return client[DB_NAME]
+
 
 class SessionStore:
     """MongoDB-backed session store for token management and blacklisting."""
     
     def __init__(self):
         self.client = MongoClient(MONGO_URI, tlsCAFile=certifi.where())
-        self.db = self.client.get_database()
+        self.db = _get_db(self.client)
         self._ensure_indexes()
     
     def _ensure_indexes(self):
@@ -97,7 +103,7 @@ class TokenBlacklist:
     
     def __init__(self):
         self.client = MongoClient(MONGO_URI, tlsCAFile=certifi.where())
-        self.db = self.client.get_database()
+        self.db = _get_db(self.client)
         self._ensure_indexes()
     
     def _ensure_indexes(self):
@@ -149,7 +155,7 @@ class PasswordResetTokenStore:
     
     def __init__(self):
         self.client = MongoClient(MONGO_URI, tlsCAFile=certifi.where())
-        self.db = self.client.get_database()
+        self.db = _get_db(self.client)
         self._ensure_indexes()
     
     def _ensure_indexes(self):
