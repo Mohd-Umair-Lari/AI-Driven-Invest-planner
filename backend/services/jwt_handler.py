@@ -92,20 +92,35 @@ class PasswordHasher:
             return generate_password_hash(password, method='pbkdf2:sha256', salt_length=16)
     
     @staticmethod
+    def needs_rehash(stored: str) -> bool:
+        """True if stored value is legacy plain text and should be upgraded."""
+        if not stored or not isinstance(stored, str):
+            return True
+        return not stored.startswith(
+            ("pbkdf2:", "scrypt:", "argon2:", "$2b$", "$2a$", "$2y$")
+        )
+
+    @staticmethod
     def verify(password: str, hashed: str) -> bool:
-        """Verify a password against its hash."""
-        try:
-            import bcrypt
-            if hashed.startswith(('$2b$', '$2a$', '$2y$')):
-                return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
-        except ImportError:
-            pass
-        
-        try:
+        """Verify password (bcrypt, werkzeug hashes, or legacy plain text)."""
+        if not password or not hashed or not isinstance(hashed, str):
+            return False
+
+        if hashed.startswith(("pbkdf2:", "scrypt:", "argon2:")):
             from werkzeug.security import check_password_hash
             return check_password_hash(hashed, password)
-        except Exception:
-            return False
+
+        if hashed.startswith(("$2b$", "$2a$", "$2y$")):
+            try:
+                import bcrypt
+                return bcrypt.checkpw(
+                    password.encode("utf-8"), hashed.encode("utf-8")
+                )
+            except Exception:
+                return False
+
+        # Legacy accounts may have plain-text passwords from before auth hardening
+        return hmac.compare_digest(password, hashed)
 
 
 class TokenValidator:

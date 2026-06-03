@@ -231,9 +231,17 @@ async def api_login(body: LoginRequest):
             log.warning(f"User not found: {email_lower}")
             raise HTTPException(401, "Invalid credentials")
 
-        if not PasswordHasher.verify(body.password, user.get("password", "")):
+        stored_password = user.get("password") or ""
+        if not PasswordHasher.verify(body.password, stored_password):
             log.warning(f"Invalid password for user: {email_lower}")
             raise HTTPException(401, "Invalid credentials")
+
+        if PasswordHasher.needs_rehash(stored_password):
+            collection.update_one(
+                {"email": email_lower},
+                {"$set": {"password": PasswordHasher.hash(body.password)}},
+            )
+            log.info(f"Upgraded legacy password hash for: {email_lower}")
 
         log.info(f"Password verified for: {email_lower}")
 
@@ -317,10 +325,11 @@ async def api_signup(body: SignupRequest):
         pwd_validation = SecurityValidator.validate_password_strength(body.password)
         if not pwd_validation["is_strong"]:
             log.warning(f"Weak password for registration: {email_lower}")
-            raise HTTPException(400, {
-                "error": "Password is not strong enough",
-                "issues": pwd_validation["issues"]
-            })
+            issues = "; ".join(pwd_validation["issues"])
+            raise HTTPException(
+                400,
+                f"Password is not strong enough. {issues}",
+            )
 
         doc = {
             "_id": ObjectId(),
