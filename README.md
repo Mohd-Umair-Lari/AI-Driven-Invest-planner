@@ -307,3 +307,5 @@ All investment data shown is for illustrative purposes.
 Please consult a SEBI-registered investment advisor before making significant financial decisions.
 
 ---
+
+The agent used for the build is Kimi2.6 model API's from OpenRouter and the LLM used is Groq 5.1 
