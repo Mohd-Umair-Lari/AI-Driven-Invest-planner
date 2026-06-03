@@ -2,6 +2,15 @@
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
+
+def _session_title(messages: List[Dict], fallback: str = "New conversation") -> str:
+    for m in messages:
+        if m.get("role") == "user" and m.get("content"):
+            text = m["content"].strip().replace("\n", " ")
+            return (text[:48] + "…") if len(text) > 48 else text
+    return fallback
+
+
 class ConversationMemory:
 
     def __init__(self, conversations_col):
@@ -26,15 +35,26 @@ class ConversationMemory:
             for m in messages[-limit:]
         ]
 
-    def list_sessions(self, email: str) -> List[Dict]:
+    def list_sessions(self, email: str, limit: int = 30) -> List[Dict]:
+        sessions = []
+        cursor = self.col.find(
+            {"email": email},
+            {"_id": 0, "session_id": 1, "created_at": 1, "updated_at": 1,
+             "title": 1, "messages": 1},
+        ).sort("updated_at", -1).limit(limit)
 
-        return list(
-            self.col.find(
-                {"email": email},
-                {"_id": 0, "session_id": 1, "created_at": 1, "updated_at": 1,
-                 "messages": {"$slice": -1}},
-            ).sort("updated_at", -1).limit(20)
-        )
+        for doc in cursor:
+            messages = doc.get("messages") or []
+            last = messages[-1] if messages else None
+            sessions.append({
+                "session_id": doc.get("session_id"),
+                "title": doc.get("title") or _session_title(messages),
+                "created_at": doc.get("created_at"),
+                "updated_at": doc.get("updated_at"),
+                "message_count": len(messages),
+                "preview": (last.get("content", "")[:80] if last else ""),
+            })
+        return sessions
 
     def append(
         self,
@@ -52,11 +72,18 @@ class ConversationMemory:
             {"role": "assistant", "content": ai_msg,   "timestamp": now,
              "intent": intent, "context_used": context_used},
         ]
+        existing = self.get_session(email, session_id)
+        title_update = {}
+        if not existing or not existing.get("title"):
+            title_update["title"] = _session_title(
+                (existing or {}).get("messages", []) + [{"role": "user", "content": user_msg}]
+            )
+
         self.col.update_one(
             {"email": email, "session_id": session_id},
             {
                 "$push": {"messages": {"$each": messages}},
-                "$set":  {"updated_at": now, "email": email},
+                "$set":  {"updated_at": now, "email": email, **title_update},
                 "$setOnInsert": {"created_at": now, "session_id": session_id},
             },
             upsert=True,

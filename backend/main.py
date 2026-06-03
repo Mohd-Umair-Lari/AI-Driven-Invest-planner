@@ -983,7 +983,7 @@ async def recommended_actions(email: str = FPath(...)):
 async def advisor_chat(body: AdvisorChatRequest):
 
     ctx        = body.context
-    session_id = getattr(body, "session_id", None) or str(uuid.uuid4())
+    session_id = (body.session_id or "").strip() or str(uuid.uuid4())
     extra = {
         "income":   ctx.monthly_income if ctx else 0,
         "expenses": ctx.monthly_expenses if ctx else 0,
@@ -999,7 +999,7 @@ async def advisor_chat(body: AdvisorChatRequest):
     )
     if not result.get("success", True):
         raise HTTPException(500, result.get("response", "AI error"))
-    return {**result, "user_email": body.email}
+    return {**result, "user_email": body.email, "session_id": session_id}
 
 @api.post("/api/rag/chat", tags=["AI Advisor"])
 async def rag_chat(body: AdvisorChatRequest):

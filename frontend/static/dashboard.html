@@ -216,44 +216,37 @@
                     </div>
                 </div>
 
-                <div class="ai-panel p-6 flex flex-col col-span-1 lg:col-span-1">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="w-10 h-10 rounded-xl bg-red-500/20 dark:bg-cyan-500/20 border border-red-500/30 dark:border-cyan-400/30 flex items-center justify-center text-red-500 dark:text-cyan-300">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                <div class="ai-panel ai-panel-chat p-4 sm:p-6 flex flex-col col-span-1 lg:col-span-1 min-h-[420px]">
+                    <div class="flex items-center justify-between gap-3 mb-4 shrink-0">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-red-500/20 dark:bg-cyan-500/20 border border-red-500/30 dark:border-cyan-400/30 flex items-center justify-center text-red-500 dark:text-cyan-300">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                            </div>
+                            <div>
+                                <h3 class="ai-panel-title font-bold text-lg leading-tight">AI Advisor</h3>
+                                <p class="ai-panel-sub text-[11px] font-medium">Chat with memory · resume anytime</p>
+                            </div>
                         </div>
-                        <div>
-                            <h3 class="ai-panel-title font-bold text-lg leading-tight">AI Advisor</h3>
-                            <p class="ai-panel-sub text-[11px] font-medium">Smart Suggestions &amp; Insights</p>
-                        </div>
+                        <button type="button" id="chat-new-btn" class="chat-new-btn" title="Start new conversation">+ New</button>
                     </div>
 
-                    <div class="flex-1 overflow-y-auto pr-2 space-y-4 max-h-[300px]" style="scrollbar-width: thin; scrollbar-color: #334155 transparent;" id="ai-chat-messages">
-
-                        <div class="ai-chat-card">
-                            <div class="flex justify-between items-center mb-3">
-                                <span class="text-[10px] font-bold text-rose-600 dark:text-rose-400 bg-rose-100 dark:bg-rose-500/10 px-2 py-1 rounded tracking-wider">SAVINGS</span>
-                                <span class="text-[10px] font-bold text-rose-500 dark:text-rose-400 tracking-wide">High Impact</span>
+                    <div class="chat-layout flex flex-1 min-h-0 gap-3">
+                        <aside class="chat-sessions-panel" id="chat-sessions-panel" aria-label="Past conversations">
+                            <p class="chat-sessions-label">Conversations</p>
+                            <div id="chat-sessions-list" class="chat-sessions-list">
+                                <p class="chat-sessions-empty text-xs text-slate-400 p-2">Loading…</p>
                             </div>
-                            <h4>Emergency Fund Priority</h4>
-                            <p>Your current expenses are ₹45,000. We suggest maintaining an emergency fund of at least ₹2.7L (6 months) before aggressive investing.</p>
-                        </div>
+                        </aside>
 
-                        <div class="ai-chat-card">
-                            <div class="flex justify-between items-center mb-3">
-                                <span class="text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-500/10 px-2 py-1 rounded tracking-wider">TAX</span>
-                                <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 tracking-wide">Medium Impact</span>
+                        <div class="chat-main flex flex-col flex-1 min-w-0">
+                            <div class="flex-1 overflow-y-auto pr-1 space-y-3 chat-messages-scroll" id="ai-chat-messages"></div>
+                            <div class="mt-3 relative shrink-0">
+                                <input type="text" id="ai-chat-input" placeholder="Message FinPass AI…" class="ai-chat-input-field" autocomplete="off">
+                                <button type="button" id="ai-chat-send" class="absolute right-2 top-1/2 -translate-y-1/2 text-red-500 dark:text-yellow-400 hover:text-red-600 dark:hover:text-yellow-300 transition-colors" aria-label="Send message">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                                </button>
                             </div>
-                            <h4>Tax Optimization (80C)</h4>
-                            <p>Consider investing in ELSS or PPF to exhaust your ₹1.5L limit under Section 80C for better post-tax returns.</p>
                         </div>
-
-                    </div>
-
-                    <div class="mt-4 relative shrink-0">
-                        <input type="text" id="ai-chat-input" placeholder="Ask AI Advisor..." class="ai-chat-input-field">
-                        <button id="ai-chat-send" class="absolute right-2 top-1/2 -translate-y-1/2 text-red-500 dark:text-yellow-400 hover:text-red-600 dark:hover:text-yellow-300 transition-colors">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-                        </button>
                     </div>
                 </div>
 

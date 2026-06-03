@@ -55,6 +55,7 @@ class ChatContext(BaseModel):
 class AdvisorChatRequest(BaseModel):
     email: EmailStr
     question: str = Field(..., min_length=1)
+    session_id: Optional[str] = None
     context: Optional[ChatContext] = ChatContext()
 
 class IntelligenceRequest(BaseModel):

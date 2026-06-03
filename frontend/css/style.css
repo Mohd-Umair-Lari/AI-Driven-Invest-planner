@@ -701,6 +701,126 @@ body.wizard-mesh {
   cursor: not-allowed;
 }
 
+.ai-panel-chat .chat-layout {
+  min-height: 280px;
+  max-height: 360px;
+}
+
+.chat-messages-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #334155 transparent;
+}
+
+.chat-sessions-panel {
+  width: 7.5rem;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+  padding-right: 0.5rem;
+}
+
+.dark .chat-sessions-panel {
+  border-right-color: rgba(255, 255, 255, 0.08);
+}
+
+.chat-sessions-label {
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #94a3b8;
+  margin-bottom: 0.5rem;
+  padding-left: 0.25rem;
+}
+
+.chat-sessions-list {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.chat-session-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font-size: 0.6875rem;
+  line-height: 1.35;
+  padding: 0.5rem 0.4rem;
+  margin-bottom: 0.25rem;
+  border-radius: 0.5rem;
+  border: 1px solid transparent;
+  color: #475569;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.chat-session-item:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.chat-session-item.active {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.25);
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+.dark .chat-session-item {
+  color: #94a3b8;
+}
+
+.dark .chat-session-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dark .chat-session-item.active {
+  background: rgba(0, 217, 255, 0.12);
+  border-color: rgba(0, 217, 255, 0.3);
+  color: #ffd700;
+}
+
+.chat-new-btn {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  padding: 0.35rem 0.65rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #b91c1c;
+  background: rgba(239, 68, 68, 0.08);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.chat-new-btn:hover {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.dark .chat-new-btn {
+  border-color: rgba(255, 215, 0, 0.35);
+  color: #ffd700;
+  background: rgba(255, 215, 0, 0.08);
+}
+
+.chat-empty-hint {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  text-align: center;
+  padding: 2rem 0.75rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 640px) {
+  .chat-sessions-panel {
+    width: 5.5rem;
+  }
+  .chat-session-item {
+    font-size: 0.625rem;
+    padding: 0.4rem 0.25rem;
+  }
+}
+
 .sankey-placeholder {
   width: 100%;
   height: 220px;

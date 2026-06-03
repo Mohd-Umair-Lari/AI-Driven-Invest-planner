@@ -30,7 +30,7 @@ class AIOrchestrator:
 
         history = []
         if session_id:
-            history = self.memory.get_recent(email, session_id, limit=6)
+            history = self.memory.get_recent(email, session_id, limit=16)
 
         result = run_rag_chain(
             collection=self.collection,

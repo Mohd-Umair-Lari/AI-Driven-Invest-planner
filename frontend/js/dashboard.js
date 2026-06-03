@@ -373,42 +373,75 @@ async function loadRecommendedActions(user) {
   }
 }
 
+const CHAT_SESSION_STORAGE = 'finpass_active_chat_session';
+
+function newChatSessionId() {
+  return 'sess_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
+}
+
+function chatStorageKey(email) {
+  return `${CHAT_SESSION_STORAGE}_${email}`;
+}
+
 function setupChatbot() {
-  const chatInput    = document.getElementById('ai-chat-input');
-  const chatSend     = document.getElementById('ai-chat-send');
-  const chatMessages = document.getElementById('ai-chat-messages');
+  const chatInput       = document.getElementById('ai-chat-input');
+  const chatSend        = document.getElementById('ai-chat-send');
+  const chatMessages    = document.getElementById('ai-chat-messages');
+  const sessionsList    = document.getElementById('chat-sessions-list');
+  const newChatBtn      = document.getElementById('chat-new-btn');
 
   if (!chatInput || !chatSend || !chatMessages) return;
 
-  const sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+  let activeSessionId = null;
+  let sessionsCache = [];
 
-  function appendUserMsg(text) {
-    const div = document.createElement('div');
-    div.className = 'chat-user-msg';
-    div.innerHTML = `<p class="chat-user-text">${escapeHtml(text)}</p>`;
-    chatMessages.appendChild(div);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
   }
 
-  function appendAiMsg(text) {
-    const div = document.createElement('div');
-    div.className = 'ai-chat-card';
-
-    const formatted = text
+  function formatAiText(text) {
+    return text
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.*?)\*/g, '<em>$1</em>')
       .replace(/^[-•]\s+(.+)$/gm, '<li>$1</li>')
       .replace(/(<li>.*<\/li>)/gs, '<ul class="chat-list">$1</ul>')
       .replace(/\n/g, '<br>');
+  }
+
+  function scrollChat() {
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function showEmptyHint() {
+    chatMessages.innerHTML = `
+      <p class="chat-empty-hint">
+        Ask about savings, SIPs, goals, or your spending.<br>
+        Conversations are saved — pick one on the left to continue.
+      </p>`;
+  }
+
+  function appendUserMsg(text) {
+    const div = document.createElement('div');
+    div.className = 'chat-user-msg';
+    div.innerHTML = `<p class="chat-user-text">${escapeHtml(text)}</p>`;
+    chatMessages.appendChild(div);
+    scrollChat();
+  }
+
+  function appendAiMsg(text) {
+    const div = document.createElement('div');
+    div.className = 'ai-chat-card';
     div.innerHTML = `
       <div class="flex justify-between items-center mb-2">
         <span class="chat-response-tag">FinPass AI</span>
       </div>
-      <p class="chat-ai-text">${formatted}</p>
-    `;
+      <p class="chat-ai-text">${formatAiText(text)}</p>`;
     chatMessages.appendChild(div);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    scrollChat();
   }
 
   function appendError(msg) {
@@ -416,23 +449,117 @@ function setupChatbot() {
     div.className = 'ai-chat-card';
     div.innerHTML = `<p class="chat-ai-text" style="color:#ef4444;">⚠️ ${escapeHtml(msg)}</p>`;
     chatMessages.appendChild(div);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    scrollChat();
   }
 
   function showTyping() {
     const div = document.createElement('div');
     div.className = 'chat-typing';
     div.id = 'chat-typing-indicator';
-    div.innerHTML = `
-      <span></span><span></span><span></span>
-    `;
+    div.innerHTML = '<span></span><span></span><span></span>';
     chatMessages.appendChild(div);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    scrollChat();
     return div;
   }
 
-  function escapeHtml(str) {
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  function renderMessages(messages) {
+    chatMessages.innerHTML = '';
+    if (!messages?.length) {
+      showEmptyHint();
+      return;
+    }
+    for (const m of messages) {
+      if (m.role === 'user') appendUserMsg(m.content);
+      else if (m.role === 'assistant') appendAiMsg(m.content);
+    }
+  }
+
+  function persistActiveSession(email) {
+    if (email && activeSessionId) {
+      localStorage.setItem(chatStorageKey(email), activeSessionId);
+    }
+  }
+
+  function renderSessionsList() {
+    if (!sessionsList) return;
+    if (!sessionsCache.length) {
+      sessionsList.innerHTML = '<p class="chat-sessions-empty text-xs text-slate-400 p-2">No chats yet</p>';
+      return;
+    }
+    sessionsList.innerHTML = sessionsCache.map((s) => {
+      const active = s.session_id === activeSessionId ? ' active' : '';
+      const title = escapeHtml(s.title || 'Conversation');
+      return `<button type="button" class="chat-session-item${active}" data-session-id="${escapeHtml(s.session_id)}" title="${title}">${title}</button>`;
+    }).join('');
+
+    sessionsList.querySelectorAll('.chat-session-item').forEach((btn) => {
+      btn.addEventListener('click', () => resumeSession(btn.dataset.sessionId));
+    });
+  }
+
+  async function fetchSessions(email) {
+    try {
+      const data = await apiFetch(`/api/chat/sessions/${encodeURIComponent(email)}`);
+      sessionsCache = data.sessions || [];
+      renderSessionsList();
+    } catch (err) {
+      console.warn('Could not load chat sessions:', err.message);
+      if (sessionsList) {
+        sessionsList.innerHTML = '<p class="chat-sessions-empty text-xs text-slate-400 p-2">Unavailable</p>';
+      }
+    }
+  }
+
+  async function resumeSession(sessionId) {
+    const user = currentUser || JSON.parse(localStorage.getItem('user') || '{}');
+    if (!user?.email || !sessionId) return;
+
+    activeSessionId = sessionId;
+    persistActiveSession(user.email);
+    renderSessionsList();
+
+    try {
+      const data = await apiFetch(
+        `/api/chat/history/${encodeURIComponent(user.email)}/${encodeURIComponent(sessionId)}`
+      );
+      renderMessages(data.messages || []);
+    } catch (err) {
+      showEmptyHint();
+      appendError('Could not load this conversation.');
+    }
+  }
+
+  function startNewConversation() {
+    const user = currentUser || JSON.parse(localStorage.getItem('user') || '{}');
+    if (!user?.email) return;
+
+    activeSessionId = newChatSessionId();
+    persistActiveSession(user.email);
+    showEmptyHint();
+    renderSessionsList();
+    chatInput.focus();
+  }
+
+  async function initChatForUser(user) {
+    if (!user?.email) {
+      showEmptyHint();
+      return;
+    }
+
+    await fetchSessions(user.email);
+
+    const saved = localStorage.getItem(chatStorageKey(user.email));
+    const savedExists = saved && sessionsCache.some((s) => s.session_id === saved);
+
+    if (savedExists) {
+      await resumeSession(saved);
+    } else if (sessionsCache.length > 0) {
+      await resumeSession(sessionsCache[0].session_id);
+    } else {
+      activeSessionId = newChatSessionId();
+      persistActiveSession(user.email);
+      showEmptyHint();
+    }
   }
 
   const handleSend = async () => {
@@ -445,9 +572,17 @@ function setupChatbot() {
       return;
     }
 
+    if (!activeSessionId) {
+      activeSessionId = newChatSessionId();
+      persistActiveSession(user.email);
+    }
+
+    const hint = chatMessages.querySelector('.chat-empty-hint');
+    if (hint) hint.remove();
+
     chatInput.value = '';
     chatInput.disabled = true;
-    chatSend.disabled  = true;
+    chatSend.disabled = true;
 
     appendUserMsg(text);
     const typingEl = showTyping();
@@ -456,41 +591,57 @@ function setupChatbot() {
       const res = await apiFetch('/api/advisor/chat', {
         method: 'POST',
         body: JSON.stringify({
-          email:      user.email,
-          question:   text,
-          session_id: sessionId,
+          email: user.email,
+          question: text,
+          session_id: activeSessionId,
           context: {
-            monthly_income:   user.financials?.['monthly-income']   || 0,
+            monthly_income: user.financials?.['monthly-income'] || 0,
             monthly_expenses: user.financials?.['monthly-expenses'] || 0,
-            debt:             user.financials?.debt                 || 0,
-            risk_appetite:    user.investments?.['risk-opt']        || 'moderate',
-          }
-        })
+            debt: user.financials?.debt || 0,
+            risk_appetite: user.investments?.['risk-opt'] || 'moderate',
+          },
+        }),
       });
 
       typingEl.remove();
+      if (res.session_id) {
+        activeSessionId = res.session_id;
+        persistActiveSession(user.email);
+      }
       appendAiMsg(res.response || 'Sorry, I did not get a response. Please try again.');
+      await fetchSessions(user.email);
+      renderSessionsList();
 
     } catch (err) {
       typingEl.remove();
       if (err.message?.includes('401')) {
         appendError('Session expired. Please log in again.');
       } else if (err.message?.includes('timeout') || err.name === 'AbortError') {
-        appendError('The request timed out. The AI server may be waking up — please try again in a moment.');
+        appendError('The request timed out. Please try again in a moment.');
       } else {
-        appendError('Something went wrong: ' + (err.message || 'Unknown error'));
+        appendError(err.message || 'Something went wrong.');
       }
     } finally {
       chatInput.disabled = false;
-      chatSend.disabled  = false;
+      chatSend.disabled = false;
       chatInput.focus();
     }
   };
 
   chatSend.addEventListener('click', handleSend);
   chatInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
   });
+
+  if (newChatBtn) {
+    newChatBtn.addEventListener('click', startNewConversation);
+  }
+
+  window.__initAdvisorChat = initChatForUser;
+  showEmptyHint();
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -501,6 +652,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const user = await loadUserData();
     if (!user) return;
+
+    if (typeof window.__initAdvisorChat === 'function') {
+      await window.__initAdvisorChat(user);
+    }
 
     populateMetrics(user);
     await Promise.all([
