@@ -120,16 +120,13 @@ async def _require_auth(authorization: str = Header(default="")) -> str:
         raise HTTPException(401, "Missing or invalid Authorization header")
     token = authorization.removeprefix("Bearer ").strip()
     
-    # Validate token format and claims
     claims = TokenValidator.validate_access_token(token)
     if not claims:
         raise HTTPException(401, "Token expired or invalid")
     
-    # Check if token is blacklisted
     if token_blacklist.is_blacklisted(claims["jti"]):
         raise HTTPException(401, "Token has been revoked")
     
-    # Verify session still exists and is valid
     if not session_store.is_session_valid(claims["jti"]):
         raise HTTPException(401, "Session expired or invalidated")
     
@@ -214,7 +211,6 @@ async def api_login(body: LoginRequest):
         
         log.info(f"Login attempt for: {email_lower}")
 
-        # Rate limiting (5 attempts per 5 minutes)
         rate_check = rate_limiter.check_rate_limit(
             identifier=email_lower,
             action="login",
@@ -247,15 +243,12 @@ async def api_login(body: LoginRequest):
 
         user = _ensure_onboarding(email_lower, user)
 
-        # Create tokens with new JWT handler
         access_token = JWTHandler.create_access_token(email_lower, str(user["_id"]))
         refresh_token = JWTHandler.create_refresh_token(email_lower, str(user["_id"]))
 
-        # Extract claims to get JTI for session tracking
         access_claims = TokenValidator.validate_access_token(access_token)
         refresh_claims = TokenValidator.validate_refresh_token(refresh_token)
 
-        # Track sessions in MongoDB
         if access_claims:
             session_store.create_session(
                 email=email_lower,
@@ -274,13 +267,11 @@ async def api_login(body: LoginRequest):
                 expires_at=datetime.fromtimestamp(refresh_claims["exp"], timezone.utc)
             )
 
-        # Update user's last login
         collection.update_one(
             {"email": email_lower},
             {"$set": {"last_login": datetime.now(timezone.utc).isoformat()}}
         )
 
-        # Reset rate limit on successful login
         rate_limiter.reset_limit(email_lower, "login")
 
         log.info(f"Login successful for: {email_lower}")
@@ -305,7 +296,6 @@ async def api_signup(body: SignupRequest):
         email_lower = body.email.lower()
         log.info(f"Signup attempt for: {email_lower}")
 
-        # Rate limiting (3 registrations per 10 minutes per email)
         rate_check = rate_limiter.check_rate_limit(
             identifier=email_lower,
             action="register",
@@ -321,7 +311,6 @@ async def api_signup(body: SignupRequest):
             log.warning(f"Email already registered: {email_lower}")
             raise HTTPException(409, "Email already registered")
 
-        # Validate password strength
         pwd_validation = SecurityValidator.validate_password_strength(body.password)
         if not pwd_validation["is_strong"]:
             log.warning(f"Weak password for registration: {email_lower}")
@@ -354,15 +343,12 @@ async def api_signup(body: SignupRequest):
         result = collection.insert_one(doc)
         log.info(f"User created: {email_lower} (ID: {result.inserted_id})")
 
-        # Create tokens with new JWT handler
         access_token = JWTHandler.create_access_token(email_lower, str(result.inserted_id))
         refresh_token = JWTHandler.create_refresh_token(email_lower, str(result.inserted_id))
 
-        # Extract claims to get JTI for session tracking
         access_claims = TokenValidator.validate_access_token(access_token)
         refresh_claims = TokenValidator.validate_refresh_token(refresh_token)
 
-        # Track sessions in MongoDB
         if access_claims:
             session_store.create_session(
                 email=email_lower,
@@ -409,20 +395,16 @@ async def refresh_token(body: dict):
         if not email or not refresh:
             raise HTTPException(400, "email and refresh_token required")
         
-        # Validate refresh token
         claims = TokenValidator.validate_refresh_token(refresh)
         if not claims:
             raise HTTPException(401, "Invalid or expired refresh token")
         
-        # Check if token is blacklisted
         if token_blacklist.is_blacklisted(claims["jti"]):
             raise HTTPException(401, "Refresh token has been revoked")
         
-        # Check if session still valid
         if not session_store.is_session_valid(claims["jti"]):
             raise HTTPException(401, "Session expired or invalidated")
         
-        # Verify email matches
         if claims["sub"] != email:
             log.warning(f"Email mismatch in refresh token: {email} vs {claims['sub']}")
             raise HTTPException(401, "Invalid refresh token")
@@ -431,11 +413,9 @@ async def refresh_token(body: dict):
         if not user:
             raise HTTPException(401, "User not found")
         
-        # Create new access token
         new_access_token = JWTHandler.create_access_token(email, claims["user_id"])
         new_access_claims = TokenValidator.validate_access_token(new_access_token)
         
-        # Track new session
         if new_access_claims:
             session_store.create_session(
                 email=email,
@@ -476,10 +456,8 @@ async def logout(authorization: str = Header(None)):
         user_id = claims.get("user_id")
         email = claims["sub"]
         
-        # Invalidate session
         session_store.invalidate_session(jti)
         
-        # Add to blacklist
         token_blacklist.add_to_blacklist(
             jti=jti,
             user_id=user_id,
@@ -513,7 +491,6 @@ async def logout_all(authorization: str = Header(None)):
         user_id = claims.get("user_id")
         email = claims["sub"]
         
-        # Invalidate all sessions for this user
         count = session_store.invalidate_all_user_sessions(user_id)
         
         log.warning(f"All sessions invalidated for user: {email} ({count} sessions)")
@@ -535,7 +512,6 @@ async def forgot_password(body: ForgotPasswordRequest):
         email_lower = body.email.strip().lower()
         log.info(f"Forgot password request for: {email_lower}")
         
-        # Rate limiting (3 attempts per 15 minutes)
         rate_check = rate_limiter.check_rate_limit(
             identifier=email_lower,
             action="forgot_password",
@@ -545,7 +521,6 @@ async def forgot_password(body: ForgotPasswordRequest):
         
         if not rate_check["allowed"]:
             log.warning(f"Rate limit exceeded for password reset: {email_lower}")
-            # Don't reveal if email exists - always return success
             return {
                 "success": True,
                 "message": "If an account exists with this email, you will receive a password reset link shortly."
@@ -553,13 +528,10 @@ async def forgot_password(body: ForgotPasswordRequest):
         
         user = collection.find_one({"email": {"$regex": f"^{email_lower}$", "$options": "i"}})
         
-        # Don't reveal if email exists for security
         if user:
-            # Generate secure reset token
             reset_token = secrets.token_urlsafe(32)
             token_hash = hashlib.sha256(reset_token.encode()).hexdigest()
             
-            # Store in MongoDB (persistent, not in-memory)
             password_reset_token_store.create_reset_token(
                 email=user["email"],
                 token_hash=token_hash,
@@ -568,7 +540,6 @@ async def forgot_password(body: ForgotPasswordRequest):
             
             log.info(f"Reset token created for: {email_lower}")
             
-            # Send email with reset link
             success, message = forgot_password_service.send_reset_email(user["email"], reset_token)
             
             if success:
@@ -576,7 +547,6 @@ async def forgot_password(body: ForgotPasswordRequest):
             else:
                 log.error(f"Failed to send reset email to {email_lower}: {message}")
         
-        # Always return success for security
         return {
             "success": True,
             "message": "If an account exists with this email, you will receive a password reset link shortly."
@@ -594,10 +564,8 @@ async def verify_reset_token(body: VerifyResetTokenRequest):
     try:
         log.info("Verifying reset token")
         
-        # Hash the token
         token_hash = hashlib.sha256(body.token.encode()).hexdigest()
         
-        # Validate reset token (from MongoDB, not in-memory)
         token_record = password_reset_token_store.validate_reset_token(token_hash)
         
         if not token_record:
@@ -624,7 +592,6 @@ async def reset_password(body: ResetPasswordRequest):
         if body.new_password != body.confirm_password:
             raise HTTPException(400, "Passwords do not match")
         
-        # Validate password strength
         pwd_validation = SecurityValidator.validate_password_strength(body.new_password)
         if not pwd_validation["is_strong"]:
             raise HTTPException(400, {
@@ -634,10 +601,8 @@ async def reset_password(body: ResetPasswordRequest):
         
         log.info("Processing password reset")
         
-        # Hash the token
         token_hash = hashlib.sha256(body.token.encode()).hexdigest()
         
-        # Validate reset token (from MongoDB, not in-memory)
         token_record = password_reset_token_store.validate_reset_token(token_hash)
         
         if not token_record:
@@ -651,7 +616,6 @@ async def reset_password(body: ResetPasswordRequest):
             log.warning(f"User not found for password reset: {email}")
             raise HTTPException(404, "User not found")
         
-        # Update password
         collection.update_one(
             {"email": email},
             {"$set": {
@@ -660,13 +624,10 @@ async def reset_password(body: ResetPasswordRequest):
             }}
         )
         
-        # Mark token as used (prevent reuse)
         password_reset_token_store.mark_token_as_used(token_hash)
         
-        # Invalidate all sessions (user must login again with new password)
         count = session_store.invalidate_all_user_sessions(str(user["_id"]))
         
-        # Send confirmation email
         success, message = forgot_password_service.send_password_changed_email(email)
         
         if success:

@@ -119,7 +119,6 @@ class PasswordHasher:
             except Exception:
                 return False
 
-        # Legacy accounts may have plain-text passwords from before auth hardening
         return hmac.compare_digest(password, hashed)
 
 
@@ -132,7 +131,6 @@ class TokenValidator:
         if not token:
             return None
         
-        # Remove 'Bearer ' prefix if present
         if token.startswith('Bearer '):
             token = token[7:]
         
@@ -140,7 +138,6 @@ class TokenValidator:
         if not claims:
             return None
         
-        # Additional validation: check required claims
         required_claims = ["sub", "type", "exp", "iat", "jti"]
         if not all(claim in claims for claim in required_claims):
             return None

@@ -60,7 +60,6 @@ class RateLimiter:
                     }
                 )
             else:
-                # Create new rate limit record
                 expires_at = now + timedelta(seconds=window_seconds)
                 attempt_count = 1
                 
