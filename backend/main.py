@@ -17,7 +17,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from fastapi import FastAPI, HTTPException, Path as FPath, Depends, Header
+from fastapi import FastAPI, HTTPException, Path as FPath, Depends, Header, Query
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.wsgi import WSGIMiddleware
 from pymongo import MongoClient
@@ -166,6 +166,47 @@ api = FastAPI(
     description="Pydantic-validated REST API. Swagger UI at **/docs**.",
     version="2.0.0",
 )
+
+# ---------------------------------------------------------------------
+# Delete a specific chat conversation (session) for a user
+# Delete all chat conversations for a user
+# ---------------------------------------------------------------------
+from fastapi import Query
+
+@api.delete("/api/advisor/chat", tags=["AI Advisor"])
+async def delete_chat(email: str = Query(..., description="User email"), session_id: str = Query(..., description="Session ID to delete")):
+    """Delete the stored conversation for a given user and session.
+    This removes the entire message history for that chat thread.
+    """
+    # Ensure a session exists before attempting deletion (optional)
+    existing = memory.get_session(email, session_id)
+    if not existing:
+        raise HTTPException(404, "Conversation not found")
+    memory.clear_session(email, session_id)
+    return {"status": "deleted", "email": email, "session_id": session_id}
+
+# ---------------------------------------------------------------------
+# Delete multiple specific chat conversations (batch) for a user
+# ---------------------------------------------------------------------
+from fastapi import Body
+
+@api.delete("/api/advisor/chat/batch", tags=["AI Advisor"])
+async def delete_chat_batch(
+    email: str = Query(..., description="User email"),
+    session_ids: List[str] = Body(..., description="List of session IDs to delete"),
+):
+    """Delete several chat sessions for a user in one request.
+    Returns the list of successfully deleted session IDs.
+    """
+    deleted = []
+    for sid in session_ids:
+        if memory.get_session(email, sid):
+            memory.clear_session(email, sid)
+            deleted.append(sid)
+    if not deleted:
+        raise HTTPException(404, "No matching conversations found for deletion")
+    return {"status": "deleted_batch", "email": email, "deleted_sessions": deleted}
+
 
 api.add_middleware(
     CORSMiddleware,
