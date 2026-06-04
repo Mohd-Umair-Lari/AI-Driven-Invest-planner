@@ -943,8 +943,13 @@ async def recommended_actions(email: str = FPath(...)):
 @api.post("/api/advisor/chat", tags=["AI Advisor"])
 async def advisor_chat(body: AdvisorChatRequest):
 
-    ctx        = body.context
-    session_id = (body.session_id or "").strip() or str(uuid.uuid4())
+    ctx = body.context
+    # Use passed session_id if provided (allows explicit reset).
+    # Otherwise reuse a deterministic session per user so conversation persists.
+    if body.session_id and body.session_id.strip():
+        session_id = body.session_id.strip()
+    else:
+        session_id = f"{body.email}-session"
     extra = {
         "income":   ctx.monthly_income if ctx else 0,
         "expenses": ctx.monthly_expenses if ctx else 0,

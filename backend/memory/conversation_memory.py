@@ -23,7 +23,7 @@ class ConversationMemory:
         )
 
     def get_recent(
-        self, email: str, session_id: str, limit: int = 6
+        self, email: str, session_id: str, limit: int = 16
     ) -> List[Dict[str, str]]:
 
         session = self.get_session(email, session_id)
