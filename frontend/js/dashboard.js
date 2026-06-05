@@ -384,6 +384,34 @@ function chatStorageKey(email) {
 }
 
 function setupChatbot() {
+  // Delete button handler for removing the active chat session
+  const deleteBtn = document.getElementById('chat-delete-btn');
+  if (deleteBtn) {
+    deleteBtn.addEventListener('click', async () => {
+      if (!activeSessionId) {
+        alert('No conversation selected to delete.');
+        return;
+      }
+      const user = currentUser || JSON.parse(localStorage.getItem('user') || '{}');
+      if (!user?.email) {
+        alert('User not logged in.');
+        return;
+      }
+      if (!confirm('Delete this conversation? This cannot be undone.')) return;
+      try {
+        await apiFetch(`/api/chat/history/${encodeURIComponent(user.email)}/${encodeURIComponent(activeSessionId)}`, { method: 'DELETE' });
+        // Remove from cache and reset active session
+        sessionsCache = sessionsCache.filter(s => s.session_id !== activeSessionId);
+        activeSessionId = null;
+        renderSessionsList();
+        showEmptyHint();
+      } catch (err) {
+        console.error('Failed to delete chat session:', err);
+        alert('Could not delete the conversation.');
+      }
+    });
+  }
+
   const chatInput       = document.getElementById('ai-chat-input');
   const chatSend        = document.getElementById('ai-chat-send');
   const chatMessages    = document.getElementById('ai-chat-messages');
