@@ -308,7 +308,7 @@ Please consult a SEBI-registered investment advisor before making significant fi
 
 ---
 
-The agent used for the build is Kimi2.6 model API's from OpenRouter and the LLM used is Groq 5.1
+The agent earlier used for the build is Kimi2.6 model API's from OpenRouter and the LLM used is Groq 5.1
 the work is still in progress and can be completed after the exams i guess and will try to update the ap as far as possible 
 
 @ all rights reserved to Umair Lari

@@ -29,7 +29,6 @@
 </head>
 <body class="flex h-screen overflow-hidden text-slate-800 dark:text-white transition-colors duration-200">
 
-    <!-- Mobile overlay -->
     <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 hidden md:hidden transition-opacity duration-300 opacity-0" onclick="window.toggleSidebar()"></div>
 
     <aside id="sidebar" class="desktop-collapsed bg-white dark:bg-[#0f0f0f] border-r border-slate-200 dark:border-slate-700 flex flex-col justify-between h-full flex-shrink-0 fixed md:relative z-50 transform -translate-x-full md:translate-x-0 transition-all duration-300 overflow-hidden whitespace-nowrap">
@@ -231,7 +230,11 @@
             <button type="button" id="chat-delete-btn" class="chat-delete-btn" title="Delete selected conversation">🗑️ Delete</button>
                     </div>
 
-                    <div class="chat-layout flex flex-1 min-h-0 gap-3">
+                    <div class="chat-layout flex flex-1 min-h-0 gap-3" style="background:#f9fafb; border-radius:0.75rem; overflow:hidden;">
+                        <header class="flex items-center justify-between bg-white dark:bg-[#1a1a1a] px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+                        <h3 class="text-sm font-medium text-gray-800 dark:text-gray-200" id="chat-header-title">AI Advisor Chat</h3>
+                        <button type="button" class="text-sm text-gray-500 hover:text-red-600" id="chat-clear-btn" title="Clear chat history">✖️</button>
+                        </header>
                         <aside class="chat-sessions-panel" id="chat-sessions-panel" aria-label="Past conversations">
                             <p class="chat-sessions-label">Conversations</p>
                             <div id="chat-sessions-list" class="chat-sessions-list">
