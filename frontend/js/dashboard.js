@@ -491,17 +491,6 @@ function setupChatbot() {
   }
 
   function renderMessages(messages) {
-  // Render an array of {role, content} messages using the new bubble CSS
-  chatMessages.innerHTML = '';
-  if (!messages?.length) {
-    showEmptyHint();
-    return;
-  }
-  for (const m of messages) {
-    if (m.role === 'user') appendUserMsg(m.content);
-    else if (m.role === 'assistant') appendAiMsg(m.content);
-  }
-}
     chatMessages.innerHTML = '';
     if (!messages?.length) {
       showEmptyHint();
@@ -681,7 +670,8 @@ function setupChatbot() {
 
   window.__initAdvisorChat = initChatForUser;
   showEmptyHint();
-  console.log("🤖 Chatbot setup complete")
+  console.log("🤖 Chatbot setup complete");
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
   try {
