@@ -912,6 +912,9 @@ body.wizard-mesh {
   scrollbar-width: thin;
   scrollbar-color: #e2e8f0 transparent;
   padding: 0.75rem 0.75rem 0.5rem 0.75rem;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
 }
 
 .dark .chat-messages-scroll {
@@ -1015,6 +1018,7 @@ body.wizard-mesh {
   flex: 1;
   min-width: 0;
   min-height: 0;
+  overflow: hidden;
 }
 
 .chat-empty-hint {
