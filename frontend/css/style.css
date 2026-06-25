@@ -888,47 +888,51 @@ body.wizard-mesh {
 }
 
 /* =============================================
-   CHAT LAYOUT
+   CHAT PANEL — FIXED HEIGHT CONTAINER
    ============================================= */
-.ai-panel-chat .chat-layout {
-  flex: 1;
+
+/* The outer panel: fixed 460px, flex column, clips everything inside */
+.ai-panel-chat {
   display: flex;
-  min-height: 0;
+  flex-direction: column;
+  height: 460px !important;
+  max-height: 460px !important;
+  overflow: hidden !important;
 }
 
-.chat-layout {
-  flex: 1;
-  min-height: 0;
+/* Header: never shrinks */
+.chat-header-bar {
+  flex-shrink: 0;
+}
+
+.chat-header-left {
   display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.chat-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Body: takes all remaining space, flex row */
+.chat-body {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  min-height: 0;          /* critical — lets flex child shrink below content size */
   overflow: hidden;
-  border-top: none;
 }
 
-.dark .chat-layout {
-  background: transparent;
-}
-
-.chat-messages-scroll {
-  scrollbar-width: thin;
-  scrollbar-color: #e2e8f0 transparent;
-  padding: 0.75rem 0.75rem 0.5rem 0.75rem;
-  overflow-y: auto;
-  flex: 1;
-  min-height: 0;
-}
-
-.dark .chat-messages-scroll {
-  scrollbar-color: #2a2a2a transparent;
-}
-
-/* =============================================
-   SESSIONS SIDEBAR
-   ============================================= */
+/* Sessions sidebar: fixed width, scrolls its own list */
 .chat-sessions-panel {
   width: 6.5rem;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   border-right: 1px solid rgba(0,0,0,0.06);
   padding: 0.75rem 0.5rem;
   background: rgba(248,250,252,0.5);
@@ -939,87 +943,47 @@ body.wizard-mesh {
   background: rgba(255,255,255,0.02);
 }
 
-.chat-sessions-label {
-  font-size: 0.5625rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #94a3b8;
-  margin-bottom: 0.5rem;
-  padding-left: 0.25rem;
-}
-
-.chat-sessions-list {
-  flex: 1;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: transparent transparent;
-}
-
-.chat-session-item {
-  display: block;
-  width: 100%;
-  text-align: left;
-  font-size: 0.625rem;
-  line-height: 1.4;
-  padding: 0.4rem 0.35rem;
-  margin-bottom: 0.2rem;
-  border-radius: 0.5rem;
-  border: 1px solid transparent;
-  color: #64748b;
-  background: transparent;
-  cursor: pointer;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
-}
-
-.chat-session-item:hover {
-  background: rgba(0,0,0,0.05);
-  color: #334155;
-}
-
-.chat-session-item.active {
-  background: linear-gradient(135deg, rgba(239,68,68,0.12), rgba(239,68,68,0.06));
-  border-color: rgba(239,68,68,0.25);
-  color: #b91c1c;
-  font-weight: 700;
-}
-
-.dark .chat-session-item {
-  color: #475569;
-}
-
-.dark .chat-session-item:hover {
-  background: rgba(255,255,255,0.05);
-  color: #94a3b8;
-}
-
-.dark .chat-session-item.active {
-  background: linear-gradient(135deg, rgba(255,215,0,0.12), rgba(255,215,0,0.05));
-  border-color: rgba(255,215,0,0.25);
-  color: #ffd700;
-}
-
-.chat-sessions-empty {
-  font-size: 0.625rem;
-  color: #94a3b8;
-  padding: 0.5rem 0.25rem;
-  line-height: 1.5;
-}
-
-/* =============================================
-   CHAT MAIN AREA
-   ============================================= */
+/* Main area: flex column, takes remaining width */
 .chat-main {
   display: flex;
   flex-direction: column;
   flex: 1;
   min-width: 0;
-  min-height: 0;
+  min-height: 0;          /* critical */
   overflow: hidden;
 }
+
+/* Messages area: grows to fill, scrolls vertically */
+.chat-messages-scroll {
+  flex: 1;
+  min-height: 0;          /* critical — must be here */
+  overflow-y: auto;
+  padding: 0.75rem 0.75rem 0.5rem 0.75rem;
+  scrollbar-width: thin;
+  scrollbar-color: #e2e8f0 transparent;
+}
+
+.dark .chat-messages-scroll {
+  scrollbar-color: #2a2a2a transparent;
+}
+
+/* Input bar: never grows or shrinks, pinned at bottom */
+.chat-input-bar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.75rem;
+  border-top: 1px solid rgba(0,0,0,0.07);
+  background: rgba(248,250,252,0.9);
+}
+
+.dark .chat-input-bar {
+  border-top-color: rgba(255,255,255,0.06);
+  background: rgba(15,15,15,0.95);
+}
+
+
 
 .chat-empty-hint {
   font-size: 0.75rem;
