@@ -447,15 +447,16 @@ function setupChatbot() {
   function showEmptyHint() {
     chatMessages.innerHTML = `
       <p class="chat-empty-hint">
+        <strong>FinPass AI is ready</strong>
         Ask about savings, SIPs, goals, or your spending.<br>
-        Conversations are saved — pick one on the left to continue.
+        Your conversations are saved — pick one on the left to continue.
       </p>`;
   }
 
   function appendUserMsg(text) {
     const div = document.createElement('div');
     div.className = 'chat-user-msg';
-    div.innerHTML = `<p class="chat-user-text">${escapeHtml(text)}</p>`;
+    div.innerHTML = `<div class="chat-user-bubble"><p class="chat-user-text">${escapeHtml(text)}</p></div>`;
     chatMessages.appendChild(div);
     scrollChat();
   }
@@ -464,10 +465,12 @@ function setupChatbot() {
     const div = document.createElement('div');
     div.className = 'ai-chat-card';
     div.innerHTML = `
-      <div class="flex justify-between items-center mb-2">
-        <span class="chat-response-tag">FinPass AI</span>
+      <div class="ai-msg-icon">
+        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+        </svg>
       </div>
-      <p class="chat-ai-text">${formatAiText(text)}</p>`;
+      <div class="chat-bubble-ai"><p class="chat-ai-text">${formatAiText(text)}</p></div>`;
     chatMessages.appendChild(div);
     scrollChat();
   }
@@ -475,16 +478,28 @@ function setupChatbot() {
   function appendError(msg) {
     const div = document.createElement('div');
     div.className = 'ai-chat-card';
-    div.innerHTML = `<p class="chat-ai-text" style="color:#ef4444;">⚠️ ${escapeHtml(msg)}</p>`;
+    div.innerHTML = `
+      <div class="ai-msg-icon" style="background:linear-gradient(135deg,#ef4444,#dc2626)">
+        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+      </div>
+      <div class="chat-bubble-ai"><p class="chat-ai-text" style="color:#ef4444;">⚠️ ${escapeHtml(msg)}</p></div>`;
     chatMessages.appendChild(div);
     scrollChat();
   }
 
   function showTyping() {
     const div = document.createElement('div');
-    div.className = 'chat-typing';
+    div.className = 'ai-chat-card';
     div.id = 'chat-typing-indicator';
-    div.innerHTML = '<span></span><span></span><span></span>';
+    div.innerHTML = `
+      <div class="ai-msg-icon">
+        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+        </svg>
+      </div>
+      <div class="chat-bubble-ai chat-typing"><span></span><span></span><span></span></div>`;
     chatMessages.appendChild(div);
     scrollChat();
     return div;

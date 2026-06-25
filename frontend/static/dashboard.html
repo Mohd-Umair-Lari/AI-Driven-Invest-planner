@@ -344,63 +344,74 @@
                         </div>
                     </div>
 
-                    <div class="ai-panel ai-panel-chat p-4 sm:p-6 flex flex-col col-span-1 lg:col-span-1 min-h-[420px]">
-                        <div class="flex items-center justify-between gap-3 mb-4 shrink-0">
+                    <!-- AI Chatbot Panel - Premium Redesign -->
+                    <div class="ai-panel ai-panel-chat flex flex-col col-span-1 lg:col-span-1 min-h-[460px] overflow-hidden">
+
+                        <!-- Chat Header -->
+                        <div class="chat-header-bar">
                             <div class="flex items-center gap-3">
-                                <div
-                                    class="w-10 h-10 rounded-xl bg-red-500/10 dark:bg-yellow-400/10 border border-red-500/20 dark:border-yellow-400/20 flex items-center justify-center text-red-500 dark:text-yellow-400">
-                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                        stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                                    </svg>
+                                <div class="chat-avatar-wrapper">
+                                    <div class="chat-avatar">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                                        </svg>
+                                    </div>
+                                    <span class="chat-online-dot"></span>
                                 </div>
                                 <div>
-                                    <h3 class="ai-panel-title font-bold text-base leading-tight">AI Advisor</h3>
-                                    <p class="ai-panel-sub text-[11px] font-medium">Chat with memory · resume anytime
+                                    <h3 class="chat-header-title">FinPass AI</h3>
+                                    <p class="chat-header-sub">
+                                        <span class="chat-online-text">● Online</span> · Financial Advisor
                                     </p>
                                 </div>
                             </div>
                             <div class="flex items-center gap-2">
-                                <button type="button" id="chat-new-btn" class="chat-new-btn"
-                                    title="Start new conversation">+ New</button>
-                                <button type="button" id="chat-delete-btn" class="chat-delete-btn"
-                                    title="Delete selected conversation">
-                                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                        stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                <button type="button" id="chat-new-btn" class="chat-new-btn" title="New chat">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
                                     </svg>
-                                    Delete
+                                    New
+                                </button>
+                                <button type="button" id="chat-delete-btn" class="chat-delete-btn" title="Delete conversation">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
                                 </button>
                             </div>
                         </div>
 
+                        <!-- Chat Body: Sessions + Messages -->
                         <div class="chat-layout flex flex-1 min-h-0 gap-0">
+
+                            <!-- Sessions Sidebar -->
                             <aside class="chat-sessions-panel" id="chat-sessions-panel" aria-label="Past conversations">
-                                <p class="chat-sessions-label">Conversations</p>
+                                <p class="chat-sessions-label">History</p>
                                 <div id="chat-sessions-list" class="chat-sessions-list">
-                                    <p class="chat-sessions-empty text-xs text-slate-400 p-2">Loading…</p>
+                                    <p class="chat-sessions-empty">Loading…</p>
                                 </div>
                             </aside>
 
+                            <!-- Main Chat Area -->
                             <div class="chat-main flex flex-col flex-1 min-w-0">
-                                <div class="flex-1 overflow-y-auto pr-1 space-y-3 chat-messages-scroll"
-                                    id="ai-chat-messages"></div>
-                                <div class="mt-2 relative shrink-0">
-                                    <input type="text" id="ai-chat-input" placeholder="Message FinPass AI…"
-                                        class="ai-chat-input-field" autocomplete="off">
-                                    <button type="button" id="ai-chat-send"
-                                        class="absolute right-2.5 top-1/2 -translate-y-1/2 text-red-500 dark:text-yellow-400 hover:text-red-600 dark:hover:text-yellow-300 transition-colors"
-                                        aria-label="Send message">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                            stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                <div class="flex-1 overflow-y-auto chat-messages-scroll" id="ai-chat-messages"></div>
+
+                                <!-- Input Bar -->
+                                <div class="chat-input-bar">
+                                    <input
+                                        type="text"
+                                        id="ai-chat-input"
+                                        placeholder="Ask about savings, SIPs, goals…"
+                                        class="ai-chat-input-field"
+                                        autocomplete="off"
+                                    >
+                                    <button type="button" id="ai-chat-send" class="chat-send-btn" aria-label="Send message">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                                         </svg>
                                     </button>
                                 </div>
                             </div>
+
                         </div>
                     </div>
 
