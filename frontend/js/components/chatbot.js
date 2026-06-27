@@ -1,7 +1,4 @@
-/**
- * Dashboard chatbot component.
- * Manages the AI advisor chat panel: sessions, messages, send/receive.
- */
+
 
 import { apiFetch } from "../api.js";
 import { escapeHtml } from "../utils/formatting.js";
@@ -9,17 +6,12 @@ import { newChatSessionId, chatStorageKey } from "../utils/chat-session.js";
 
 let currentUserRef = null;
 
-/**
- * Set the user reference so chatbot functions can access it.
- * @param {object} user
- */
+
 export function setChatbotUser(user) {
   currentUserRef = user;
 }
 
-/**
- * Format AI response text with basic markdown-like formatting.
- */
+
 function formatAiText(text) {
   return text
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -30,11 +22,9 @@ function formatAiText(text) {
     .replace(/\n/g, '<br>');
 }
 
-/**
- * Set up the chatbot: event listeners, session management, message rendering.
- */
+
 export function setupChatbot() {
-  // Delete button handler
+  
   const deleteBtn = document.getElementById('chat-delete-btn');
   if (deleteBtn) {
     deleteBtn.addEventListener('click', async () => {

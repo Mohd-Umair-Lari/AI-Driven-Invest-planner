@@ -22,14 +22,14 @@ from ai.groq_service import initialize_groq
 from config.logging_config import setup_logging
 from services.security_utils import SecurityHeaders
 
-# Import shared DB module (initialises connection, seeds KB)
+
 import db as _db
 
-# Import Flask blueprints (legacy — mounted at /flask prefix)
+
 from routes.intelligence_routes import intelligence_bp
 from routes.advisor_routes import advisor_bp
 
-# Import FastAPI route modules
+
 from routes.auth_routes import router as auth_router
 from routes.onboarding_routes import router as onboarding_router
 from routes.user_routes import router as user_router
@@ -38,9 +38,9 @@ from routes.chat_routes import router as chat_router
 from routes.transaction_routes import router as transaction_router
 from routes.dev_routes import router as dev_router
 
-# ---------------------------------------------------------------------------
-# Logging & AI init
-# ---------------------------------------------------------------------------
+
+
+
 
 log = setup_logging()
 
@@ -50,9 +50,9 @@ try:
 except Exception as e:
     print(f"Groq AI skipped: {e}")
 
-# ---------------------------------------------------------------------------
-# CORS origins
-# ---------------------------------------------------------------------------
+
+
+
 
 _ORIGINS = [
     "http://localhost:3000",
@@ -66,9 +66,9 @@ _ORIGINS = [
 
 PORT = int(os.getenv("PORT", 7860))
 
-# ---------------------------------------------------------------------------
-# Flask app (legacy blueprints)
-# ---------------------------------------------------------------------------
+
+
+
 
 flask_app = Flask(__name__)
 CORS(flask_app, resources={r"/api/*": {"origins": _ORIGINS}}, supports_credentials=True)
@@ -81,9 +81,9 @@ def _flask_health():
     return {"status": "ok", "engine": "flask"}
 
 
-# ---------------------------------------------------------------------------
-# FastAPI app
-# ---------------------------------------------------------------------------
+
+
+
 
 api = FastAPI(
     title="FinPass AI – Financial Advisor API",
@@ -109,9 +109,9 @@ async def add_security_headers(request, call_next):
     return response
 
 
-# ---------------------------------------------------------------------------
-# Health endpoints
-# ---------------------------------------------------------------------------
+
+
+
 
 @api.get("/", tags=["Health"])
 async def health():
@@ -136,9 +136,9 @@ async def test_connection():
         raise HTTPException(500, f"Database error: {str(e)}")
 
 
-# ---------------------------------------------------------------------------
-# Mount route modules
-# ---------------------------------------------------------------------------
+
+
+
 
 api.include_router(auth_router)
 api.include_router(onboarding_router)
@@ -148,15 +148,15 @@ api.include_router(chat_router)
 api.include_router(transaction_router)
 api.include_router(dev_router)
 
-# ---------------------------------------------------------------------------
-# Mount Flask under /flask
-# ---------------------------------------------------------------------------
+
+
+
 
 api.mount("/flask", WSGIMiddleware(flask_app))
 
-# ---------------------------------------------------------------------------
-# ASGI entry point (used by gunicorn / uvicorn)
-# ---------------------------------------------------------------------------
+
+
+
 
 asgi_app = api
 app = asgi_app

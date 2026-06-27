@@ -1,13 +1,6 @@
-/**
- * Shared formatting and extraction utilities.
- * Used by dashboard, chatbot, advisor, and other modules.
- */
 
-/**
- * Format a number as Indian Rupee currency.
- * @param {number} value
- * @returns {string}
- */
+
+
 export function formatCurrency(value) {
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
@@ -17,13 +10,7 @@ export function formatCurrency(value) {
   }).format(value || 0);
 }
 
-/**
- * Safely extract a nested value from an object using dot-notation path.
- * @param {object} obj
- * @param {string} path - e.g. 'financials.monthly-income'
- * @param {*} defaultVal
- * @returns {*}
- */
+
 export function safeExtract(obj, path, defaultVal = 0) {
   if (!obj || typeof obj !== 'object') return defaultVal;
   const keys = path.split('.');
@@ -38,11 +25,7 @@ export function safeExtract(obj, path, defaultVal = 0) {
   return value ?? defaultVal;
 }
 
-/**
- * Escape HTML special characters to prevent XSS.
- * @param {string} str
- * @returns {string}
- */
+
 export function escapeHtml(str) {
   return String(str)
     .replace(/&/g, '&amp;')

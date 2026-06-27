@@ -1,9 +1,4 @@
-/**
- * Dashboard — Main orchestrator.
- *
- * Loads user data, then delegates to component modules for
- * navigation, metrics, chatbot, and profile functionality.
- */
+
 
 import { apiFetch } from "./api.js";
 import { setupNavigation, toggleSidebar } from "./components/navigation.js";
@@ -15,10 +10,7 @@ console.log("📊 Dashboard Initializing...");
 
 let currentUser = null;
 
-/**
- * Load the current user from localStorage, redirecting if not logged in.
- * Auto-seeds test data if the user has no financials.
- */
+
 async function loadUserData() {
   let user = JSON.parse(localStorage.getItem("user"));
   if (!user) {
@@ -43,9 +35,7 @@ async function loadUserData() {
   return user;
 }
 
-/**
- * Logout: clear storage and redirect.
- */
+
 window.logout = () => {
   if (confirm('Are you sure you want to logout?')) {
     localStorage.removeItem('user');
@@ -54,14 +44,10 @@ window.logout = () => {
   }
 };
 
-/**
- * Mobile sidebar toggle (exposed globally for onclick handler).
- */
+
 window.toggleSidebar = toggleSidebar;
 
-/**
- * Bootstrap the dashboard on page load.
- */
+
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     setupNavigation(populateProfileData);

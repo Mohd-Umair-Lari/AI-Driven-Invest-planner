@@ -30,19 +30,19 @@ class AIOrchestrator:
 
         history = []
         if session_id:
-            # Retrieve recent messages (default 16) then enforce a token‑based window.
+            
             raw_history = self.memory.get_recent(email, session_id, limit=16)
-            # Simple token estimate: each word ~= 1 token.
-            max_tokens = 1500  # adjust as needed for your model's context budget
+            
+            max_tokens = 1500  
             token_count = 0
             clipped = []
-            # Walk backwards (most recent first) and keep adding until limit.
+            
             for msg in reversed(raw_history):
                 est = len(msg["content"].split())
                 if token_count + est > max_tokens:
                     break
                 token_count += est
-                clipped.insert(0, msg)  # prepend to preserve order
+                clipped.insert(0, msg)  
             history = clipped
 
         result = run_rag_chain(

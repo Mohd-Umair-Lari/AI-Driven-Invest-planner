@@ -17,9 +17,9 @@ from pymongo import MongoClient
 
 load_dotenv()
 
-# ---------------------------------------------------------------------------
-# Environment & Connection
-# ---------------------------------------------------------------------------
+
+
+
 
 MONGO_URI = os.getenv("MONGO_URI", "").strip()
 if not MONGO_URI:
@@ -43,9 +43,9 @@ collection = db[COLLECTION_NAME]
 conversations_col = db["conversations"]
 documents_col = db["documents"]
 
-# ---------------------------------------------------------------------------
-# Shared service instances
-# ---------------------------------------------------------------------------
+
+
+
 
 from memory.conversation_memory import ConversationMemory
 from rag.mongo_vector_store import MongoVectorStore
@@ -53,9 +53,9 @@ from rag.mongo_vector_store import MongoVectorStore
 memory = ConversationMemory(conversations_col)
 vector_store = MongoVectorStore(db)
 
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
+
+
+
 
 
 def serialize(doc: dict) -> dict:
@@ -91,9 +91,9 @@ def get_num(obj, *keys, default=0.0):
     return default
 
 
-# ---------------------------------------------------------------------------
-# Background: seed knowledge base
-# ---------------------------------------------------------------------------
+
+
+
 
 from rag.indexer import seed_knowledge_base, index_user_profile
 

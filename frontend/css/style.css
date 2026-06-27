@@ -1,8 +1,6 @@
-/* =============================================
-   1. CSS VARIABLES & RESET
-   ============================================= */
+
 :root {
-  /* Brand */
+  
   --primary: #EF4444;
   --primary-dark: #DC2626;
   --primary-light: #FCA5A5;
@@ -11,19 +9,19 @@
   --accent: #00D9FF;
   --accent-dark: #0098CC;
 
-  /* Dark palette */
+  
   --dark: #000000;
   --dark-secondary: #0f0f0f;
   --dark-tertiary: #1a1a1a;
   --dark-card: #2a2a2a;
 
-  /* Light palette */
+  
   --light: #ffffff;
   --text-primary: #1e293b;
   --text-secondary: #64748b;
   --border: #e2e8f0;
 
-  /* Advisor page overrides */
+  
   --bg: #ffffff;
   --surface: rgba(0, 0, 0, 0.03);
   --text: #1e293b;
@@ -94,9 +92,7 @@ canvas {
   max-width: 100%;
 }
 
-/* =============================================
-   2. TYPOGRAPHY
-   ============================================= */
+
 h1,
 h2,
 h3,
@@ -121,9 +117,7 @@ h6 {
   -webkit-text-fill-color: transparent;
 }
 
-/* =============================================
-   3. SCROLLBAR
-   ============================================= */
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -150,9 +144,7 @@ h6 {
   background: #64748b;
 }
 
-/* =============================================
-   4. GLASSMORPHISM & BACKGROUNDS
-   ============================================= */
+
 .glass {
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(20px);
@@ -257,9 +249,7 @@ body.wizard-mesh {
   background: linear-gradient(135deg, #00D9FF 0%, #0098CC 100%);
 }
 
-/* =============================================
-   5. FORM ELEMENTS
-   ============================================= */
+
 .input-field {
   width: 100%;
   background: rgba(0, 0, 0, 0.02);
@@ -330,9 +320,7 @@ body.wizard-mesh {
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
 }
 
-/* =============================================
-   6. BUTTONS
-   ============================================= */
+
 .btn-primary {
   padding: 0.6rem 1.5rem;
   background: linear-gradient(135deg, #EF4444, #DC2626);
@@ -386,9 +374,7 @@ html.dark .btn-secondary:hover {
   background: #3f3f46;
 }
 
-/* =============================================
-   7. NAVIGATION & SIDEBAR
-   ============================================= */
+
 .sidebar-item {
   transition: all 0.2s ease;
 }
@@ -445,9 +431,7 @@ html.dark .btn-secondary:hover {
   transform: scale(1.25);
 }
 
-/* =============================================
-   8. CARDS (stat, panel, glass, modern)
-   ============================================= */
+
 .card-modern {
   background: var(--light);
   border: 1px solid var(--border);
@@ -497,9 +481,7 @@ html.dark .card-modern {
   border-color: #222222;
 }
 
-/* =============================================
-   9. AI CHAT PANEL
-   ============================================= */
+
 .ai-panel {
   background-color: #ffffff;
   border-radius: 1.25rem;
@@ -516,7 +498,7 @@ html.dark .card-modern {
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
 }
 
-/* Fixed height container */
+
 .ai-panel-chat {
   display: flex;
   flex-direction: column;
@@ -525,7 +507,7 @@ html.dark .card-modern {
   overflow: hidden !important;
 }
 
-/* --- Chat header --- */
+
 .chat-header-bar {
   display: flex;
   align-items: center;
@@ -619,7 +601,7 @@ html.dark .card-modern {
   font-weight: 600;
 }
 
-/* --- Chat body layout --- */
+
 .chat-body {
   display: flex;
   flex-direction: row;
@@ -666,7 +648,7 @@ html.dark .card-modern {
   scrollbar-color: #2a2a2a transparent;
 }
 
-/* --- Chat input bar --- */
+
 .chat-input-bar {
   flex-shrink: 0;
   display: flex;
@@ -719,7 +701,7 @@ html.dark .card-modern {
   box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.12);
 }
 
-/* --- Chat send button --- */
+
 .chat-send-btn {
   width: 2rem;
   height: 2rem;
@@ -755,7 +737,7 @@ html.dark .card-modern {
   box-shadow: 0 5px 14px rgba(255, 215, 0, 0.4);
 }
 
-/* --- Chat message bubbles --- */
+
 .chat-user-msg {
   display: flex;
   justify-content: flex-end;
@@ -839,7 +821,7 @@ html.dark .card-modern {
   color: #ffffff;
 }
 
-/* --- Chat typing indicator --- */
+
 .chat-typing {
   display: flex;
   align-items: center;
@@ -910,7 +892,7 @@ html.dark .card-modern {
   color: #64748b;
 }
 
-/* --- Header action buttons --- */
+
 .chat-new-btn {
   display: inline-flex;
   align-items: center;
@@ -981,9 +963,7 @@ html.dark .card-modern {
   margin-bottom: 0.5rem;
 }
 
-/* =============================================
-   10. PROFILE SECTION
-   ============================================= */
+
 .profile-section {
   background: white;
   border: 1px solid #e2e8f0;
@@ -1256,9 +1236,7 @@ html.dark .card-modern {
   animation: slideDown 0.3s ease-out;
 }
 
-/* =============================================
-   11. ADVISOR PAGE
-   ============================================= */
+
 body.advisor-page {
   background: var(--bg);
   color: var(--text);
@@ -1422,7 +1400,7 @@ html.dark .pstat-value.indigo {
   color: #FFD700;
 }
 
-/* --- Loading state --- */
+
 #loading-state {
   display: flex;
   flex-direction: column;
@@ -1484,7 +1462,7 @@ html.dark .pstat-value.indigo {
   flex-shrink: 0;
 }
 
-/* --- Error state --- */
+
 #error-state {
   display: none;
   flex-direction: column;
@@ -1529,7 +1507,7 @@ html.dark .pstat-value.indigo {
   opacity: 0.85;
 }
 
-/* --- Allocation section --- */
+
 #alloc-section {
   display: none;
   margin-bottom: 2rem;
@@ -1587,7 +1565,7 @@ html.dark .pstat-value.indigo {
   flex-shrink: 0;
 }
 
-/* --- Insight sections --- */
+
 #insight-sections {
   display: none;
 }
@@ -1754,9 +1732,7 @@ html.dark .motive-banner p {
   color: var(--text);
 }
 
-/* =============================================
-   12. SANKEY PLACEHOLDER
-   ============================================= */
+
 .sankey-placeholder {
   width: 100%;
   height: 220px;
@@ -1779,9 +1755,7 @@ html.dark .motive-banner p {
   fill: #cbd5e1;
 }
 
-/* =============================================
-   13. ANIMATIONS
-   ============================================= */
+
 @keyframes pulse-green {
   0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
   50% { box-shadow: 0 0 0 4px rgba(34, 197, 94, 0); }
@@ -1834,9 +1808,7 @@ html.dark .motive-banner p {
   to { transform: rotate(360deg); }
 }
 
-/* =============================================
-   14. RESPONSIVE
-   ============================================= */
+
 @media (max-width: 640px) {
   .chat-sessions-panel { width: 5rem; }
   .chat-session-item { font-size: 0.5625rem; padding: 0.35rem 0.25rem; }

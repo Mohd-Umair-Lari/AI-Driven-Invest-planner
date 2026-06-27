@@ -1,7 +1,4 @@
-/**
- * Dashboard metrics component.
- * Handles stat cards, cash flow chart, goal progress, and recommended actions.
- */
+
 
 import { apiFetch } from "../api.js";
 import { formatCurrency, safeExtract, escapeHtml } from "../utils/formatting.js";
@@ -17,9 +14,7 @@ const _COLOR_MAP = {
   slate:  { border: "border-slate-200 dark:border-slate-600",  tag: "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300",  icon: "#64748b" },
 };
 
-/**
- * Create or recreate a doughnut chart showing cash flow breakdown.
- */
+
 export function createCashFlowChart(debt, surplus, expenses, targetId = 'cashFlowChart') {
   const ctx = document.getElementById(targetId);
   if (!ctx) {
@@ -64,10 +59,7 @@ export function createCashFlowChart(debt, surplus, expenses, targetId = 'cashFlo
   console.log("✅ Cash Flow chart created on #" + targetId);
 }
 
-/**
- * Populate stat cards and sidebar user info.
- * @returns {object} metricsData
- */
+
 export function populateMetrics(user) {
   const income = safeExtract(user, 'financials.monthly-income', 0);
   const expenses = safeExtract(user, 'financials.monthly-expenses', 0);
@@ -94,9 +86,7 @@ export function populateMetrics(user) {
   return metricsData;
 }
 
-/**
- * Fetch and display goal intelligence data.
- */
+
 export async function populateGoalData(user) {
   try {
     const response = await apiFetch(`/api/goal-intelligence/${user.email}`);
@@ -128,9 +118,7 @@ export async function populateGoalData(user) {
   }
 }
 
-/**
- * Fetch and display recommended actions.
- */
+
 export async function loadRecommendedActions(user) {
   const loading = document.getElementById('rec-loading');
   const list = document.getElementById('rec-actions-list');

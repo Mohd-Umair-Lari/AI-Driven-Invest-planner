@@ -89,7 +89,7 @@ async def recommended_actions(email: str = FPath(...)):
 
     actions = []
 
-    # Emergency fund check
+    
     em_fund = fin.get("em-fund-opted", False)
     if not em_fund or surplus < 5000:
         months_covered = (invest_amt / expenses) if expenses > 0 else 0
@@ -105,7 +105,7 @@ async def recommended_actions(email: str = FPath(...)):
                 "color": "red",
             })
 
-    # Expense ratio check
+    
     if exp_ratio > 0.75 and income > 0:
         over_spend = expenses - (income * 0.6)
         actions.append({
@@ -119,7 +119,7 @@ async def recommended_actions(email: str = FPath(...)):
             "color": "orange",
         })
 
-    # Debt ratio check
+    
     debt_ratio = debt / income if income > 0 else 0
     if debt_ratio > 0.4:
         actions.append({
@@ -133,7 +133,7 @@ async def recommended_actions(email: str = FPath(...)):
             "color": "red",
         })
 
-    # SIP recommendations
+    
     if sav_ratio > 0.25 and invest_amt > 0:
         sip_boost = round(invest_amt * 0.10 / 500) * 500
         actions.append({
@@ -159,7 +159,7 @@ async def recommended_actions(email: str = FPath(...)):
             "color": "indigo",
         })
 
-    # Goal gap analysis
+    
     if target_amt > 0 and timeline > 0 and income > 0:
         required_monthly = target_amt / timeline
         if invest_amt < required_monthly * 0.8:
@@ -187,7 +187,7 @@ async def recommended_actions(email: str = FPath(...)):
                 "color": "green",
             })
 
-    # Risk-age alignment
+    
     age = get_num(user, "Age")
     if age > 50 and risk in ("aggressive", "high"):
         actions.append({
@@ -212,7 +212,7 @@ async def recommended_actions(email: str = FPath(...)):
             "color": "indigo",
         })
 
-    # Tax saving suggestion
+    
     if income > 50000:
         actions.append({
             "title": "Maximise 80C Deductions",
@@ -225,7 +225,7 @@ async def recommended_actions(email: str = FPath(...)):
             "color": "indigo",
         })
 
-    # Fallback
+    
     if not actions:
         actions.append({
             "title": "Complete Your Financial Profile",

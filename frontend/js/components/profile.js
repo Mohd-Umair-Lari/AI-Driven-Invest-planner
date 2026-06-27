@@ -1,14 +1,9 @@
-/**
- * Dashboard profile component.
- * Handles profile data display, edit form, and save logic.
- */
+
 
 import { apiFetch } from "../api.js";
 import { formatCurrency, safeExtract } from "../utils/formatting.js";
 
-/**
- * Populate the read-only profile display with current user data.
- */
+
 export function populateProfileData() {
   const user = JSON.parse(localStorage.getItem('user'));
   if (!user) return;
@@ -29,9 +24,7 @@ export function populateProfileData() {
   console.log("👤 Profile data loaded");
 }
 
-/**
- * Set up the profile editor: edit button, cancel button, and save form.
- */
+
 export function setupProfileEditor() {
   const editBtn = document.getElementById('profile-edit-btn');
   const editForm = document.getElementById('profile-edit-form');

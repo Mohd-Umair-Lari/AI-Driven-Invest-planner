@@ -16,9 +16,9 @@ def _get_orchestrator() -> AIOrchestrator:
     return AIOrchestrator(collection, conversations_col)
 
 
-# ------------------------------------------------------------------
-# Advisor chat
-# ------------------------------------------------------------------
+
+
+
 @router.post("/api/advisor/chat", tags=["AI Advisor"])
 async def advisor_chat(body: AdvisorChatRequest):
     ctx = body.context
@@ -54,9 +54,9 @@ async def rag_chat(body: AdvisorChatRequest):
     return await advisor_chat(body)
 
 
-# ------------------------------------------------------------------
-# Session management
-# ------------------------------------------------------------------
+
+
+
 @router.get("/api/chat/sessions/{email}", tags=["Chat History"])
 async def get_sessions(email: str = FPath(...)):
     return {"sessions": memory.list_sessions(email)}
@@ -82,9 +82,9 @@ async def clear_all_sessions(email: str = FPath(...)):
     return {"status": "all sessions cleared"}
 
 
-# ------------------------------------------------------------------
-# Delete specific / batch sessions (query-param based)
-# ------------------------------------------------------------------
+
+
+
 @router.delete("/api/advisor/chat", tags=["AI Advisor"])
 async def delete_chat(
     email: str = Query(..., description="User email"),

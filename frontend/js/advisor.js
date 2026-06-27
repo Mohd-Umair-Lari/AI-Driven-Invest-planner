@@ -1,7 +1,4 @@
-/**
- * Standalone AI Advisor page chatbot.
- * Uses the AdvisorChatbot class to render a full chat UI inside a container.
- */
+
 
 import { apiFetch } from "./api.js";
 import { escapeHtml } from "./utils/formatting.js";
@@ -123,7 +120,7 @@ export class AdvisorChatbot {
       this.sessionsCache = data.sessions || [];
       this.renderSessionsList();
     } catch {
-      /* ignore */
+      
     }
   }
 

@@ -25,9 +25,9 @@ log = setup_logging()
 router = APIRouter(tags=["Auth"])
 
 
-# ------------------------------------------------------------------
-# Login
-# ------------------------------------------------------------------
+
+
+
 @router.post("/api/login")
 async def api_login(body: LoginRequest):
     try:
@@ -118,9 +118,9 @@ async def api_login(body: LoginRequest):
         raise HTTPException(500, f"Login failed: {str(e)}")
 
 
-# ------------------------------------------------------------------
-# Signup
-# ------------------------------------------------------------------
+
+
+
 @router.post("/api/signup", status_code=201)
 async def api_signup(body: SignupRequest):
     try:
@@ -215,9 +215,9 @@ async def api_signup(body: SignupRequest):
         raise HTTPException(500, f"Signup failed: {str(e)}")
 
 
-# ------------------------------------------------------------------
-# Token refresh
-# ------------------------------------------------------------------
+
+
+
 @router.post("/api/auth/refresh")
 async def refresh_token(body: dict):
     try:
@@ -272,9 +272,9 @@ async def refresh_token(body: dict):
         raise HTTPException(500, f"Token refresh failed: {str(e)}")
 
 
-# ------------------------------------------------------------------
-# Logout
-# ------------------------------------------------------------------
+
+
+
 @router.post("/api/auth/logout")
 async def logout(authorization: str = Header(None)):
     """Logout user and revoke current session."""
@@ -310,9 +310,9 @@ async def logout(authorization: str = Header(None)):
         raise HTTPException(500, f"Logout failed: {str(e)}")
 
 
-# ------------------------------------------------------------------
-# Logout all devices
-# ------------------------------------------------------------------
+
+
+
 @router.post("/api/auth/logout-all")
 async def logout_all(authorization: str = Header(None)):
     """Logout user from all devices."""
@@ -341,9 +341,9 @@ async def logout_all(authorization: str = Header(None)):
         raise HTTPException(500, f"Logout failed: {str(e)}")
 
 
-# ------------------------------------------------------------------
-# Forgot password
-# ------------------------------------------------------------------
+
+
+
 @router.post("/api/auth/forgot-password", status_code=200)
 async def forgot_password(body: ForgotPasswordRequest):
     try:
@@ -400,9 +400,9 @@ async def forgot_password(body: ForgotPasswordRequest):
         }
 
 
-# ------------------------------------------------------------------
-# Verify reset token
-# ------------------------------------------------------------------
+
+
+
 @router.post("/api/auth/verify-reset-token")
 async def verify_reset_token(body: VerifyResetTokenRequest):
     try:
@@ -429,9 +429,9 @@ async def verify_reset_token(body: VerifyResetTokenRequest):
         raise HTTPException(500, f"Error verifying token: {str(e)}")
 
 
-# ------------------------------------------------------------------
-# Reset password
-# ------------------------------------------------------------------
+
+
+
 @router.post("/api/auth/reset-password")
 async def reset_password(body: ResetPasswordRequest):
     try:

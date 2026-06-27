@@ -1,12 +1,6 @@
-/**
- * Dashboard navigation component.
- * Handles sidebar tab switching and mobile sidebar toggle.
- */
 
-/**
- * Set up sidebar navigation: tab switching and profile tab trigger.
- * @param {Function} onProfileTab - callback when profile tab is opened
- */
+
+
 export function setupNavigation(onProfileTab) {
   const navItems = document.querySelectorAll('#sidebar-nav .sidebar-item');
   const contentTabs = document.querySelectorAll('.content-tab');
@@ -42,9 +36,7 @@ export function setupNavigation(onProfileTab) {
   });
 }
 
-/**
- * Toggle sidebar visibility on mobile.
- */
+
 export function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
   const overlay = document.getElementById('sidebar-overlay');
