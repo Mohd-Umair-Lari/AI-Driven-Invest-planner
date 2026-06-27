@@ -1,14 +1,11 @@
+/**
+ * Standalone AI Advisor page chatbot.
+ * Uses the AdvisorChatbot class to render a full chat UI inside a container.
+ */
+
 import { apiFetch } from "./api.js";
-
-const CHAT_SESSION_STORAGE = "finpass_active_chat_session";
-
-function newChatSessionId() {
-  return "sess_" + Date.now() + "_" + Math.random().toString(36).slice(2, 9);
-}
-
-function chatStorageKey(email) {
-  return `${CHAT_SESSION_STORAGE}_${email}`;
-}
+import { escapeHtml } from "./utils/formatting.js";
+import { newChatSessionId, chatStorageKey } from "./utils/chat-session.js";
 
 export class AdvisorChatbot {
   constructor() {
@@ -112,7 +109,7 @@ export class AdvisorChatbot {
     this.sessionsListEl.innerHTML = this.sessionsCache
       .map((s) => {
         const active = s.session_id === this.activeSessionId ? " font-bold text-indigo-600" : " text-slate-500";
-        return `<button type="button" data-sid="${this.escapeHtml(s.session_id)}" class="block w-full text-left p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700${active}">${this.escapeHtml(s.title || "Chat")}</button>`;
+        return `<button type="button" data-sid="${escapeHtml(s.session_id)}" class="block w-full text-left p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700${active}">${escapeHtml(s.title || "Chat")}</button>`;
       })
       .join("");
     this.sessionsListEl.querySelectorAll("button[data-sid]").forEach((btn) => {
@@ -222,11 +219,11 @@ export class AdvisorChatbot {
 
     if (sender === "user") {
       messageEl.className = "flex justify-end";
-      messageEl.innerHTML = `<p class="text-sm bg-indigo-600 text-white rounded-lg px-4 py-2 max-w-[85%]">${this.escapeHtml(text)}</p>`;
+      messageEl.innerHTML = `<p class="text-sm bg-indigo-600 text-white rounded-lg px-4 py-2 max-w-[85%]">${escapeHtml(text)}</p>`;
     } else if (sender === "advisor") {
-      messageEl.innerHTML = `<div class="text-sm bg-slate-100 dark:bg-slate-700 rounded-lg px-4 py-2 max-w-[90%] whitespace-pre-wrap">${this.escapeHtml(text)}</div>`;
+      messageEl.innerHTML = `<div class="text-sm bg-slate-100 dark:bg-slate-700 rounded-lg px-4 py-2 max-w-[90%] whitespace-pre-wrap">${escapeHtml(text)}</div>`;
     } else {
-      messageEl.innerHTML = `<p class="text-xs text-center text-slate-400 w-full">${this.escapeHtml(text)}</p>`;
+      messageEl.innerHTML = `<p class="text-xs text-center text-slate-400 w-full">${escapeHtml(text)}</p>`;
     }
 
     messagesDiv.appendChild(messageEl);
@@ -237,12 +234,6 @@ export class AdvisorChatbot {
     this.isLoading = isLoading;
     if (this.sendButton) this.sendButton.disabled = isLoading;
     if (this.inputField) this.inputField.disabled = isLoading;
-  }
-
-  escapeHtml(text) {
-    const div = document.createElement("div");
-    div.textContent = text;
-    return div.innerHTML;
   }
 }
 
