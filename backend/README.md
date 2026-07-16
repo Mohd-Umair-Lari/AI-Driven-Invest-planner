@@ -1,5 +1,5 @@
 ---
-title: AI Financial Advisor Backend
+title: FinPass Backend
 emoji: 📈
 colorFrom: blue
 colorTo: green
@@ -7,5 +7,6 @@ sdk: docker
 pinned: false
 ---
 
-# AI Financial Advisor Backend
-This is the backend API for the AI Financial Advisor.
+# FinPass Backend
+
+Backend API for **FinPass** — a Financial Planner + Advisor.

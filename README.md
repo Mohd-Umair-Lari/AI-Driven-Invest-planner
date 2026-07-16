@@ -1,5 +1,5 @@
 ---
-title: FinPass AI
+title: FinPass
 emoji: 📈
 colorFrom: indigo
 colorTo: purple
@@ -7,16 +7,16 @@ sdk: docker
 pinned: false
 ---
 
-# FinPass AI — AI-Driven Financial Advisor
+# FinPass — Financial Planner + Advisor
 
 > **Live App:** [https://ai-driven-invest-planner.vercel.app](https://ai-driven-invest-planner.vercel.app)  
 > **Original Concept:** [Notion — Personalized AI-Driven Investment Planner](https://www.notion.so/2-Personalized-AI-Driven-Investment-Planner-21cd1ee2d1be807da0a1e1693cd1f0c8)
 
 ---
 
-## What Is FinPass AI?
+## What Is FinPass?
 
-FinPass AI is a full-stack, AI-powered personal finance advisor built for Indian investors. It combines a deterministic financial engine with Groq-powered LLaMA-3 AI to generate personalized investment plans, goal projections, and actionable financial insights — all through a clean, responsive web dashboard.
+**FinPass** is a **Financial Planner + Advisor** — a full-stack app for Indian investors that combines deterministic financial planning with Groq-powered LLaMA-3 AI. It generates personalized investment plans, goal projections, and actionable insights through a clean, responsive web dashboard.
 
 The app is designed around three principles:
 
@@ -301,7 +301,7 @@ The `frontend/vercel.json` maps legacy root URLs to the new `static/` folder:
 
 ## Disclaimer
 
-FinPass AI is an **educational and informational tool** only.  
+FinPass is an **educational and informational tool** only.  
 It does not execute trades, manage funds, or provide legally binding financial advice.  
 All investment data shown is for illustrative purposes.  
 Please consult a SEBI-registered investment advisor before making significant financial decisions.
