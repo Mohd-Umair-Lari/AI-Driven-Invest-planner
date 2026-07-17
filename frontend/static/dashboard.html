@@ -338,7 +338,7 @@
                     </div>
 
                     
-                    <div id="ai-advisor-panel" class="ai-panel ai-panel-chat col-span-1 lg:col-span-1">
+                    <div id="dashboard-chat-panel" class="ai-panel ai-panel-chat col-span-1 lg:col-span-1">
 
                         
                         <div class="chat-header-bar">
@@ -357,13 +357,7 @@
                                 </div>
                             </div>
                             <div class="chat-header-actions">
-                                <button type="button" id="chat-new-btn" class="chat-new-btn" title="New chat">
-                                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                                    New
-                                </button>
-                                <button type="button" id="chat-delete-btn" class="chat-delete-btn" title="Delete conversation">
-                                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                </button>
+                                <button type="button" id="chat-launch-btn" class="chat-launch-btn" title="Open full chat">Chat</button>
                             </div>
                         </div>
 
@@ -379,14 +373,8 @@
                             </aside>
 
                             
-                            <div class="chat-main">
+                            <div class="chat-main chat-main-readonly">
                                 <div class="chat-messages-scroll" id="ai-chat-messages"></div>
-                                <div class="chat-input-bar">
-                                    <input type="text" id="ai-chat-input" placeholder="Ask about savings, SIPs, goals…" class="ai-chat-input-field" autocomplete="off">
-                                    <button type="button" id="ai-chat-send" class="chat-send-btn" aria-label="Send message">
-                                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-                                    </button>
-                                </div>
                             </div>
 
                         </div>
@@ -438,6 +426,57 @@
 
                         <div>
                             <div class="flex rounded-2xl overflow-hidden h-10 w-full shadow-sm">
+
+                    <div id="chatbot-modal" class="chatbot-modal" aria-hidden="true">
+                        <div id="chatbot-modal-backdrop" class="chatbot-modal-backdrop"></div>
+                        <section id="chatbot-modal-shell" class="chatbot-modal-shell" role="dialog" aria-modal="true" aria-label="Full screen chat assistant">
+                            <div class="chat-header-bar chatbot-modal-topbar">
+                                <div class="chat-header-left">
+                                    <div class="chat-avatar-wrapper">
+                                        <div class="chat-avatar">
+                                            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                                            </svg>
+                                        </div>
+                                        <span class="chat-online-dot"></span>
+                                    </div>
+                                    <div>
+                                        <h3 class="chat-header-title">FinPass AI</h3>
+                                        <p class="chat-header-sub"><span class="chat-online-text">● Online</span> · Financial Advisor</p>
+                                    </div>
+                                </div>
+                                <div class="chat-header-actions">
+                                    <button type="button" id="chat-close-btn" class="chat-close-btn" title="Close chat">Close</button>
+                                    <button type="button" id="chat-new-btn" class="chat-new-btn" title="New chat">
+                                        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                                        New
+                                    </button>
+                                    <button type="button" id="chat-delete-btn" class="chat-delete-btn" title="Delete conversation">
+                                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="chat-body chatbot-modal-body">
+                                <aside class="chat-sessions-panel" id="chat-sessions-panel" aria-label="Past conversations">
+                                    <p class="chat-sessions-label">History</p>
+                                    <div id="chat-sessions-list" class="chat-sessions-list">
+                                        <p class="chat-sessions-empty">Loading…</p>
+                                    </div>
+                                </aside>
+
+                                <div class="chat-main">
+                                    <div class="chat-messages-scroll" id="ai-chat-messages"></div>
+                                    <div class="chat-input-bar">
+                                        <input type="text" id="ai-chat-input" placeholder="Ask about savings, SIPs, goals…" class="ai-chat-input-field" autocomplete="off">
+                                        <button type="button" id="ai-chat-send" class="chat-send-btn" aria-label="Send message">
+                                            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
                                 <div class="flex items-center justify-center text-white text-xs font-bold tracking-wide"
                                     style="width:45%;background:#ef4444;">45%</div>
                                 <div class="flex items-center justify-center text-white text-xs font-bold tracking-wide"

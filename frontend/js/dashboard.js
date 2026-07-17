@@ -9,6 +9,24 @@ import { populateProfileData, setupProfileEditor } from "./components/profile.js
 console.log("📊 Dashboard Initializing...");
 
 let currentUser = null;
+let initDashboardChat = null;
+let initModalChat = null;
+
+function openChatModal() {
+  const modal = document.getElementById('chatbot-modal');
+  if (!modal) return;
+  modal.classList.add('is-open');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('chatbot-modal-open');
+}
+
+function closeChatModal() {
+  const modal = document.getElementById('chatbot-modal');
+  if (!modal) return;
+  modal.classList.remove('is-open');
+  modal.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('chatbot-modal-open');
+}
 
 
 async function loadUserData() {
@@ -52,15 +70,32 @@ document.addEventListener('DOMContentLoaded', async () => {
   try {
     setupNavigation(populateProfileData);
     setupProfileEditor();
-    setupChatbot();
+    const dashboardChatRoot = document.getElementById('dashboard-chat-panel');
+    const modalChatRoot = document.getElementById('chatbot-modal-shell');
+    initDashboardChat = setupChatbot({ scope: dashboardChatRoot, readOnly: true, exposeGlobal: false });
+    initModalChat = setupChatbot({ scope: modalChatRoot, readOnly: false, exposeGlobal: false });
+
+    const launchBtn = document.getElementById('chat-launch-btn');
+    const closeBtn = document.getElementById('chat-close-btn');
+    const backdrop = document.getElementById('chatbot-modal-backdrop');
+
+    launchBtn?.addEventListener('click', openChatModal);
+    closeBtn?.addEventListener('click', closeChatModal);
+    backdrop?.addEventListener('click', closeChatModal);
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') closeChatModal();
+    });
 
     const user = await loadUserData();
     if (!user) return;
 
     setChatbotUser(user);
 
-    if (typeof window.__initAdvisorChat === 'function') {
-      await window.__initAdvisorChat(user);
+    if (typeof initDashboardChat === 'function') {
+      await initDashboardChat(user);
+    }
+    if (typeof initModalChat === 'function') {
+      await initModalChat(user);
     }
 
     populateMetrics(user);

@@ -23,9 +23,12 @@ function formatAiText(text) {
 }
 
 
-export function setupChatbot() {
-  
-  const deleteBtn = document.getElementById('chat-delete-btn');
+export function setupChatbot(options = {}) {
+  const scope = options.scope || document;
+  const readOnly = options.readOnly === true;
+  const exposeGlobal = options.exposeGlobal !== false;
+
+  const deleteBtn = scope.querySelector('#chat-delete-btn');
   if (deleteBtn) {
     deleteBtn.addEventListener('click', async () => {
       if (!activeSessionId) {
@@ -51,26 +54,30 @@ export function setupChatbot() {
     });
   }
 
-  const chatInput = document.getElementById('ai-chat-input');
-  const chatSend = document.getElementById('ai-chat-send');
-  const chatMessages = document.getElementById('ai-chat-messages');
-  const sessionsList = document.getElementById('chat-sessions-list');
-  const newChatBtn = document.getElementById('chat-new-btn');
+  const chatInput = scope.querySelector('#ai-chat-input');
+  const chatSend = scope.querySelector('#ai-chat-send');
+  const chatMessages = scope.querySelector('#ai-chat-messages');
+  const sessionsList = scope.querySelector('#chat-sessions-list');
+  const newChatBtn = scope.querySelector('#chat-new-btn');
 
-  if (!chatInput || !chatSend || !chatMessages) return;
+  if (!chatMessages) return null;
 
   let activeSessionId = null;
   let sessionsCache = [];
+  const interactive = Boolean(chatInput && chatSend && !readOnly);
 
   function scrollChat() {
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }
 
   function showEmptyHint() {
+    const emptyText = readOnly
+      ? 'Pick a past conversation on the left to review the thread.'
+      : 'Ask about savings, SIPs, goals, or your spending.';
     chatMessages.innerHTML = `
       <p class="chat-empty-hint">
         <strong>FinPass AI is ready</strong>
-        Ask about savings, SIPs, goals, or your spending.<br>
+        ${emptyText}<br>
         Your conversations are saved — pick one on the left to continue.
       </p>`;
   }
@@ -255,14 +262,18 @@ export function setupChatbot() {
       await resumeSession(saved);
     } else if (sessionsCache.length > 0) {
       await resumeSession(sessionsCache[0].session_id);
-    } else {
+    } else if (interactive) {
       activeSessionId = newChatSessionId();
       persistActiveSession(user.email);
+      showEmptyHint();
+    } else {
+      activeSessionId = null;
       showEmptyHint();
     }
   }
 
   const handleSend = async () => {
+    if (!interactive) return;
     const text = chatInput.value.trim();
     if (!text) return;
 
@@ -328,19 +339,24 @@ export function setupChatbot() {
     }
   };
 
-  chatSend.addEventListener('click', handleSend);
-  chatInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  });
+  if (interactive) {
+    chatSend.addEventListener('click', handleSend);
+    chatInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleSend();
+      }
+    });
+  }
 
   if (newChatBtn) {
     newChatBtn.addEventListener('click', startNewConversation);
   }
 
-  window.__initAdvisorChat = initChatForUser;
+  if (exposeGlobal) {
+    window.__initAdvisorChat = initChatForUser;
+  }
   showEmptyHint();
   console.log("🤖 Chatbot setup complete");
+  return initChatForUser;
 }
