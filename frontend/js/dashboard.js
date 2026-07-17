@@ -21,6 +21,14 @@ function openChatModal() {
   document.body.classList.add('chatbot-modal-open');
 }
 
+async function openChatModalWithNewChat() {
+  openChatModal();
+  if (typeof initModalChat === 'function' && currentUser) {
+    await initModalChat(currentUser);
+  }
+  document.getElementById('chat-new-btn')?.click();
+}
+
 async function openChatModalForSession(sessionId) {
   if (currentUser?.email && sessionId) {
     localStorage.setItem(chatStorageKey(currentUser.email), sessionId);
@@ -96,7 +104,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const closeBtn = document.getElementById('chat-close-btn');
     const backdrop = document.getElementById('chatbot-modal-backdrop');
 
-    launchBtn?.addEventListener('click', openChatModal);
+    launchBtn?.addEventListener('click', openChatModalWithNewChat);
     closeBtn?.addEventListener('click', closeChatModal);
     backdrop?.addEventListener('click', closeChatModal);
     document.addEventListener('keydown', (event) => {
