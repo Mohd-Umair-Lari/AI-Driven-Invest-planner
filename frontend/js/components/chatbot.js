@@ -145,16 +145,51 @@ export function setupChatbot() {
     }
   }
 
+  function formatSessionTime(value) {
+    if (!value) return 'Just now';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return 'Recent';
+    const now = Date.now();
+    const diffMinutes = Math.floor((now - date.getTime()) / 60000);
+    if (diffMinutes < 1) return 'Just now';
+    if (diffMinutes < 60) return `${diffMinutes}m ago`;
+    const diffHours = Math.floor(diffMinutes / 60);
+    if (diffHours < 24) return `${diffHours}h ago`;
+    const diffDays = Math.floor(diffHours / 24);
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+  }
+
+  function formatMessageCount(count) {
+    const safeCount = Number.isFinite(Number(count)) ? Number(count) : 0;
+    return `${safeCount} message${safeCount === 1 ? '' : 's'}`;
+  }
+
   function renderSessionsList() {
     if (!sessionsList) return;
     if (!sessionsCache.length) {
-      sessionsList.innerHTML = '<p class="chat-sessions-empty text-xs text-slate-400 p-2">No chats yet</p>';
+      sessionsList.innerHTML = `
+        <div class="chat-sessions-empty">
+          <p class="chat-sessions-empty-title">No chats yet</p>
+          <p class="chat-sessions-empty-sub">Start a new chat to save your first conversation.</p>
+        </div>`;
       return;
     }
     sessionsList.innerHTML = sessionsCache.map((s) => {
       const active = s.session_id === activeSessionId ? ' active' : '';
       const title = escapeHtml(s.title || 'Conversation');
-      return `<button type="button" class="chat-session-item${active}" data-session-id="${escapeHtml(s.session_id)}" title="${title}">${title}</button>`;
+      const preview = escapeHtml((s.preview || 'No messages yet').trim());
+      const updated = formatSessionTime(s.updated_at || s.created_at);
+      const count = formatMessageCount(s.message_count);
+      return `
+        <button type="button" class="chat-session-item${active}" data-session-id="${escapeHtml(s.session_id)}" title="${title}">
+          <span class="chat-session-title">${title}</span>
+          <span class="chat-session-preview">${preview}</span>
+          <span class="chat-session-meta">
+            <span class="chat-session-time">${escapeHtml(updated)}</span>
+            <span class="chat-session-count">${escapeHtml(count)}</span>
+          </span>
+        </button>`;
     }).join('');
 
     sessionsList.querySelectorAll('.chat-session-item').forEach((btn) => {
