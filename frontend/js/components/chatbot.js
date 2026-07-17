@@ -26,7 +26,10 @@ function formatAiText(text) {
 export function setupChatbot(options = {}) {
   const scope = options.scope || document;
   const readOnly = options.readOnly === true;
+  const historyOnly = options.historyOnly === true;
   const exposeGlobal = options.exposeGlobal !== false;
+  const onSessionSelected = typeof options.onSessionSelected === 'function' ? options.onSessionSelected : null;
+  const onNewChat = typeof options.onNewChat === 'function' ? options.onNewChat : null;
 
   const deleteBtn = scope.querySelector('#chat-delete-btn');
   if (deleteBtn) {
@@ -60,17 +63,28 @@ export function setupChatbot(options = {}) {
   const sessionsList = scope.querySelector('#chat-sessions-list');
   const newChatBtn = scope.querySelector('#chat-new-btn');
 
-  if (!chatMessages) return null;
+  if (!chatMessages && !sessionsList) return null;
 
   let activeSessionId = null;
   let sessionsCache = [];
-  const interactive = Boolean(chatInput && chatSend && !readOnly);
+  const interactive = Boolean(chatInput && chatSend && !readOnly && !historyOnly);
 
   function scrollChat() {
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
   }
 
   function showEmptyHint() {
+    if (!chatMessages) {
+      if (sessionsList && !sessionsCache.length) {
+        sessionsList.innerHTML = `
+          <div class="chat-sessions-empty">
+            <p class="chat-sessions-empty-title">No chats yet</p>
+            <p class="chat-sessions-empty-sub">Start a full-screen chat to save your first conversation.</p>
+          </div>`;
+      }
+      return;
+    }
+
     const emptyText = readOnly
       ? 'Pick a past conversation on the left to review the thread.'
       : 'Ask about savings, SIPs, goals, or your spending.';
@@ -83,6 +97,7 @@ export function setupChatbot(options = {}) {
   }
 
   function appendUserMsg(text) {
+    if (!chatMessages) return;
     const div = document.createElement('div');
     div.className = 'chat-user-msg';
     div.innerHTML = `<div class="chat-user-bubble"><p class="chat-user-text">${escapeHtml(text)}</p></div>`;
@@ -91,6 +106,7 @@ export function setupChatbot(options = {}) {
   }
 
   function appendAiMsg(text) {
+    if (!chatMessages) return;
     const div = document.createElement('div');
     div.className = 'ai-chat-card';
     div.innerHTML = `
@@ -105,6 +121,7 @@ export function setupChatbot(options = {}) {
   }
 
   function appendError(msg) {
+    if (!chatMessages) return;
     const div = document.createElement('div');
     div.className = 'ai-chat-card';
     div.innerHTML = `
@@ -119,6 +136,7 @@ export function setupChatbot(options = {}) {
   }
 
   function showTyping() {
+    if (!chatMessages) return null;
     const div = document.createElement('div');
     div.className = 'ai-chat-card';
     div.id = 'chat-typing-indicator';
@@ -135,6 +153,7 @@ export function setupChatbot(options = {}) {
   }
 
   function renderMessages(messages) {
+    if (!chatMessages) return;
     chatMessages.innerHTML = '';
     if (!messages?.length) {
       showEmptyHint();
@@ -175,11 +194,7 @@ export function setupChatbot(options = {}) {
   function renderSessionsList() {
     if (!sessionsList) return;
     if (!sessionsCache.length) {
-      sessionsList.innerHTML = `
-        <div class="chat-sessions-empty">
-          <p class="chat-sessions-empty-title">No chats yet</p>
-          <p class="chat-sessions-empty-sub">Start a new chat to save your first conversation.</p>
-        </div>`;
+      showEmptyHint();
       return;
     }
     sessionsList.innerHTML = sessionsCache.map((s) => {
@@ -225,6 +240,11 @@ export function setupChatbot(options = {}) {
     persistActiveSession(user.email);
     renderSessionsList();
 
+    if (historyOnly) {
+      if (onSessionSelected) onSessionSelected(sessionId);
+      return;
+    }
+
     try {
       const data = await apiFetch(
         `/api/chat/history/${encodeURIComponent(user.email)}/${encodeURIComponent(sessionId)}`
@@ -239,6 +259,11 @@ export function setupChatbot(options = {}) {
   function startNewConversation() {
     const user = currentUserRef || JSON.parse(localStorage.getItem('user') || '{}');
     if (!user?.email) return;
+
+    if (historyOnly) {
+      if (onNewChat) onNewChat();
+      return;
+    }
 
     activeSessionId = newChatSessionId();
     persistActiveSession(user.email);
@@ -265,6 +290,9 @@ export function setupChatbot(options = {}) {
     } else if (interactive) {
       activeSessionId = newChatSessionId();
       persistActiveSession(user.email);
+      showEmptyHint();
+    } else if (historyOnly) {
+      activeSessionId = null;
       showEmptyHint();
     } else {
       activeSessionId = null;
@@ -355,6 +383,10 @@ export function setupChatbot(options = {}) {
 
   if (exposeGlobal) {
     window.__initAdvisorChat = initChatForUser;
+  }
+
+  if (historyOnly) {
+    showEmptyHint();
   }
   showEmptyHint();
   console.log("🤖 Chatbot setup complete");

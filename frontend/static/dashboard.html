@@ -339,8 +339,6 @@
 
                     
                     <div id="dashboard-chat-panel" class="ai-panel ai-panel-chat col-span-1 lg:col-span-1">
-
-                        
                         <div class="chat-header-bar">
                             <div class="chat-header-left">
                                 <div class="chat-avatar-wrapper">
@@ -356,27 +354,19 @@
                                     <p class="chat-header-sub"><span class="chat-online-text">● Online</span> · Financial Advisor</p>
                                 </div>
                             </div>
-                            <div class="chat-header-actions">
-                                <button type="button" id="chat-launch-btn" class="chat-launch-btn" title="Open full chat">Chat</button>
-                            </div>
+                            <div class="chat-header-actions"></div>
                         </div>
 
-                        
-                        <div class="chat-body">
+                        <button type="button" id="chat-launch-btn" class="chat-launch-btn chat-launch-fab" title="Open full chat">Chat</button>
 
-                            
-                            <aside class="chat-sessions-panel" id="chat-sessions-panel" aria-label="Past conversations">
+                        <div class="chat-history-shell">
+                            <div class="chat-history-head">
                                 <p class="chat-sessions-label">History</p>
-                                <div id="chat-sessions-list" class="chat-sessions-list">
-                                    <p class="chat-sessions-empty">Loading…</p>
-                                </div>
-                            </aside>
-
-                            
-                            <div class="chat-main chat-main-readonly">
-                                <div class="chat-messages-scroll" id="ai-chat-messages"></div>
+                                <p class="chat-history-note">Select a past conversation to open it full screen.</p>
                             </div>
-
+                            <div id="chat-sessions-list" class="chat-sessions-list chat-history-list">
+                                <p class="chat-sessions-empty">Loading…</p>
+                            </div>
                         </div>
                     </div>
 

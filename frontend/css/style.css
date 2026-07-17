@@ -500,6 +500,7 @@ html.dark .card-modern {
 
 
 .ai-panel-chat {
+  position: relative;
   display: flex;
   flex-direction: column;
   height: 460px !important;
@@ -553,6 +554,13 @@ html.dark .card-modern {
   text-transform: uppercase;
   cursor: pointer;
   transition: transform 0.16s ease, background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.chat-launch-fab {
+  position: absolute;
+  top: 0.95rem;
+  right: 0.95rem;
+  z-index: 3;
 }
 
 .chat-launch-btn:hover,
@@ -651,8 +659,33 @@ html.dark .card-modern {
   overflow: hidden;
 }
 
-.chat-main-readonly .chat-messages-scroll {
-  padding-bottom: 1rem;
+.chat-history-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex: 1;
+  min-height: 0;
+  padding: 0.9rem 1rem 1rem;
+}
+
+.chat-history-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.chat-history-note {
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: #64748b;
+}
+
+.dark .chat-history-note {
+  color: #94a3b8;
+}
+
+.chat-history-list {
+  padding-right: 0;
 }
 
 .chat-sessions-panel {
@@ -1140,7 +1173,6 @@ body.chatbot-modal-open {
   display: flex;
   align-items: stretch;
   justify-content: center;
-  padding: 1rem;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -1163,23 +1195,25 @@ body.chatbot-modal-open {
 .chatbot-modal-shell {
   position: relative;
   z-index: 1;
-  width: min(1440px, 100%);
-  height: calc(100vh - 2rem);
-  margin: auto;
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border-radius: 28px;
+  border-radius: 0;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.94);
   box-shadow: 0 30px 80px rgba(15, 23, 42, 0.32);
+  transform-origin: center right;
+  clip-path: inset(12% 10% 12% 65% round 28px);
   transform: translateY(18px) scale(0.965);
   opacity: 0;
-  transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.22s ease;
+  transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.22s ease, clip-path 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .chatbot-modal.is-open .chatbot-modal-shell {
   transform: translateY(0) scale(1);
+  clip-path: inset(0 0 0 0 round 0);
   opacity: 1;
 }
 
@@ -1229,6 +1263,11 @@ body.chatbot-modal-open {
     max-height: 11rem;
     border-right: none;
     border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  .chat-launch-fab {
+    top: 0.75rem;
+    right: 0.75rem;
   }
 
   .dark .chat-sessions-panel {

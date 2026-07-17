@@ -5,6 +5,7 @@ import { setupNavigation, toggleSidebar } from "./components/navigation.js";
 import { populateMetrics, populateGoalData, loadRecommendedActions } from "./components/metrics.js";
 import { setupChatbot, setChatbotUser } from "./components/chatbot.js";
 import { populateProfileData, setupProfileEditor } from "./components/profile.js";
+import { chatStorageKey } from "./utils/chat-session.js";
 
 console.log("📊 Dashboard Initializing...");
 
@@ -18,6 +19,16 @@ function openChatModal() {
   modal.classList.add('is-open');
   modal.setAttribute('aria-hidden', 'false');
   document.body.classList.add('chatbot-modal-open');
+}
+
+async function openChatModalForSession(sessionId) {
+  if (currentUser?.email && sessionId) {
+    localStorage.setItem(chatStorageKey(currentUser.email), sessionId);
+  }
+  openChatModal();
+  if (typeof initModalChat === 'function' && currentUser) {
+    await initModalChat(currentUser);
+  }
 }
 
 function closeChatModal() {
@@ -72,7 +83,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupProfileEditor();
     const dashboardChatRoot = document.getElementById('dashboard-chat-panel');
     const modalChatRoot = document.getElementById('chatbot-modal-shell');
-    initDashboardChat = setupChatbot({ scope: dashboardChatRoot, readOnly: true, exposeGlobal: false });
+    initDashboardChat = setupChatbot({
+      scope: dashboardChatRoot,
+      readOnly: true,
+      historyOnly: true,
+      exposeGlobal: false,
+      onSessionSelected: openChatModalForSession,
+    });
     initModalChat = setupChatbot({ scope: modalChatRoot, readOnly: false, exposeGlobal: false });
 
     const launchBtn = document.getElementById('chat-launch-btn');
