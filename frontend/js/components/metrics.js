@@ -64,20 +64,42 @@ export function populateMetrics(user) {
   const income = safeExtract(user, 'financials.monthly-income', 0);
   const expenses = safeExtract(user, 'financials.monthly-expenses', 0);
   const debt = safeExtract(user, 'financials.debt', 0);
-  const portfolio = safeExtract(user, 'investments.invest-amt', 500000);
+  const portfolio = safeExtract(user, 'investments.invest-amt', 0);
 
-  document.getElementById('metric-income').textContent = formatCurrency(income);
-  document.getElementById('metric-debt').textContent = formatCurrency(debt);
-  document.getElementById('metric-portfolio').textContent = formatCurrency(portfolio);
+  const incEl = document.getElementById('metric-income');
+  if (incEl) incEl.textContent = formatCurrency(income);
+
+  const debtEl = document.getElementById('metric-debt');
+  if (debtEl) debtEl.textContent = formatCurrency(debt);
+
+  const portEl = document.getElementById('metric-portfolio');
+  if (portEl) portEl.textContent = formatCurrency(portfolio);
 
   const name = user.Name || 'User';
-  document.getElementById('sidebar-name').textContent = name;
-  document.getElementById('sidebar-email').textContent = user.email || 'user@example.com';
-  document.getElementById('hdr-name').textContent = name;
-  document.getElementById('sidebar-avatar').textContent = name.charAt(0).toUpperCase();
+  const sidebarName = document.getElementById('sidebar-name');
+  if (sidebarName) sidebarName.textContent = name;
+
+  const sidebarEmail = document.getElementById('sidebar-email');
+  if (sidebarEmail) sidebarEmail.textContent = user.email || '';
+
+  const hdrName = document.getElementById('hdr-name');
+  if (hdrName) hdrName.textContent = name;
+
+  const sidebarAvatar = document.getElementById('sidebar-avatar');
+  if (sidebarAvatar) sidebarAvatar.textContent = name.charAt(0).toUpperCase();
+
+  const ratioEl = document.getElementById('cashflow-expense-ratio');
+  if (ratioEl) {
+    const ratio = income > 0 ? Math.round((expenses / income) * 100) : 0;
+    ratioEl.textContent = `${ratio}%`;
+  }
+
+  const noteEl = document.getElementById('cashflow-income-note');
+  if (noteEl) {
+    noteEl.textContent = `* Calculated from your monthly income of ${formatCurrency(income)} across all financial goals.`;
+  }
 
   const surplus = Math.max(0, income - expenses - debt);
-
   const metricsData = { income, expenses, debt, surplus, portfolio };
 
   createCashFlowChart(debt, surplus, expenses);
@@ -89,22 +111,34 @@ export function populateMetrics(user) {
 
 export async function populateGoalData(user) {
   try {
+    const userGoalAmt = safeExtract(user, 'Goal.target-amt', null);
+    const userGoalTime = safeExtract(user, 'Goal.target-time', null);
+    const userGoalName = safeExtract(user, 'Goal.goal', null);
+
     const response = await apiFetch(`/api/goal-intelligence/${user.email}`);
     const goalData = response.goal_intelligence || {};
 
-    const targetAmount = safeExtract(goalData, 'target_amount', 2100000);
-    const timeline = safeExtract(user, 'Goal.target-time', 24);
-    const goalName = safeExtract(user, 'Goal.goal', 'Luxury Car');
+    const targetAmount = userGoalAmt ?? safeExtract(goalData, 'target_amount', 0);
+    const timeline = userGoalTime ?? safeExtract(goalData, 'target_time', 12);
+    const goalName = userGoalName || safeExtract(goalData, 'goal_name', 'Financial Goal');
 
-    let probability = safeExtract(goalData, 'goal_probability', 24);
+    let probability = safeExtract(goalData, 'goal_probability', 0);
     if (probability > 100) probability = 100;
 
-    document.getElementById('metric-goal-target').textContent = formatCurrency(targetAmount);
-    document.getElementById('metric-goal-name').textContent = goalName;
+    const metricTarget = document.getElementById('metric-goal-target');
+    if (metricTarget) metricTarget.textContent = formatCurrency(targetAmount);
 
-    document.getElementById('goal-progress-name').textContent = goalName;
-    document.getElementById('goal-progress-pct').textContent = `${Math.round(probability)}% COMPLETE`;
-    document.getElementById('goal-progress-total').textContent = formatCurrency(targetAmount);
+    const metricName = document.getElementById('metric-goal-name');
+    if (metricName) metricName.textContent = goalName;
+
+    const progName = document.getElementById('goal-progress-name');
+    if (progName) progName.textContent = goalName;
+
+    const progPct = document.getElementById('goal-progress-pct');
+    if (progPct) progPct.textContent = `${Math.round(probability)}% COMPLETE`;
+
+    const progTotal = document.getElementById('goal-progress-total');
+    if (progTotal) progTotal.textContent = formatCurrency(targetAmount);
 
     const bar = document.getElementById('goal-progress-bar');
     if (bar) bar.style.width = `${probability}%`;

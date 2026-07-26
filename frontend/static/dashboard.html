@@ -111,12 +111,12 @@
         <div class="sidebar-profile-box p-3 mx-3 mb-4 border border-slate-100 dark:border-slate-700 bg-[#f8fafc] dark:bg-[#1a1a1a] rounded-2xl flex items-center cursor-pointer hover:bg-slate-50 dark:hover:bg-[#2a2a2a] transition-all duration-300 gap-2 min-w-0"
             onclick="window.logout()">
             <div class="w-9 h-9 rounded-full bg-red-100 dark:bg-cyan-900/50 text-red-600 dark:text-cyan-400 flex items-center justify-center font-bold text-sm shrink-0"
-                id="sidebar-avatar">A</div>
+                id="sidebar-avatar">—</div>
             <div class="sidebar-profile-text flex-1 min-w-0 transition-all duration-300">
                 <p class="text-sm font-semibold text-slate-900 dark:text-white truncate transition-colors"
-                    id="sidebar-name">Aditya Sharma</p>
+                    id="sidebar-name">—</p>
                 <p class="text-[10px] text-slate-500 dark:text-gray-400 uppercase tracking-wider truncate transition-colors"
-                    id="sidebar-email">ADITYA@EXAMPLE.COM</p>
+                    id="sidebar-email">—</p>
             </div>
             <svg class="w-4 h-4 text-slate-400 shrink-0 sidebar-profile-text transition-all duration-300" fill="none"
                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -147,7 +147,7 @@
                         <h2 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight transition-colors">
                             AI-Financial Advisor</h2>
                         <p class="text-sm text-slate-500 dark:text-white mt-0.5 transition-colors">Personalized Wealth
-                            Strategy for <span id="hdr-name">Aditya Sharma</span></p>
+                            Strategy for <span id="hdr-name">—</span></p>
                     </div>
                 </div>
                 <div class="flex items-center gap-4">
@@ -184,7 +184,7 @@
                             class="text-[11px] font-bold text-slate-400 dark:text-yellow-400 uppercase tracking-wider mb-2 transition-colors">
                             Monthly Income</p>
                         <h3 class="text-2xl font-bold text-slate-900 dark:text-white transition-colors"
-                            id="metric-income">₹1,50,000</h3>
+                            id="metric-income">—</h3>
                         <p class="text-[10px] text-slate-500 dark:text-white mt-3 transition-colors">Gross income for
                             this month</p>
                     </div>
@@ -206,7 +206,7 @@
                             class="text-[11px] font-bold text-slate-400 dark:text-yellow-400 uppercase tracking-wider mb-2 transition-colors">
                             Total Portfolio</p>
                         <h3 class="text-2xl font-bold text-slate-900 dark:text-white transition-colors"
-                            id="metric-portfolio">₹5,00,000</h3>
+                            id="metric-portfolio">—</h3>
                         <p class="text-[10px] text-slate-500 dark:text-white mt-3 transition-colors">Current investment
                             value</p>
                     </div>
@@ -226,14 +226,14 @@
                             class="text-[11px] font-bold text-slate-400 dark:text-yellow-400 uppercase tracking-wider mb-2 transition-colors">
                             Goal Target</p>
                         <h3 class="text-2xl font-bold text-slate-900 dark:text-white transition-colors"
-                            id="metric-goal-target">₹21,00,000</h3>
+                            id="metric-goal-target">—</h3>
                         <p
                             class="text-[10px] text-slate-500 dark:text-white mt-3 flex items-center gap-1 transition-colors">
                             <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <span id="metric-goal-name">Luxury Car</span>
+                            <span id="metric-goal-name">—</span>
                         </p>
                     </div>
 
@@ -601,12 +601,12 @@
                                 <p
                                     class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold mb-1">
                                     Expense Ratio</p>
-                                <p class="text-3xl font-bold text-rose-600 dark:text-rose-400">45%</p>
+                                <p class="text-3xl font-bold text-rose-600 dark:text-rose-400" id="cashflow-expense-ratio">—</p>
                             </div>
                         </div>
 
-                        <p class="text-xs text-slate-400 italic">
-                            * Calculated from your monthly income of ₹1,50,000 across all financial goals.
+                        <p class="text-xs text-slate-400 italic" id="cashflow-income-note">
+                            * Calculated from your monthly income across all financial goals.
                         </p>
 
                     </div>
@@ -637,8 +637,8 @@
                             <div class="flex items-center gap-2">
                                 <p
                                     class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                                    Last Updated</p>
-                                <p class="text-xs text-slate-600 dark:text-slate-300 font-medium">2/20/2024</p>
+                                    Status</p>
+                                <p class="text-xs text-slate-600 dark:text-slate-300 font-medium" id="profile-status">Active Account</p>
                             </div>
                         </div>
                         <button id="profile-edit-btn"
@@ -693,16 +693,16 @@
                         <div class="profile-form-grid">
                             <div class="form-group">
                                 <label class="form-label">Full Name</label>
-                                <input type="text" id="edit-name" class="form-input" placeholder="Your Name" required>
+                                <input type="text" id="edit-name" class="form-input" placeholder="Full Name in Database" required>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Email Address</label>
-                                <input type="email" id="edit-email" class="form-input" placeholder="your@email.com"
+                                <input type="email" id="edit-email" class="form-input" placeholder="Email in Database"
                                     disabled>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Age</label>
-                                <input type="number" id="edit-age" class="form-input" placeholder="25" min="18"
+                                <input type="number" id="edit-age" class="form-input" placeholder="Age (years)" min="18"
                                     max="100">
                             </div>
                             <div class="form-group">
@@ -718,11 +718,11 @@
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Monthly Income (₹)</label>
-                                <input type="number" id="edit-income" class="form-input" placeholder="75000" min="0">
+                                <input type="number" id="edit-income" class="form-input" placeholder="Monthly Income in Database" min="0">
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Monthly Expenses (₹)</label>
-                                <input type="number" id="edit-expenses" class="form-input" placeholder="45000" min="0">
+                                <input type="number" id="edit-expenses" class="form-input" placeholder="Monthly Expenses in Database" min="0">
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Risk Appetite</label>

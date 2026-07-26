@@ -55,13 +55,16 @@ async function loadResumeState() {
   const user = JSON.parse(localStorage.getItem("user"));
   if (!user?.email) return;
 
+  // Pre-fill from existing user DB record if present
+  hydrateWizard(user);
+
   try {
     const res = await apiFetch(`/api/onboarding/status/${user.email}`);
     const onboarding = res.onboarding;
 
-    if (onboarding &&(onboarding.state === "in_progress" || onboarding.state === "cancelled")) {
+    if (onboarding && (onboarding.state === "in_progress" || onboarding.state === "cancelled")) {
       step = Number(onboarding.current_step) || 0;
-      if (onboarding.data) {
+      if (onboarding.data && Object.keys(onboarding.data).length > 0) {
         hydrateWizard(onboarding.data);
       }
     }

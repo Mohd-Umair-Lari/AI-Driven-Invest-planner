@@ -35,13 +35,29 @@ export function setupProfileEditor() {
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user) return;
 
-    document.getElementById('edit-name').value = user.Name || '';
-    document.getElementById('edit-email').value = user.email || '';
-    document.getElementById('edit-age').value = user.Age || '';
-    document.getElementById('edit-employment').value = user['employment-status'] || '';
-    document.getElementById('edit-income').value = safeExtract(user, 'financials.monthly-income', '') || '';
-    document.getElementById('edit-expenses').value = safeExtract(user, 'financials.monthly-expenses', '') || '';
-    document.getElementById('edit-risk').value = safeExtract(user, 'investments.risk-opt', '') || '';
+    const name = user.Name || '';
+    const email = user.email || '';
+    const age = user.Age || '';
+    const emp = user['employment-status'] || '';
+    const inc = safeExtract(user, 'financials.monthly-income', '');
+    const exp = safeExtract(user, 'financials.monthly-expenses', '');
+    const risk = safeExtract(user, 'investments.risk-opt', '');
+
+    const nameEl = document.getElementById('edit-name');
+    const emailEl = document.getElementById('edit-email');
+    const ageEl = document.getElementById('edit-age');
+    const empEl = document.getElementById('edit-employment');
+    const incEl = document.getElementById('edit-income');
+    const expEl = document.getElementById('edit-expenses');
+    const riskEl = document.getElementById('edit-risk');
+
+    if (nameEl) { nameEl.value = name; nameEl.placeholder = name || 'Enter Full Name'; }
+    if (emailEl) { emailEl.value = email; emailEl.placeholder = email || 'user@example.com'; }
+    if (ageEl) { ageEl.value = age; ageEl.placeholder = age ? `Current DB: ${age}` : 'Age (years)'; }
+    if (empEl) { empEl.value = emp; }
+    if (incEl) { incEl.value = inc; incEl.placeholder = inc ? `Current DB: ₹${inc}` : 'Monthly Income'; }
+    if (expEl) { expEl.value = exp; expEl.placeholder = exp ? `Current DB: ₹${exp}` : 'Monthly Expenses'; }
+    if (riskEl) { riskEl.value = risk; }
 
     readOnlyView.style.display = 'none';
     editForm.style.display = 'block';
