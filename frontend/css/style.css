@@ -541,17 +541,15 @@ html.dark .card-modern {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 2rem;
-  padding: 0.35rem 0.8rem;
-  border-radius: 999px;
-  border: 1.5px solid rgba(239, 68, 68, 0.28);
-  background: rgba(239, 68, 68, 0.08);
-  color: #dc2626;
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border-radius: 0.5rem;
+  border: 1.5px solid rgba(239, 68, 68, 0.35);
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
   cursor: pointer;
+  flex-shrink: 0;
   transition: transform 0.16s ease, background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
 }
 
@@ -565,23 +563,23 @@ html.dark .card-modern {
 .chat-launch-btn:hover,
 .chat-close-btn:hover {
   transform: translateY(-1px);
-  background: rgba(239, 68, 68, 0.14);
-  border-color: rgba(239, 68, 68, 0.42);
-  box-shadow: 0 8px 18px rgba(239, 68, 68, 0.14);
+  background: rgba(239, 68, 68, 0.18);
+  border-color: rgba(239, 68, 68, 0.55);
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.22);
 }
 
 .dark .chat-launch-btn,
 .dark .chat-close-btn {
-  border-color: rgba(255, 215, 0, 0.28);
-  background: rgba(255, 215, 0, 0.08);
-  color: #FFD700;
+  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
 }
 
 .dark .chat-launch-btn:hover,
 .dark .chat-close-btn:hover {
-  background: rgba(255, 215, 0, 0.14);
-  border-color: rgba(255, 215, 0, 0.42);
-  box-shadow: 0 8px 18px rgba(255, 215, 0, 0.12);
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.6);
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.25);
 }
 
 .chat-avatar-wrapper {
@@ -973,31 +971,36 @@ html.dark .card-modern {
 .chat-new-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  padding: 0.35rem 0.7rem;
-  border-radius: 0.6rem;
-  border: 1.5px solid rgba(239, 68, 68, 0.3);
-  color: #dc2626;
-  background: rgba(239, 68, 68, 0.07);
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border-radius: 0.5rem;
+  border: 1.5px solid rgba(255, 215, 0, 0.4);
+  color: #d4a017;
+  background: rgba(255, 215, 0, 0.1);
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+  transition: background 0.15s, border-color 0.15s, transform 0.15s, box-shadow 0.15s;
 }
 
 .chat-new-btn:hover {
-  background: rgba(239, 68, 68, 0.13);
-  border-color: rgba(239, 68, 68, 0.45);
+  transform: translateY(-1px);
+  background: rgba(255, 215, 0, 0.18);
+  border-color: rgba(255, 215, 0, 0.6);
+  box-shadow: 0 4px 14px rgba(255, 215, 0, 0.2);
 }
 
 .dark .chat-new-btn {
-  border-color: rgba(255, 215, 0, 0.3);
+  border-color: rgba(255, 215, 0, 0.4);
   color: #ffd700;
-  background: rgba(255, 215, 0, 0.07);
+  background: rgba(255, 215, 0, 0.1);
 }
 
 .dark .chat-new-btn:hover {
-  background: rgba(255, 215, 0, 0.13);
+  background: rgba(255, 215, 0, 0.2);
+  border-color: rgba(255, 215, 0, 0.6);
+  box-shadow: 0 4px 14px rgba(255, 215, 0, 0.22);
 }
 
 .chat-delete-btn {
