@@ -2277,7 +2277,10 @@ html.dark .motive-banner p {
     margin-left: auto !important;
     margin-right: auto !important;
     justify-content: center !important;
-    border-radius: 0.75rem !important;
     gap: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
   }
 }
