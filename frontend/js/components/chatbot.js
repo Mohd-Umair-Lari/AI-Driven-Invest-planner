@@ -232,7 +232,7 @@ export function setupChatbot(options = {}) {
     }
   }
 
-  async function resumeSession(sessionId) {
+  async function resumeSession(sessionId, isInit = false) {
     const user = currentUserRef || JSON.parse(localStorage.getItem('user') || '{}');
     if (!user?.email || !sessionId) return;
 
@@ -241,7 +241,8 @@ export function setupChatbot(options = {}) {
     renderSessionsList();
 
     if (historyOnly) {
-      if (onSessionSelected) onSessionSelected(sessionId);
+      // Only open the modal when user explicitly clicks a session, not on init
+      if (!isInit && onSessionSelected) onSessionSelected(sessionId);
       return;
     }
 
@@ -284,9 +285,9 @@ export function setupChatbot(options = {}) {
     const savedExists = saved && sessionsCache.some((s) => s.session_id === saved);
 
     if (savedExists) {
-      await resumeSession(saved);
+      await resumeSession(saved, true);           // isInit=true → no modal
     } else if (sessionsCache.length > 0) {
-      await resumeSession(sessionsCache[0].session_id);
+      await resumeSession(sessionsCache[0].session_id, true); // isInit=true → no modal
     } else if (interactive) {
       activeSessionId = newChatSessionId();
       persistActiveSession(user.email);
