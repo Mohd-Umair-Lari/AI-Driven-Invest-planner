@@ -12,6 +12,7 @@ console.log("📊 Dashboard Initializing...");
 let currentUser = null;
 let initDashboardChat = null;
 let initModalChat = null;
+let modalInitialized = false;
 
 function openChatModal() {
   const modal = document.getElementById('chatbot-modal');
@@ -23,8 +24,9 @@ function openChatModal() {
 
 async function openChatModalWithNewChat() {
   openChatModal();
-  if (typeof initModalChat === 'function' && currentUser) {
+  if (!modalInitialized && typeof initModalChat === 'function' && currentUser) {
     await initModalChat(currentUser);
+    modalInitialized = true;
   }
   document.getElementById('chat-new-btn')?.click();
 }
@@ -34,8 +36,9 @@ async function openChatModalForSession(sessionId) {
     localStorage.setItem(chatStorageKey(currentUser.email), sessionId);
   }
   openChatModal();
-  if (typeof initModalChat === 'function' && currentUser) {
+  if (!modalInitialized && typeof initModalChat === 'function' && currentUser) {
     await initModalChat(currentUser);
+    modalInitialized = true;
   }
 }
 
@@ -118,9 +121,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (typeof initDashboardChat === 'function') {
       await initDashboardChat(user);
-    }
-    if (typeof initModalChat === 'function') {
-      await initModalChat(user);
     }
 
     populateMetrics(user);
