@@ -200,17 +200,9 @@ export function setupChatbot(options = {}) {
     sessionsList.innerHTML = sessionsCache.map((s) => {
       const active = s.session_id === activeSessionId ? ' active' : '';
       const title = escapeHtml(s.title || 'Conversation');
-      const preview = escapeHtml((s.preview || 'No messages yet').trim());
-      const updated = formatSessionTime(s.updated_at || s.created_at);
-      const count = formatMessageCount(s.message_count);
       return `
         <button type="button" class="chat-session-item${active}" data-session-id="${escapeHtml(s.session_id)}" title="${title}">
           <span class="chat-session-title">${title}</span>
-          <span class="chat-session-preview">${preview}</span>
-          <span class="chat-session-meta">
-            <span class="chat-session-time">${escapeHtml(updated)}</span>
-            <span class="chat-session-count">${escapeHtml(count)}</span>
-          </span>
         </button>`;
     }).join('');
 
