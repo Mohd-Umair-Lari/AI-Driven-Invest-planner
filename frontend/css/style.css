@@ -668,11 +668,11 @@ html.dark .card-modern {
   flex-direction: column;
   flex: 1;
   min-height: 0;
-  padding: 0.75rem 0.85rem 0.85rem;
-  gap: 0.6rem;
+  padding: 0.65rem 0.75rem 0.75rem;
+  gap: 0;
+  overflow: hidden;
 }
 
-/* Hide the heading row — the tab bar speaks for itself */
 .chat-history-head {
   display: none;
 }
@@ -681,106 +681,129 @@ html.dark .card-modern {
   display: none;
 }
 
-.dark .chat-history-note {
-  color: #94a3b8;
-}
-
-/* ── Full-width tab bar ─────────────────────────────────── */
+/* ── Vertical stacked conversation list ─────────────────── */
 .chat-history-list {
   display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap;
-  gap: 0.4rem;
+  flex-direction: column !important;
+  gap: 0.25rem;
   width: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  align-items: stretch;
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;
+  min-height: 0;
   padding: 0;
-  /* Subtle inset background for the tab rail */
-  background: rgba(0,0,0,0.04);
-  border-radius: 0.65rem;
-  padding: 0.3rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148,163,184,0.3) transparent;
 }
 
 .dark .chat-history-list {
-  background: rgba(255,255,255,0.04);
+  scrollbar-color: rgba(71,85,105,0.4) transparent;
 }
 
 .chat-history-list::-webkit-scrollbar {
-  display: none;
+  width: 3px;
 }
 
-/* ── Individual tab ─────────────────────────────────────── */
+.chat-history-list::-webkit-scrollbar-thumb {
+  background: rgba(148,163,184,0.35);
+  border-radius: 99px;
+}
+
+/* ── Individual row ─────────────────────────────────────── */
 .chat-history-list .chat-session-item {
-  /* Each tab grows equally to fill the row */
-  flex: 1 1 0;
-  min-width: 4rem;
+  width: 100% !important;
   max-width: none !important;
-  width: auto !important;
-  height: 2.15rem;
-  padding: 0 0.6rem;
-  border-radius: 0.45rem;
-  border: none;
+  flex-shrink: 0;
+  height: auto;
+  min-height: 2.25rem;
+  padding: 0.45rem 0.7rem 0.45rem 0.75rem;
+  border-radius: 0.55rem;
+  border: 1px solid transparent;
   background: transparent;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   cursor: pointer;
-  transition: background 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease;
-  position: relative;
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
   gap: 0;
   box-shadow: none;
+  position: relative;
+}
+
+.chat-history-list .chat-session-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 20%;
+  height: 60%;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: transparent;
+  transition: background 0.15s ease;
 }
 
 .chat-history-list .chat-session-item:hover:not(.active) {
-  background: rgba(0,0,0,0.06);
+  background: rgba(0,0,0,0.05);
+  border-color: rgba(0,0,0,0.06);
   transform: none;
   box-shadow: none;
 }
 
 .dark .chat-history-list .chat-session-item:hover:not(.active) {
-  background: rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.07);
 }
 
-/* Active tab — filled pill with gradient */
+/* Active row — left accent + subtle fill */
 .chat-history-list .chat-session-item.active {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  box-shadow: 0 3px 12px rgba(239, 68, 68, 0.35);
+  background: rgba(239, 68, 68, 0.09);
+  border-color: rgba(239, 68, 68, 0.18);
+  box-shadow: none;
   transform: none;
 }
 
+.chat-history-list .chat-session-item.active::before {
+  background: #ef4444;
+}
+
 .dark .chat-history-list .chat-session-item.active {
-  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-  box-shadow: 0 3px 14px rgba(255, 215, 0, 0.4);
+  background: rgba(255, 215, 0, 0.1);
+  border-color: rgba(255, 215, 0, 0.25);
 }
 
-.chat-history-list .chat-session-item.active .chat-session-title {
-  color: #ffffff;
+.dark .chat-history-list .chat-session-item.active::before {
+  background: #FFD700;
 }
 
-.dark .chat-history-list .chat-session-item.active .chat-session-title {
-  color: #000000;
-}
-
+/* Title text */
 .chat-history-list .chat-session-title {
-  font-size: 0.73rem;
-  font-weight: 600;
+  font-size: 0.78rem;
+  font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  text-align: center;
+  text-align: left;
   width: 100%;
   color: #475569;
-  letter-spacing: 0.01em;
+  letter-spacing: 0;
+  line-height: 1.4;
+  padding-left: 0.4rem;
+}
+
+.chat-history-list .chat-session-item.active .chat-session-title {
+  color: #dc2626;
+  font-weight: 600;
 }
 
 .dark .chat-history-list .chat-session-title {
   color: #94a3b8;
 }
 
-/* Empty state inside the tab rail */
+.dark .chat-history-list .chat-session-item.active .chat-session-title {
+  color: #FFD700;
+}
+
+/* Empty state */
 .chat-history-list .chat-sessions-empty {
   flex: 1;
   display: flex;
