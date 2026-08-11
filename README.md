@@ -1,5 +1,5 @@
 ---
-title: FinPass
+title: FinPass AI
 emoji: 📈
 colorFrom: indigo
 colorTo: purple
@@ -7,243 +7,213 @@ sdk: docker
 pinned: false
 ---
 
-# FinPass — Financial Planner + Advisor
+<div align="center">
 
-> **Live App:** [https://ai-driven-invest-planner.vercel.app](https://ai-driven-invest-planner.vercel.app)  
-> **Original Concept:** [Notion — Personalized AI-Driven Investment Planner](https://www.notion.so/2-Personalized-AI-Driven-Investment-Planner-21cd1ee2d1be807da0a1e1693cd1f0c8)
+<img src="https://img.shields.io/badge/Status-Live-brightgreen?style=for-the-badge" />
+<img src="https://img.shields.io/badge/Frontend-Vercel-black?style=for-the-badge&logo=vercel" />
+<img src="https://img.shields.io/badge/Backend-HuggingFace-yellow?style=for-the-badge&logo=huggingface" />
+<img src="https://img.shields.io/badge/AI-Groq%20LLaMA--3-blueviolet?style=for-the-badge" />
+<img src="https://img.shields.io/badge/DB-MongoDB%20Atlas-green?style=for-the-badge&logo=mongodb" />
+
+# FinPass AI
+### *Your Personal AI Financial Advisor — Built for India's Future Investors*
+
+**[🚀 Try Live App](https://ai-driven-invest-planner.vercel.app)** &nbsp;·&nbsp; **[📖 Full Docs](./docs/PRODUCT_DOCS.md)** &nbsp;·&nbsp; **[🖼 Screenshots](./docs/SCREENSHOTS.md)**
+
+</div>
 
 ---
 
-## What Is FinPass?
+## ❌ The Problem
 
-**FinPass** is a **Financial Planner + Advisor** — a full-stack app for Indian investors that combines deterministic financial planning with Groq-powered LLaMA-3 AI. It generates personalized investment plans, goal projections, and actionable insights through a clean, responsive web dashboard.
+Most Indians earn enough to build real wealth — but **never do**.
 
-The app is designed around three principles:
+Not because they don't try. But because the system is broken:
 
-| Principle | What it means in practice |
+- 💸 **No one explains where their money actually goes** — expenses, debt, and lifestyle creep silently consume every rupee of surplus
+- 📉 **Generic advice doesn't work** — "invest in SIPs" means nothing without knowing *how much*, *in what*, and *for how long*, tailored to *your* income
+- 🧮 **Planning tools are either too complex or too shallow** — spreadsheets intimidate beginners; generic apps give useless blanket advice
+- 🔮 **People invest blind** — no way to simulate outcomes, stress-test goals, or see if they're on track
+- 🤖 **AI tools exist — but not for personal finance in India** — no product combines real financial math with conversational AI in a single accessible platform
+
+**The result?** Millions of earning Indians leave their money idle in savings accounts, missing a decade of compounding returns.
+
+---
+
+## ✅ The Solution — FinPass AI
+
+**FinPass AI** is a full-stack, AI-powered financial advisor built for Indian investors. It combines rigorous financial mathematics with Groq-powered LLaMA-3 AI to give you:
+
+> *A personalized investment plan, goal probability forecast, and a conversational AI advisor — all in one intelligent dashboard.*
+
+You input your financials once. FinPass AI tells you exactly:
+- **Where your money is going** (visual cash flow breakdown)
+- **Whether you'll hit your goal** (Monte Carlo probability with 1,000 simulations)
+- **How to allocate your investments** (risk-adjusted asset allocation)
+- **What to do next** (AI-generated, context-aware action plan)
+
+No spreadsheets. No jargon. No guessing.
+
+---
+
+## 🎯 Who Is It For?
+
+| Profile | What FinPass AI Does For Them |
 |---|---|
-| **Explainability over hype** | Every recommendation comes with a rationale. No black-box outputs. |
-| **Discipline over greed** | Recommendations focus on SIPs, diversification, and long-term wealth — not speculation. |
-| **System-led, AI-assisted** | Deterministic math governs all calculations (SIP future value, goal probability, asset allocation). AI is used only for interpretation and natural-language explanation. |
+| 🧑‍💼 **Salaried Professionals** | Analyzes take-home pay, expenses & SIP capacity; shows retirement readiness |
+| 🚀 **First-Time Investors** | Demystifies asset allocation — tells you exactly where to put your money |
+| 🎓 **Young Adults (22–35)** | Shows the power of early investing through SIP projections and compounding math |
+| 💼 **Self-Employed / Freelancers** | Handles variable income; sets conservative projections |
+| 👨‍👩‍👧 **Goal-Oriented Families** | Tracks multiple financial goals — home, retirement, education — in one place |
 
 ---
 
-## How It Works — Core Flow
+## ⚡ Key Features
 
-```
-User registers → Onboarding Wizard (3 steps) → Dashboard
-                                                    │
-                                        ┌───────────┴───────────┐
-                                        ▼                       ▼
-                               Goal Intelligence         AI Advisor Chat
-                          (SIP math + Monte Carlo)   (Groq LLaMA-3 analysis)
-                                        │                       │
-                                        └───────────┬───────────┘
-                                                    ▼
-                                         Personalized Dashboard
-                              (Stat cards · Cash flow · Goal bar · Insights)
-```
+### 🧠 AI Financial Intelligence
+- **Groq LLaMA-3 Analysis** — Sends your full financial profile to LLaMA-3.1-8b-instant and returns a personalized health score (0–100), honest assessment, and 3 actionable recommendations
+- **Conversational AI Advisor** — Chat with an AI that *knows your portfolio* — ask anything about your finances in plain English
+- **Graceful Fallback** — If AI is unavailable, a deterministic rule engine computes the same fields instantly
 
-### Step-by-Step User Journey
+### 📊 Goal Intelligence Engine
+- **SIP Future Value Formula** — Calculates your projected corpus at goal maturity:
+  ```
+  FV = P × [(1 + r)^n − 1] / r
+  ```
+  Where `P` = monthly surplus, `r` = monthly return rate, `n` = timeline in months
+- **Monte Carlo Simulation** — Runs 1,000 simulations with Gaussian noise to compute statistical goal probability
+- **Gap Analysis** — Shows exactly how far you are from your target and what it takes to close the gap
+- **Plain-English Verdicts** — "On Track · Slightly Behind · Needs Immediate Attention"
 
-1. **Landing page** (`/`) — Introduction to the app; links to Sign In / Get Started.
-2. **Register** (`/register.html`) — Creates account (name, email, password, age, employment).
-3. **Onboarding Wizard** (`/wizard.html`) — 3-step form collecting:
-   - Financial Goal (goal type, target amount, timeline)
-   - Monthly Financials (income, expenses, debt, emergency fund)
-   - Investment Preferences (risk appetite, investment mode, SIP amount)
-4. **Dashboard** (`/dashboard.html`) — Personalized analytics hub with 5 tabs.
+### 💹 Cash Flow Analysis
+- Full visual breakdown of income → Expenses · Debt · Investments · Surplus
+- Live progress bars with ₹ values for every allocation category
+- Key financial ratios: Savings Rate · Debt-to-Income · Expense Ratio
 
----
-
-## Dashboard — Features
-
-### Tab 1: Overview (Main Dashboard)
-- **4 Stat Cards**: Monthly Income · Total Portfolio · Goal Target · Monthly Debt
-- **Cash Flow Donut Chart** (Chart.js): Breaks income into Debt / Investable Surplus / Living Expenses
-- **Goal Progress Bar**: Live probability of reaching financial goal (from `/api/goal-intelligence`)
-- **AI Advisor Panel**: Two static insights + live chatbot input (asks AI about your portfolio)
-- **Recommended Actions**: Tax filing, SIP top-ups, insurance review
-
-### Tab 2: Cash Flow Analysis
-- Stacked proportional bar showing where income goes (Expenses · Debt · Investments · Surplus)
-- Detailed allocation rows with mini progress bars and ₹ values
-- Summary metrics: Savings Rate · Debt Ratio · Expense Ratio
-
-### Tab 3: Wealth Reports
-- Placeholder — planned for PDF generation and tax-saving strategy reports
-
-### Tab 4: My Profile
-- Read-only view of all profile data
-- Edit form: update name, age, employment status, income, expenses, risk appetite
-- Changes saved via `PUT /api/user/<email>` and reflected instantly in the dashboard
-
-### Tab 5: Preferences
-- Email notification and SMS alert toggles (UI complete)
-
----
-
-## Intelligence Engine — How the Numbers Work
-
-### Goal Intelligence (`/api/goal-intelligence/<email>`)
-Uses compound interest SIP future value formula:
-
-```
-FV = P × [(1 + r)^n − 1] / r
-```
-
-Where:
-- `P` = monthly savings (income − expenses)
-- `r` = monthly ROI (Low: 6% / Moderate: 10% / High: 14% annualized)
-- `n` = goal timeline in months
-
-Returns: expected corpus, probability %, gap to goal, and a human-readable verdict.
-
-### Goal Probability (`/api/predict/<email>`)
-Runs **1,000 Monte Carlo simulations** with Gaussian noise on monthly returns to compute the statistical likelihood of hitting the target amount.
-
-### AI Financial Analysis (`/api/analyze-finances/<email>`)
-Sends user's full financial profile to **Groq LLaMA-3.1-8b-instant** and requests:
-- A health score (0–100)
-- 2–3 sentence honest assessment
-- 3 specific actionable recommendations
-- Investment allocation (equity/debt/cash, must sum to 100%)
-
-If Groq is unavailable, a deterministic rule-based fallback computes the same fields using savings rate and debt-to-income ratio.
-
-### Asset Allocation (Risk-Based)
-| Risk Level | Equity | Debt | Gold |
+### 📈 Smart Asset Allocation (Risk-Based)
+| Risk Appetite | Equity | Debt | Gold |
 |---|---|---|---|
-| Low | 30% | 60% | 10% |
-| Moderate | 60% | 30% | 10% |
-| High | 80% | 15% | 5% |
+| 🟢 Low | 30% | 60% | 10% |
+| 🟡 Moderate | 60% | 30% | 10% |
+| 🔴 High | 80% | 15% | 5% |
+
+### 🖥 Personalized Dashboard
+- Real-time stat cards: Monthly Income · Total Portfolio · Goal Target · Monthly Debt
+- Interactive Chart.js donut for cash flow visualization
+- Live goal probability progress bar (pulled from `/api/goal-intelligence`)
+- AI Advisor chat panel embedded directly in the dashboard
+- Dark / Light mode with glassmorphism UI
+
+### 🧙‍♂️ Guided Onboarding Wizard
+- 3-step guided setup: Financial Goal → Monthly Financials → Investment Preferences
+- Session-saved — resume exactly where you left off
+- Completed in under 5 minutes
 
 ---
 
-## Tech Stack
+## 🔄 How It Works
 
-### Frontend
-| Layer | Technology |
-|---|---|
-| Structure | HTML5 (semantic) |
-| Styling | Vanilla CSS (`style.css`) + Tailwind CSS CDN |
-| Charts | Chart.js |
-| Scripting | Vanilla JavaScript (ES modules) |
-| Fonts | Google Fonts — Inter |
-| Theme | Dark/Light toggle via `.dark` class on `<html>` |
-| Deployment | **Vercel** |
+```
+User Registers → Onboarding Wizard (3 steps) → Dashboard
+                                                    │
+                                    ┌───────────────┴───────────────┐
+                                    ▼                               ▼
+                           Goal Intelligence Engine          AI Advisor Chat
+                      (SIP FV Math + Monte Carlo)       (Groq LLaMA-3 Analysis)
+                                    │                               │
+                                    └───────────────┬───────────────┘
+                                                    ▼
+                                       Personalized Dashboard
+                            (Stat Cards · Cash Flow · Goal Bar · Insights)
+```
 
-### Backend
-| Layer | Technology |
-|---|---|
-| Framework | Python Flask 3.0 |
-| AI | Groq SDK — `llama-3.1-8b-instant` |
-| Database | MongoDB Atlas (via PyMongo + Certifi TLS) |
-| Auth | Werkzeug password hashing (scrypt/pbkdf2) |
-| Deployment | **Hugging Face Spaces** (primary) |
-| Process Manager | Gunicorn (2 workers, 4 threads, gthread class) |
+### Investment Route Logic
+The system determines your investment recommendation by combining:
+1. **Risk appetite** (Low / Moderate / High) set during onboarding wizard
+2. **Investable surplus** = Monthly Income − Expenses − Debt EMI
+3. **Goal timeline** — shorter timelines shift allocation toward safer debt instruments
+4. **AI verdict** (HOLD / BUY / REBALANCE) — computed by the financial agent
 
 ---
 
-## Project Structure
+## 🛠 Tech Stack
+
+| Layer | Technology |
+|---|---|
+| **Frontend** | HTML5 · Vanilla CSS (`style.css`) · Tailwind CDN · Chart.js · Google Fonts (Inter) |
+| **Backend** | Python Flask 3.0 · Gunicorn (2 workers, 4 threads) |
+| **AI Model** | Groq SDK · `llama-3.1-8b-instant` (temp 0.4 analysis / 0.5 chat) |
+| **Database** | MongoDB Atlas via PyMongo + Certifi TLS |
+| **Auth** | Werkzeug scrypt/pbkdf2 password hashing |
+| **Frontend Deploy** | **Vercel** (static, `frontend/` root) |
+| **Backend Deploy** | **Hugging Face Spaces** (Docker container) |
+
+---
+
+## 🚀 Live Deployment
+
+| Service | Hosts | URL |
+|---|---|---|
+| **Vercel** | Frontend | [ai-driven-invest-planner.vercel.app](https://ai-driven-invest-planner.vercel.app) |
+| **Hugging Face Spaces** | Backend Flask API | [umairlari-ai-financial-advisor-backend.hf.space](https://umairlari-ai-financial-advisor-backend.hf.space) |
+
+---
+
+## 🏗 Project Structure
 
 ```
 AI-Financial Advisor/
-├── Procfile                          ← gunicorn startup config
-├── vercel.json                       ← root-level JS MIME type headers
-│
 ├── backend/
-│   ├── main.py                       ← Flask app + all core API routes (21 endpoints)
-│   ├── groq_service.py               ← Groq AI client initialisation + financial insights
-│   ├── requirements.txt
-│   ├── .env                          ← MONGO_URI, GROQ_API_KEY, DB_NAME, PORT
-│   │
-│   ├── ai/
-│   │   ├── groq_client.py            ← generate_response(prompt)
-│   │   ├── prompts.py                ← investment_explanation_prompt(), financial_analysis_prompt()
-│   │   └── formatter.py             ← clean_response() JSON cleaner
-│   │
-│   ├── ml/
-│   │   ├── goal_intelligence.py      ← SIP FV formula + verdict engine
-│   │   └── goal_predictor.py        ← Monte Carlo simulation, asset_allocation(), generate_plan()
-│   │
-│   ├── analytics/
-│   │   └── financial_analytics.py   ← compute_financial_health()
-│   │
-│   ├── core/
-│   │   ├── financial_state.py        ← FinancialState dataclass (liquidity, stability score)
-│   │   ├── insight.py
-│   │   ├── market_state.py
-│   │   └── rule_engine.py           ← Deterministic rule-based insight engine
-│   │
-│   ├── agent/
-│   │   ├── financial_agent.py        ← run_agent() — AI action decision system
-│   │   ├── decision_engine.py
-│   │   └── what_if.py               ← What-if scenario analysis
-│   │
-│   ├── adapter/
-│   │   └── market_adapter.py
-│   │
-│   ├── services/
-│   │   └── intelligence_service.py  ← Wraps rule engine for insight generation
-│   │
-│   └── routes/
-│       ├── advisor_routes.py         ← POST /api/advisor/chat (chatbot)
-│       └── intelligence_routes.py   ← POST /api/intelligence/insights
+│   ├── main.py                   ← Flask app + 21 API endpoints
+│   ├── groq_service.py           ← Groq AI client + financial insights
+│   ├── ai/                       ← LLaMA-3 client, prompts, response formatter
+│   ├── ml/                       ← SIP math (goal_intelligence.py), Monte Carlo (goal_predictor.py)
+│   ├── analytics/                ← compute_financial_health()
+│   ├── core/                     ← Rule engine, FinancialState, MarketState
+│   ├── agent/                    ← AI decision agent, what-if analysis
+│   └── routes/                   ← /api/advisor/chat, /api/intelligence/insights
 │
-└── frontend/
-    ├── vercel.json                   ← URL rewrites: /login.html → /static/login.html
-    ├── css/
-    │   └── style.css                 ← Master stylesheet (dark/light CSS variables)
-    ├── js/
-    │   ├── config.js                 ← BACKEND_URL (dev vs. prod switcher)
-    │   ├── api.js                    ← apiFetch() with 60s timeout + error handling
-    │   ├── theme.js                  ← Dark/light toggle, localStorage persistence
-    │   ├── dashboard.js              ← Dashboard logic (charts, chatbot, profile, tabs)
-    │   ├── login.js                  ← Login form handler
-    │   ├── register.js               ← Registration form handler
-    │   ├── wizard.js                 ← Multi-step onboarding wizard logic
-    │   └── advisor.js                ← Dedicated AI advisor page
-    └── static/                       ← All HTML pages
-        ├── index.html                ← Landing page
-        ├── login.html
-        ├── register.html
-        ├── wizard.html
-        ├── dashboard.html
-        └── advisor.html
+├── frontend/
+│   ├── css/style.css             ← Master stylesheet (dark/light CSS variables, 1300+ lines)
+│   ├── js/                       ← dashboard.js · wizard.js · api.js · theme.js · login.js
+│   └── static/                   ← index.html · login.html · register.html · dashboard.html
+│
+└── docs/
+    ├── PRODUCT_DOCS.md           ← Full product documentation
+    └── SCREENSHOTS.md            ← Visual app walkthrough
 ```
 
 ---
 
-## API Reference
+## 📖 Documentation
 
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/` | Health check |
-| GET | `/api/test-connection` | MongoDB ping |
-| POST | `/api/login` | Authenticate user |
-| POST | `/api/signup` | Register new user |
-| POST | `/api/onboarding/start` | Start wizard session |
-| POST | `/api/onboarding/save` | Save wizard step data |
-| POST | `/api/onboarding/cancel` | Pause onboarding |
-| GET | `/api/onboarding/status/<email>` | Get onboarding state |
-| POST | `/api/onboarding/complete` | Mark onboarding complete |
-| GET | `/api/user/<email>` | Fetch user profile |
-| PUT | `/api/user/<email>` | Update user profile |
-| GET | `/api/analytics/<email>` | Financial health metrics |
-| GET | `/api/predict/<email>` | Monte Carlo goal probability |
-| GET | `/api/recommend/<email>` | Asset allocation plan |
-| GET | `/api/goal-intelligence/<email>` | SIP FV + verdict + gap |
-| GET | `/api/analyze-finances/<email>` | Full Groq AI analysis |
-| POST | `/api/init-test-data/<email>` | Seed test financial data |
-| GET | `/api/ai/investment-insight/<email>` | AI investment insight |
-| GET | `/api/agent/<email>` | AI agent decision (HOLD/BUY/REBALANCE) |
-| POST | `/api/advisor/chat` | Chatbot Q&A with financial context |
-| POST | `/api/intelligence/insights` | Rule-based insight engine |
+| Document | Description |
+|---|---|
+| **[PRODUCT_DOCS.md](./docs/PRODUCT_DOCS.md)** | Full feature docs, user flows, recommendation logic, API reference |
+| **[SCREENSHOTS.md](./docs/SCREENSHOTS.md)** | Visual walkthrough — every page of the live app |
 
 ---
 
-## Environment Variables
+## ⚙️ Running Locally
+
+### Backend
+```bash
+cd backend
+pip install -r requirements.txt
+# Create .env with: MONGO_URI, GROQ_API_KEY, DB_NAME, COLLECTION_NAME, PORT
+python main.py
+# Runs on http://localhost:5000
+```
+
+### Frontend
+```bash
+npx serve frontend
+# config.js automatically switches BACKEND_URL between localhost:5000 and prod
+```
+
+---
+
+## 🔐 Environment Variables
 
 ```env
 MONGO_URI=mongodb+srv://...         # MongoDB Atlas connection string
@@ -255,60 +225,14 @@ PORT=5000                           # Server port
 
 ---
 
-## Running Locally
+## ⚠️ Disclaimer
 
-### Backend
-```bash
-cd backend
-pip install -r requirements.txt
-python main.py
-# Runs on http://localhost:5000
-```
-
-### Frontend
-Open `frontend/static/index.html` in a browser, or serve with any static server:
-```bash
-npx serve frontend
-# Vercel dev: vercel dev (from frontend/)
-```
-
-The `config.js` automatically switches `BACKEND_URL` between `localhost:5000` (dev) and the Hugging Face production URL.
+FinPass AI is an **educational and informational tool** only. It does not execute trades, manage funds, or provide legally binding financial advice. All projections are illustrative. Please consult a SEBI-registered investment advisor before making significant financial decisions.
 
 ---
 
-## Deployment
+<div align="center">
 
-| Service | Hosts | URL |
-|---|---|---|
-| **Vercel** | Frontend (`frontend/` root) | `https://ai-driven-invest-planner.vercel.app` |
-| **Hugging Face Spaces** | Backend Flask API | `https://umairlari-ai-financial-advisor-backend.hf.space` |
+Made with ❤️ by **Umair Lari** &nbsp;|&nbsp; © 2026 FinPass AI · All Rights Reserved
 
-The `frontend/vercel.json` maps legacy root URLs to the new `static/` folder:
-```json
-{ "source": "/login.html", "destination": "/static/login.html" }
-```
-
----
-
-## Known Limitations / In Progress
-
-- **AI Chatbot**: The chatbot UI is live, but responses are currently simulated. Connection to the `/api/advisor/chat` backend endpoint is pending.
-- **Cash Flow tab**: Allocation figures are static placeholder values, not yet dynamically pulled from user data.
-- **Wealth Reports tab**: Placeholder — PDF report generation not yet implemented.
-- **Preferences tab**: Toggle UI is complete; backend persistence is not yet wired.
-
----
-
-## Disclaimer
-
-FinPass is an **educational and informational tool** only.  
-It does not execute trades, manage funds, or provide legally binding financial advice.  
-All investment data shown is for illustrative purposes.  
-Please consult a SEBI-registered investment advisor before making significant financial decisions.
-
----
-
-The agent earlier used for the build is Kimi2.6 model API's from OpenRouter and the LLM used is Groq 5.1
-the work is still in progress and can be completed after the exams i guess and will try to update the ap as far as possible 
-
-@ all rights reserved to Umair Lari
+</div>
