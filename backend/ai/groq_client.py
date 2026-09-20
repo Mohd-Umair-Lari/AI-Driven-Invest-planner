@@ -4,7 +4,7 @@ from typing import Dict, List, Optional
 
 _client = None
 
-MODEL = os.getenv("GROQ_MODEL", "llama3-8b-8192")
+MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
 
 def _get_client():
     global _client

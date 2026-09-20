@@ -36,7 +36,7 @@ def generate_financial_insights(user_data: dict) -> str:
             },
             {"role": "user", "content": prompt}
         ],
-        model="llama3-8b-8192",
+        model="openai/gpt-oss-120b",
         temperature=0.4
     )
 
