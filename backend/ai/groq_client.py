@@ -4,7 +4,7 @@ from typing import Dict, List, Optional
 
 _client = None
 
-MODEL = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")
+MODEL = os.getenv("GROQ_MODEL", "llama3-8b-8192")
 
 def _get_client():
     global _client

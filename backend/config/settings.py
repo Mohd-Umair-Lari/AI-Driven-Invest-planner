@@ -19,7 +19,7 @@ try:
 
         LLM_PROVIDER: str = "groq"
         GROQ_API_KEY: str = ""
-        GROQ_MODEL: str = "llama-3.1-8b-instant"
+        GROQ_MODEL: str = "llama3-8b-8192"
 
         VECTOR_PROVIDER: str = "chroma"
         CHROMA_PERSIST_DIR: str = "./chroma_db"
@@ -47,7 +47,7 @@ except ImportError:
         REFRESH_TOKEN_EXPIRE_DAYS   = 7
         LLM_PROVIDER           = os.getenv("LLM_PROVIDER", "groq")
         GROQ_API_KEY           = os.getenv("GROQ_API_KEY", "")
-        GROQ_MODEL             = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")
+        GROQ_MODEL             = os.getenv("GROQ_MODEL", "llama3-8b-8192")
         VECTOR_PROVIDER        = "chroma"
         CHROMA_PERSIST_DIR     = "./chroma_db"
         CHROMA_COLLECTION      = "finpass_docs"
