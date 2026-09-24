@@ -55,7 +55,7 @@ except Exception as e:
 
 
 
-_ORIGINS = [
+_DEFAULT_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:5173",
     "http://localhost:8080",
@@ -64,6 +64,11 @@ _ORIGINS = [
     "http://127.0.0.1:8080",
     "https://ai-driven-invest-planner.vercel.app",
 ]
+
+# Extra origins (e.g. Vercel preview URLs) can be added via a comma-separated
+# ALLOWED_ORIGINS env var without loosening CORS to every *.vercel.app site.
+_EXTRA_ORIGINS = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "").split(",") if o.strip()]
+_ORIGINS = _DEFAULT_ORIGINS + _EXTRA_ORIGINS
 
 PORT = int(os.getenv("PORT", 7860))
 
@@ -95,7 +100,6 @@ api = FastAPI(
 api.add_middleware(
     CORSMiddleware,
     allow_origins=_ORIGINS,
-    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

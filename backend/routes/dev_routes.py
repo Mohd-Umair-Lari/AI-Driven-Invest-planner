@@ -1,5 +1,7 @@
 """FastAPI dev/test routes and intelligence insights."""
 
+import os
+
 from fastapi import APIRouter, HTTPException, Path as FPath
 
 from api.schemas import IntelligenceRequest
@@ -7,9 +9,16 @@ from db import collection
 
 router = APIRouter()
 
+_IS_PRODUCTION = os.getenv("ENV", "production").strip().lower() == "production"
+
 
 @router.post("/api/init-test-data/{email}", tags=["Dev"])
 async def init_test_data(email: str = FPath(...)):
+    # Seeds arbitrary financial data for a user by email with no auth — must
+    # never be reachable in production, where it would allow tampering.
+    if _IS_PRODUCTION:
+        raise HTTPException(404, "Not found")
+
     user = collection.find_one({"email": email})
     if not user:
         raise HTTPException(404, "User not found")
