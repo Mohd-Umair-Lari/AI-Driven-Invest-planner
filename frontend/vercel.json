@@ -7,7 +7,8 @@
     { "source": "/register.html", "destination": "/static/register.html" },
     { "source": "/dashboard.html", "destination": "/static/dashboard.html" },
     { "source": "/wizard.html", "destination": "/static/wizard.html" },
-    { "source": "/advisor.html", "destination": "/static/advisor.html" }
+    { "source": "/advisor.html", "destination": "/static/advisor.html" },
+    { "source": "/callback.html", "destination": "/static/callback.html" }
   ],
   "headers": [
     {
