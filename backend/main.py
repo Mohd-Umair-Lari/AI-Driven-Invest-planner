@@ -38,6 +38,7 @@ from routes.chat_routes import router as chat_router
 from routes.transaction_routes import router as transaction_router
 from routes.dev_routes import router as dev_router
 from routes.github_routes import router as github_router
+from routes.google_routes import router as google_router
 
 
 
@@ -153,6 +154,7 @@ api.include_router(chat_router)
 api.include_router(transaction_router)
 api.include_router(dev_router)
 api.include_router(github_router)
+api.include_router(google_router)
 
 
 

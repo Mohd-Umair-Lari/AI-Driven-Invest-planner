@@ -21,8 +21,11 @@ console.log("🔥 callback.js loaded");
   const error = params.get("error");
   if (error) {
     const friendly = {
+      cancelled: "Sign in was cancelled. No account was accessed.",
+      access_denied: "Sign in was cancelled. No account was accessed.",
       invalid_state: "Session expired or invalid request. Please try again.",
-      token_exchange_failed: "Could not verify your GitHub account. Please try again.",
+      token_exchange_failed: "Could not verify your account. Please try again.",
+      oauth_error: "The provider reported an error. Please try again.",
       server_error: "Server error during sign in. Please try again later.",
     };
     fail(friendly[error] || decodeURIComponent(error));

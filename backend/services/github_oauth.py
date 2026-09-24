@@ -16,14 +16,16 @@ Env vars required:
 
 import secrets
 import time
-from datetime import datetime, timezone
 from urllib.parse import urlencode
 
 import requests
 
-from db import collection, serialize, ensure_onboarding
-from services.jwt_handler import JWTHandler, TokenValidator
-from services.session_store import session_store
+from services.oauth_common import (
+    get_backend_base_url,
+    get_frontend_base_url,
+    upsert_oauth_user,
+    create_app_session,
+)
 from config.logging_config import setup_logging
 
 log = setup_logging()
@@ -33,6 +35,7 @@ GITHUB_TOKEN_URL = "https://github.com/login/oauth/access_token"
 GITHUB_USER_URL = "https://api.github.com/user"
 GITHUB_USER_EMAILS_URL = "https://api.github.com/user/emails"
 
+CALLBACK_PATH = "/api/auth/github/callback"
 STATE_TTL_SECONDS = 600  # CSRF state is valid for 10 minutes
 
 # In-memory CSRF state store: {state: {"created_at": epoch}}
@@ -55,15 +58,12 @@ def _get_client_secret() -> str:
     return client_secret
 
 
-def get_frontend_base_url() -> str:
-    import os
-    return os.getenv(
-        "FRONTEND_BASE_URL",
-        "https://ai-driven-invest-planner.vercel.app",
-    ).strip().rstrip("/")
+def _redirect_uri() -> str:
+    """Where GitHub sends the OAuth code — our own backend callback route."""
+    return f"{get_backend_base_url()}{CALLBACK_PATH}"
 
 
-def build_authorize_url(redirect_path: str = "/static/callback.html") -> str:
+def build_authorize_url() -> str:
     """Create the GitHub authorization URL with a fresh CSRF state."""
     client_id = _get_client_id()
     state = secrets.token_urlsafe(32)
@@ -75,10 +75,9 @@ def build_authorize_url(redirect_path: str = "/static/callback.html") -> str:
         if now - _states[s]["created_at"] > STATE_TTL_SECONDS:
             _states.pop(s, None)
 
-    redirect_uri = f"{get_frontend_base_url()}{redirect_path}"
     params = {
         "client_id": client_id,
-        "redirect_uri": redirect_uri,
+        "redirect_uri": _redirect_uri(),
         "scope": "read:user user:email",
         "state": state,
         "allow_signup": "true",
@@ -103,6 +102,7 @@ def exchange_code_for_token(code: str) -> str:
             "client_id": _get_client_id(),
             "client_secret": _get_client_secret(),
             "code": code,
+            "redirect_uri": _redirect_uri(),
             "grant_type": "authorization_code",
         },
         timeout=15,
@@ -151,79 +151,15 @@ def fetch_github_user(access_token: str) -> dict:
 
 
 def upsert_github_user(github_user: dict) -> dict:
-    """Create or link the MongoDB user document, mirroring password-auth users."""
-    email = github_user["email"]
-    now_iso = datetime.now(timezone.utc).isoformat()
-
-    existing = collection.find_one({"email": email})
-    if existing:
-        collection.update_one(
-            {"email": email},
-            {
-                "$set": {
-                    "github_id": github_user["github_id"],
-                    "github_login": github_user["github_login"],
-                    "avatar_url": github_user["avatar_url"],
-                    "last_login": now_iso,
-                }
-            },
-        )
-        user = collection.find_one({"email": email})
-        log.info(f"GitHub login linked to existing user: {email}")
-    else:
-        doc = {
-            "Name": github_user["name"],
-            "email": email,
-            "github_id": github_user["github_id"],
-            "github_login": github_user["github_login"],
+    """Create or link the MongoDB user document (delegates to shared helper)."""
+    return upsert_oauth_user(
+        {
+            "email": github_user["email"],
+            "name": github_user["name"],
+            "provider_id": github_user["github_id"],
+            "provider_login": github_user["github_login"],
             "avatar_url": github_user["avatar_url"],
-            "auth_provider": "github",
-            "Goal": {},
-            "financials": {},
-            "investments": {},
-            "progress": {},
-            "created_at": now_iso,
-            "last_login": now_iso,
-        }
-        collection.insert_one(doc)
-        user = collection.find_one({"email": email})
-        log.info(f"New GitHub user created: {email}")
-
-    user = ensure_onboarding(email, user)
-    return user
-
-
-def create_app_session(user: dict) -> dict:
-    """Issue our own JWT access/refresh tokens + session records (like /api/login)."""
-    email = user["email"]
-    user_id = str(user["_id"])
-
-    access_token = JWTHandler.create_access_token(email, user_id)
-    refresh_token = JWTHandler.create_refresh_token(email, user_id)
-
-    access_claims = TokenValidator.validate_access_token(access_token)
-    refresh_claims = TokenValidator.validate_refresh_token(refresh_token)
-
-    if access_claims:
-        session_store.create_session(
-            email=email,
-            user_id=user_id,
-            jti=access_claims["jti"],
-            token_type="access",
-            expires_at=datetime.fromtimestamp(access_claims["exp"], timezone.utc),
-        )
-    if refresh_claims:
-        session_store.create_session(
-            email=email,
-            user_id=user_id,
-            jti=refresh_claims["jti"],
-            token_type="refresh",
-            expires_at=datetime.fromtimestamp(refresh_claims["exp"], timezone.utc),
-        )
-
-    return {
-        "access_token": access_token,
-        "refresh_token": refresh_token,
-        "user": serialize(user),
-    }
+        },
+        provider="github",
+    )
 

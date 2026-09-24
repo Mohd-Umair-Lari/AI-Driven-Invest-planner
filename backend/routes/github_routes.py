@@ -61,10 +61,9 @@ async def github_callback(
 
     if error:
         log.warning(f"GitHub OAuth denied: {error} - {error_description}")
-        return RedirectResponse(
-            f"{callback_page}?error={urlencode({'d': error_description or error})[2:]}",
-            status_code=302,
-        )
+        # User backed out / declined consent — fail cleanly, issue nothing.
+        code_out = "cancelled" if error in ("access_denied", "user_cancelled_authorize") else "oauth_error"
+        return RedirectResponse(f"{callback_page}?error={code_out}", status_code=302)
 
     if not code:
         raise HTTPException(400, "Missing authorization code")
@@ -76,7 +75,8 @@ async def github_callback(
     try:
         access_token = github_oauth.exchange_code_for_token(code)
         github_user = github_oauth.fetch_github_user(access_token)
-        session = github_oauth.create_app_session(github_user)
+        user = github_oauth.upsert_github_user(github_user)
+        session = github_oauth.create_app_session(user)
     except ValueError as e:
         log.error(f"GitHub OAuth token exchange failed: {e}")
         return RedirectResponse(f"{callback_page}?error=token_exchange_failed", status_code=302)
