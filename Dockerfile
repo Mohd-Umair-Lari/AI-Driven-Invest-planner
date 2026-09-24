@@ -8,11 +8,9 @@ ENV PYTHONUNBUFFERED=True \
 
 WORKDIR /app
 
-# Install dependencies from the backend folder
 COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy only the backend code to the container
 COPY --chown=user:user backend/ .
 
 USER user
