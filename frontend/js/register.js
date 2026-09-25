@@ -1,6 +1,10 @@
 import { apiFetch } from "./api.js";
+import { initOAuthButtons } from "./oauth.js";
 
 console.log("🔥 register.js loaded");
+
+// GitHub + Google sign-up share the same OAuth flow as sign-in (backend upserts).
+initOAuthButtons();
 
 const btn = document.getElementById("register-btn");
 
