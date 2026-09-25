@@ -3,6 +3,7 @@ import os
 from functools import lru_cache
 
 try:
+    from pydantic import AliasChoices, Field
     from pydantic_settings import BaseSettings, SettingsConfigDict
 
     class Settings(BaseSettings):
@@ -28,7 +29,11 @@ try:
         EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
 
         PORT: int = 7860
-        ENV: str = "production"
+        # HF Space uses FLASK_ENV as the canonical name; accept ENV locally too.
+        ENV: str = Field(
+            default="production",
+            validation_alias=AliasChoices("FLASK_ENV", "ENV"),
+        )
         LOG_LEVEL: str = "INFO"
 
     @lru_cache
@@ -53,7 +58,7 @@ except ImportError:
         CHROMA_COLLECTION      = "finpass_docs"
         EMBEDDING_MODEL        = "all-MiniLM-L6-v2"
         PORT                   = int(os.getenv("PORT", 7860))
-        ENV                    = os.getenv("ENV", "production")
+        ENV                    = os.getenv("FLASK_ENV", os.getenv("ENV", "production"))
         LOG_LEVEL              = os.getenv("LOG_LEVEL", "INFO")
 
     @lru_cache

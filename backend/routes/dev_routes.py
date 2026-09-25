@@ -9,7 +9,10 @@ from db import collection
 
 router = APIRouter()
 
-_IS_PRODUCTION = os.getenv("ENV", "production").strip().lower() == "production"
+_IS_PRODUCTION = (
+    os.getenv("FLASK_ENV", os.getenv("ENV", "production")).strip().lower()
+    == "production"
+)
 
 
 @router.post("/api/init-test-data/{email}", tags=["Dev"])
