@@ -1,4 +1,5 @@
 import { apiFetch } from "./api.js";
+import { initOAuthButtons } from "./oauth.js";
 
 console.log("🔥 login.js loaded");
 
@@ -53,45 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  const oauthBtn = document.getElementById("oauth-btn");
-  if (oauthBtn) {
-    oauthBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-
-      oauthBtn.innerHTML = `<svg class="animate-spin h-5 w-5 text-slate-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Connecting...`;
-
-      // Real GitHub OAuth2 flow: backend issues the GitHub redirect
-      // (with CSRF state), GitHub sends the code to the backend callback,
-      // which then redirects to /static/callback.html with our JWTs.
-      const isDev = ["localhost", "127.0.0.1"].includes(window.location.hostname);
-      const backendUrl = isDev
-        ? "http://localhost:5000"
-        : "https://umairlari-ai-financial-advisor-backend.hf.space";
-
-      setTimeout(() => {
-        window.location.href = `${backendUrl}/api/auth/github/authorize`;
-      }, 600);
-    });
-  }
-
-  const googleBtn = document.getElementById("google-oauth-btn");
-  if (googleBtn) {
-    googleBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-
-      googleBtn.innerHTML = `<svg class="animate-spin h-5 w-5 text-slate-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Connecting...`;
-
-      // Google OAuth2 flow: backend issues the Google redirect (with CSRF
-      // state), Google sends the code to the backend callback, which then
-      // redirects to /static/callback.html with our JWTs.
-      const isDev = ["localhost", "127.0.0.1"].includes(window.location.hostname);
-      const backendUrl = isDev
-        ? "http://localhost:5000"
-        : "https://umairlari-ai-financial-advisor-backend.hf.space";
-
-      setTimeout(() => {
-        window.location.href = `${backendUrl}/api/auth/google/authorize`;
-      }, 600);
-    });
-  }
+  // GitHub + Google OAuth (shared with the sign-up page). Sign in and sign up
+  // are the same flow — the backend upserts the account.
+  initOAuthButtons();
 });
