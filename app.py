@@ -4,6 +4,7 @@ import os
 import sys
 
 import gradio as gr
+import spaces
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "backend"))
 
@@ -12,6 +13,7 @@ from core.financial_state import FinancialState
 from services.intelligence_service import IntelligenceService
 
 
+@spaces.GPU
 def chat(question: str, email: str, income: float, expenses: float, savings: float, debt: float, risk: str) -> str:
     if not question.strip():
         return "Please enter a question."
@@ -30,6 +32,7 @@ Give practical, educational guidance and clearly state that this is not regulate
         return f"The AI service is unavailable. Check GROQ_API_KEY in Space Settings. ({exc})"
 
 
+@spaces.GPU
 def insights(income: float, expenses: float, savings: float, debt: float, risk_score: float, exposure: float, horizon: int, emergency: float):
     try:
         state = FinancialState(income, expenses, savings, debt, risk_score, exposure, horizon, emergency)
