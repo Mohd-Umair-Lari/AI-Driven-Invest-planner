@@ -151,7 +151,3 @@ api.include_router(advisor_router)
 
 asgi_app = api
 app = asgi_app
-
-
-
-
