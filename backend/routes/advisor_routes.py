@@ -1,52 +1,30 @@
-from flask import Blueprint, request, jsonify
-from ai.groq_client import generate_response
+from fastapi import APIRouter, HTTPException
+from api.schemas import AdvisorChatRequest
+from db import collection, conversations_col
+from orchestrator.ai_orchestrator import AIOrchestrator
 
-advisor_bp = Blueprint("advisor", __name__)
+router = APIRouter()
 
-@advisor_bp.route("/advisor/chat", methods=["POST"])
-def chat_advisor():
-
-    data = request.get_json(silent=True) or {}
-
-    user_question = data.get("question", "").strip()
-    user_email = data.get("email", "").strip()
-
-    if not user_question:
-        return jsonify({"error": "Please provide a question"}), 400
-
-    if not user_email:
-        return jsonify({"error": "User email is required"}), 400
-
+@router.post("/api/advisor/chat", tags=["AI Advisor"])
+async def chat_advisor(body: AdvisorChatRequest):
     try:
-
-        context = data.get("context", {})
-        monthly_income = context.get("monthly_income", 0)
-        monthly_expenses = context.get("monthly_expenses", 0)
-        total_savings = context.get("total_savings", 0)
-        debt = context.get("debt", 0)
-        risk_appetite = context.get("risk_appetite", "Moderate")
-
-        enhanced_prompt = f"""You are a financial advisor. The user has asked: '{user_question}'
-            Here is their financial context:
-            - Monthly Income: ₹{monthly_income}
-            - Monthly Expenses: ₹{monthly_expenses}
-            - Total Savings: ₹{total_savings}
-            - Current Debt: ₹{debt}
-            - Risk Appetite: {risk_appetite}
-
-            Please provide personalized financial advice based on their situation."""
-
-        ai_response = generate_response(enhanced_prompt)
-
-        return jsonify({
-            "success": True,
-            "response": ai_response,
-            "user_email": user_email
-        }), 200
-
-    except Exception as e:
-        print(f"❌ Advisor error: {str(e)}")
-        return jsonify({
-            "error": "Failed to generate response",
-            "details": str(e)
-        }), 500
+        ctx = body.context
+        session_id = body.session_id.strip() if body.session_id and body.session_id.strip() else f"{body.email}-session"
+        result = AIOrchestrator(collection, conversations_col).run(
+            email=body.email,
+            query=body.question,
+            session_id=session_id,
+            extra_context={
+                "income": ctx.monthly_income if ctx else 0,
+                "expenses": ctx.monthly_expenses if ctx else 0,
+                "debt": ctx.debt if ctx else 0,
+                "risk": ctx.risk_appetite if ctx else "moderate",
+            },
+        )
+        if not result.get("success", True):
+            raise HTTPException(status_code=502, detail=result.get("response", "AI service error"))
+        return {**result, "user_email": body.email, "session_id": session_id}
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail="Failed to generate advisor response") from exc

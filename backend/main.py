@@ -1,7 +1,7 @@
 """
 FinPass AI — Application Entry Point
 
-Sets up FastAPI + Flask dual framework, CORS, security middleware,
+Sets up the FastAPI application, CORS, security middleware,
 and mounts all route modules. All route handlers live in routes/*.
 """
 
@@ -12,11 +12,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from flask import Flask
-from flask_cors import CORS
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from starlette.middleware.wsgi import WSGIMiddleware
 
 from ai.groq_service import initialize_groq
 from config.logging_config import setup_logging
@@ -26,8 +23,8 @@ from services.security_utils import SecurityHeaders
 import db as _db
 
 
-from routes.intelligence_routes import intelligence_bp
-from routes.advisor_routes import advisor_bp
+from routes.intelligence_routes import router as intelligence_router
+from routes.advisor_routes import router as advisor_router
 
 
 from routes.auth_routes import router as auth_router
@@ -77,21 +74,6 @@ PORT = int(os.getenv("PORT", 7860))
 
 
 
-flask_app = Flask(__name__)
-CORS(flask_app, resources={r"/api/*": {"origins": _ORIGINS}}, supports_credentials=True)
-flask_app.register_blueprint(intelligence_bp, url_prefix="/api")
-flask_app.register_blueprint(advisor_bp, url_prefix="/api")
-
-
-@flask_app.route("/")
-def _flask_health():
-    return {"status": "ok", "engine": "flask"}
-
-
-
-
-
-
 api = FastAPI(
     title="FinPass AI – Financial Advisor API",
     description="Pydantic-validated REST API. Swagger UI at **/docs**.",
@@ -121,7 +103,7 @@ async def add_security_headers(request, call_next):
 
 @api.get("/", tags=["Health"])
 async def health():
-    return {"status": "ok", "service": "FinPass Backend", "version": "v2 (FastAPI+Flask)"}
+    return {"status": "ok", "service": "FinPass Backend", "version": "3.0.0"}
 
 
 @api.get("/api/test-connection", tags=["Health"])
@@ -160,7 +142,8 @@ api.include_router(google_router)
 
 
 
-api.mount("/flask", WSGIMiddleware(flask_app))
+api.include_router(intelligence_router)
+api.include_router(advisor_router)
 
 
 
@@ -168,3 +151,7 @@ api.mount("/flask", WSGIMiddleware(flask_app))
 
 asgi_app = api
 app = asgi_app
+
+
+
+

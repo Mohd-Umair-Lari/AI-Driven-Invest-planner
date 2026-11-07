@@ -1,13 +1,14 @@
-from flask import Blueprint, request, jsonify
+from fastapi import APIRouter, HTTPException
+from api.schemas import IntelligenceRequest
 from core.financial_state import FinancialState
 from services.intelligence_service import IntelligenceService
 
-intelligence_bp = Blueprint("intelligence", __name__)
+router = APIRouter()
 service = IntelligenceService()
 
-@intelligence_bp.route("/intelligence/insights", methods=["POST"])
-def get_insights():
-    data = request.get_json(silent=True) or {}
+@router.post("/api/intelligence/insights", tags=["Intelligence"])
+async def get_insights(body: IntelligenceRequest):
+    data = body.model_dump()
 
     required_fields = [
         "income", "expenses", "savings", "debt",
@@ -31,7 +32,7 @@ def get_insights():
         )
 
         insights = service.run(financial_state)
-        return jsonify({"insights": insights})
+        return {"insights": insights}
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        raise HTTPException(status_code=500, detail="Unable to generate insights") from e
 

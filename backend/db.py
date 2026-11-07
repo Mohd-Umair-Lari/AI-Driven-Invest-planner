@@ -36,7 +36,8 @@ _mongo = MongoClient(
     connectTimeoutMS=10_000,
     socketTimeoutMS=10_000,
 )
-_mongo.admin.command("ping")
+# Do not perform a network call while importing the application.
+# Database connectivity is checked when a database-backed operation runs.
 
 db = _mongo[DB_NAME]
 collection = db[COLLECTION_NAME]
@@ -123,3 +124,5 @@ def trigger_user_indexing(email: str):
             print(f"User indexing failed for {email}: {e}")
 
     threading.Thread(target=_do_index, daemon=True).start()
+
+
