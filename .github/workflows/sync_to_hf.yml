@@ -20,4 +20,4 @@ jobs:
             echo "Error: HF_TOKEN is empty! Please add it to your GitHub Repository Secrets."
             exit 1
           fi
-          git push -f https://UmairLari:$HF_TOKEN@huggingface.co/spaces/UmairLari/ai-financial-advisor-backend main
+          git push -f https://UmairLari:$HF_TOKEN@huggingface.co/spaces/UmairLari/Finpass-AI main
