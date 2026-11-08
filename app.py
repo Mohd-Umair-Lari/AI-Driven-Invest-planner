@@ -68,4 +68,11 @@ if __name__ == "__main__":
     # Keep the full FastAPI backend available while exposing the Gradio UI at /ui.
     # FastAPI remains the public API root; existing /api/* routes are preserved.
     fastapi_app = gr.mount_gradio_app(fastapi_app, demo, path="/ui")
-    uvicorn.run(fastapi_app, host="0.0.0.0", port=int(os.getenv("PORT", "7860")))
+    # Custom Uvicorn startup bypasses Gradio's normal launch hook, so explicitly
+    # send ZeroGPU the decorated-function registration report.
+    try:
+        from spaces.zero import startup as zerogpu_startup
+        zerogpu_startup()
+    except ImportError:
+        pass
+    uvicorn.run(fastapi_app, host="0.0.0.0", port=int(os.getenv("APP_PORT", "7860")))
