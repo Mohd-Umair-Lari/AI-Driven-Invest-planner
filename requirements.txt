@@ -1,5 +1,6 @@
 groq
 pydantic>=2.7.1
+email-validator>=2.1.0
 python-dotenv==1.0.1
 pymongo==4.6.3
 certifi==2024.7.4
