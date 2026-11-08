@@ -31,6 +31,7 @@ export async function apiFetch(endpoint, options = {}) {
     const res = await fetch(url, {
       headers: {
         "Content-Type": "application/json",
+        ...(localStorage.getItem("access_token") ? { Authorization: `Bearer ${localStorage.getItem("access_token")}` } : {}),
         ...(options.headers || {})
       },
       signal: controller.signal,

@@ -8,9 +8,7 @@
 // (bfcache) with the button still showing "Connecting…". We reset every button
 // on `pageshow` so it never keeps spinning.
 
-const BACKEND_URL = ["localhost", "127.0.0.1"].includes(window.location.hostname)
-  ? "http://localhost:5000"
-  : "https://umairlari-ai-financial-advisor-backend.hf.space";
+const BACKEND_URL = "";
 
 const SPINNER = `<svg class="animate-spin h-5 w-5 text-slate-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Connecting...`;
 
