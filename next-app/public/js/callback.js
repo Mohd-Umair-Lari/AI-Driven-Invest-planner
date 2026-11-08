@@ -44,10 +44,7 @@ console.log("🔥 callback.js loaded");
 
   // 3. Fetch the user profile from the backend with the access token.
   //    config.js is not imported (plain script), so determine the URL the same way.
-  const isDev = ["localhost", "127.0.0.1"].includes(window.location.hostname);
-  const backendUrl = isDev
-    ? "http://localhost:5000"
-    : "https://umairlari-ai-financial-advisor-backend.hf.space";
+  const backendUrl = "";
 
   fetch(`${backendUrl}/api/me`, {
     headers: { Authorization: `Bearer ${accessToken}` },
