@@ -75,4 +75,5 @@ if __name__ == "__main__":
         zerogpu_startup()
     except ImportError:
         pass
-    uvicorn.run(fastapi_app, host="0.0.0.0", port=int(os.getenv("APP_PORT", "7860")))
+    # Hugging Face's Gradio SSR proxy owns 7860 and forwards Python traffic to 7861.
+    uvicorn.run(fastapi_app, host="0.0.0.0", port=int(os.getenv("APP_PORT", "7861")))
