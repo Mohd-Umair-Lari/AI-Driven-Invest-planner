@@ -16,7 +16,7 @@ export async function POST(request: Request, { params }: Context) {
   if (authenticated instanceof Response) return authenticated;
   if (!matchesEmail(authenticated, email)) return NextResponse.json({ detail: "Forbidden" }, { status: 403 });
   if (!Array.isArray(transactions) || !transactions.length) return NextResponse.json({ detail: "No transactions provided" }, { status: 400 });
-  const result = await (await getDb()).collection<any>("userGoals").updateOne({ email }, { $push: { transactions: { $each: transactions } } });
+  const result = await (await getDb()).collection<any>("userGoals").updateOne({ email }, { $push: { transactions: { $each: transactions } } } as any);
   if (!result.matchedCount) return NextResponse.json({ detail: "User not found" }, { status: 404 });
   return NextResponse.json({ status: "success", added: transactions.length }, { status: 201 });
 }
