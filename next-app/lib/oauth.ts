@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import { getDb, stripMongoId } from "./mongo";
 import { createToken } from "./jwt";
+import { env, requireEnv } from "./env";
 
 export async function createOauthState(provider: string) {
   const state = crypto.randomBytes(32).toString("base64url");
@@ -22,6 +23,6 @@ export async function upsertOauthUser(profile: { email: string; name: string; pr
   return { user, access_token: await createToken(email, String(user._id), "access"), refresh_token: await createToken(email, String(user._id), "refresh") };
 }
 
-export function callbackUrl(provider: string) { return `${process.env.APP_URL ?? "http://localhost:3000"}/api/auth/${provider}/callback`; }
-export function callbackPage() { return `${process.env.APP_URL ?? "http://localhost:3000"}/static-pages/callback.html`; }
+export function callbackUrl(provider: string) { return `${requireEnv(env.appUrl, "APP_URL")}/api/auth/${provider}/callback`; }
+export function callbackPage() { return `${requireEnv(env.appUrl, "APP_URL")}/static-pages/callback.html`; }
 export { stripMongoId };
