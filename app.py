@@ -5,12 +5,14 @@ import sys
 
 import gradio as gr
 import spaces
+import uvicorn
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "backend"))
 
 from ai.groq_client import generate_response
 from core.financial_state import FinancialState
 from services.intelligence_service import IntelligenceService
+from main import api as fastapi_app
 
 
 @spaces.GPU
@@ -63,4 +65,7 @@ with gr.Blocks(title="FinPass AI") as demo:
 
 
 if __name__ == "__main__":
-    demo.launch(server_name="0.0.0.0", server_port=int(os.getenv("PORT", "7860")))
+    # Keep the full FastAPI backend available while exposing the Gradio UI at /ui.
+    # FastAPI remains the public API root; existing /api/* routes are preserved.
+    fastapi_app = gr.mount_gradio_app(fastapi_app, demo, path="/ui")
+    uvicorn.run(fastapi_app, host="0.0.0.0", port=int(os.getenv("PORT", "7860")))
